@@ -8,7 +8,7 @@ load_dotenv()
 # Configuración flexible del servidor de IA
 api_base_url = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
 model_name = os.getenv("MODEL_NAME", "gpt-4")
-api_key = os.getenv("OPENAI_API_KEY", "not-needed")
+api_key = os.getenv("OPENAI_API_KEY")
 
 print("=" * 50)
 print("Mi primer agente de IA")
@@ -18,11 +18,46 @@ print(f"🤖 Modelo: {model_name}")
 print("=" * 50)
 
 # Inicializar cliente con configuración personalizada
-client = OpenAI(
-    base_url=api_base_url,
-    api_key=api_key
-)
+# Para OpenRouter, necesitamos headers adicionales
+if "openrouter.ai" in api_base_url:
+    client = OpenAI(
+        base_url=api_base_url,
+        api_key=api_key,
+        default_headers={
+            "HTTP-Referer": "https://github.com/tu-usuario/agente-ia",  # Opcional pero recomendado
+            "X-Title": "Mi Agente IA"  # Opcional pero recomendado
+        }
+    )
+else:
+    client = OpenAI(
+        base_url=api_base_url,
+        api_key=api_key
+    )
 agent = Agent()
+
+def cmd_limpiar():
+    agent.messages = [
+        {"role": "system", "content": "Eres un asistente útil que habla español y eres muy conciso con tus respuestas,lee el archivo agent.py si existe"}
+    ]
+    print("🧹 Historial limpiado.")
+    return True
+
+def cmd_salir():
+    print("Hasta luego!")
+    return False
+
+def cmd_inicializar():
+    agent.messages = [{"role": "user", "content": "verifica si el archivo agent.md existe, si no existe crea lo y pide al usuario que rellene con las indicaciones para este proyecto"}]    
+    print("Se crea el archivo agent.md.")
+    return True
+    
+comandos = {
+    "/limpiar": cmd_limpiar,
+    "/salir": cmd_salir,
+    "/exit": cmd_salir,
+    "/bye": cmd_salir,
+    "/init": cmd_inicializar
+}
 
 while True:
     user_input = input("Tú: ").strip()
@@ -31,14 +66,9 @@ while True:
     if not user_input:
         continue
     
-    if user_input.lower() in ("salir", "exit", "bye", "sayonara"):
-        print("Hasta luego!")
-        break
-    if user_input.lower() == "limpiar":
-        agent.messages = [
-            {"role": "system", "content": "Eres un asistente útil que habla español y eres muy conciso con tus respuestas"}
-        ]
-
+    if user_input.lower() in comandos:
+        if not comandos[user_input.lower()]():
+            break
         continue
     
     #Agregar nuestro mensaje al historial

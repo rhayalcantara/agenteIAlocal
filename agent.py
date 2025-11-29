@@ -1,14 +1,33 @@
 import os
 import json
 import subprocess
+from tools import Tool
+
+iatools = Tool()
 
 class Agent:
+    
     def __init__(self):
         self.setup_tools()
+        system_message_content = "Eres un asistente útil que habla español y eres muy conciso con tus respuestas."
+        
+        # Intentar leer agent.md
+        agent_md_path = "C:\\Proyectos\\agenteIAlocal\\agent.md" # Asumimos que está en el mismo directorio
+        if os.path.exists(agent_md_path):
+            try:
+                with open(agent_md_path, "r", encoding="utf-8") as f:
+                    agent_md_content = f.read()
+                system_message_content = agent_md_content
+                print(f"✅ Configuración cargada desde {agent_md_path}")
+            except Exception as e:
+                print(f"Advertencia: No se pudo leer {agent_md_path}: {e}. Usando mensaje predeterminado.")
+        else:
+            print(f"Advertencia: El archivo {agent_md_path} no fue encontrado. Usando mensaje predeterminado.")
+
         self.messages = [
-            {"role": "system", "content": "Eres un asistente útil que habla español y eres muy conciso con tus respuestas"}
+            {"role": "system", "content": system_message_content}
         ]
-    
+            
     def setup_tools(self):
         self.tools = [
             {
@@ -36,6 +55,10 @@ class Agent:
                         "path": {
                             "type": "string",
                             "description": "La ruta del archivo a leer"
+                        },
+                          "encodings": {
+                            "type": "string",
+                            "description": "El tipo de encoding para leer el archivo"
                         }
                     },
                     "required": ["path"]
@@ -80,87 +103,37 @@ class Agent:
                 }
             }
         ]
-        
-    #Definición de herramientas
-    def list_files_in_dir(self, directory="."):
-        print("  ⚙️ Herramienta llamada: list_files_in_dir")
-        try:
-            files = os.listdir(directory)
-            
-            #Asi lo deje en el video. En realidad allá se agrega a un
-            #diccionario entonces no es necesario hacerlo aquí
-            return {"files": files}
-        except Exception as e:
-            return {"error": str(e)}
-        
-    #Herramienta: Leer archivos
-    def read_file(self, path):
-        print("  ⚙️ Herramienta llamada: read_file")
-        try:
-            with open(path, encoding="utf-8") as f:
-                return f.read()
-        except Exception as e:
-            err = f"Error al leer el archivo {path}"
-            print(err)
-            return err
-        
-    #Herramienta: Editar archivos
-    def edit_file(self, path, prev_text, new_text):
-        print("  ⚙️ Herramienta llamada: edit_file")
-        try:
-            existed = os.path.exists(path)
-            if existed and prev_text:
-                content = self.read_file(path)
-                
-                if prev_text not in content:
-                    return f"Texto {prev_text} no encontrado en el archivo"
-                
-                content = content.replace(prev_text, new_text)
-                
-            else:
-                #Crear o sobreescribir con el nuevo texto directamente
-                dir_name = os.path.dirname(path)
-                if dir_name:
-                    os.makedirs(dir_name, exist_ok=True)
-                
-                content = new_text
-                
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(content)
-                
-            action = "editado" if existed and prev_text else "creado"
-            return f"Archivo {path} {action} exitosamente"
-        except Exception as e:
-            err = f"Error al crear o editar el archivo {path}"
-            print(err)
-            return err
-        
+      
     def process_response(self, response):
-
         #True = si llama a una funcion. False = No hubo llamado.
-        
-        #Almacenar para historial
+
+        message = response.output
+        # Almacenar mensaje del asistente en el historial
         self.messages += response.output
-        
+
+        # Verificar si hay llamadas a herramientascontent
         for output in response.output:
             if output.type == "function_call":
                 fn_name = output.name
                 args = json.loads(output.arguments)
-                
+
                 print(f"  - El modelo considera llamar a la herramienta {fn_name}")
                 print(f"  - Argumentos: {args}")
-                
+
                 if fn_name == "list_files_in_dir":
-                    result = self.list_files_in_dir(**args)
+                    result = iatools.list_files_in_dir(**args)
                 elif fn_name == "read_file":
-                    result = self.read_file(**args)
+                    result = iatools.read_file(**args)
                 elif fn_name == "edit_file":
-                    result = self.edit_file(**args)
+                    result = iatools.edit_file(**args)
                 elif fn_name == "execute_command":
-                    result = self.execute_command(**args)
+                    result = iatools.execute_command(**args)
                 else:
                     result = f"Herramienta desconocida: {fn_name}"
-                    
+
+                print(f"el resultado de la herramienta es: {result}")
+
+                # Agregar resultado de la herramienta al historial
                 #Agregar a la memoria la respuesta del llamado
                 self.messages.append({
                     "type": "function_call_output",
@@ -172,23 +145,11 @@ class Agent:
                         "files": result
                     })
                 })
-                    
                 return True
-                
+        # Si no hay tool calls, mostrar la respuesta del asistente
             elif output.type == "message":
                 #print(f"Asistente: {output.content}")
                 reply = "\n".join(part.text for part in output.content)
                 print(f"Asistente: {reply}")
-                
+
         return False
-    
-    def execute_command(self, command):
-        print("  🛠️ Herramienta llamada: execute_command")
-        try:
-            result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=30)     
-            if result.returncode == 0:
-                return result.stdout
-            else:
-                return f"Error: {result.stderr}"
-        except Exception as e:
-            return f"Excepción al ejecutar el comando: {str(e)}"
