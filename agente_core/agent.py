@@ -15,6 +15,7 @@ import re
 import traceback
 from datetime import datetime
 
+from openai import OpenAI
 from tools import Tool
 from memoria import Memoria
 from skill_loader import SkillLoader
@@ -42,8 +43,9 @@ class Agent:
         "local": [
             "list_files_in_dir", "read_file", "edit_file",
             "execute_bash", "guardar_memoria",
-            "buscar_en_internet", "listar_skills", "activar_skill",
+            "buscar_en_internet", "listar_skills", "activar_skill", "crear_skill",
             "leer_wiki", "buscar_wiki",
+            "enviar_archivo_telegram",
         ],
         "none": [],
     }
@@ -52,10 +54,26 @@ class Agent:
         "openrouter": "full",
         "openai": "full",
         "claude": "full",
+        "gemini": "full",
         "lmstudio": "local",
     }
 
-    def __init__(self, tool_profile: str = "full"):
+    def __init__(self, model: str, api_key: str,
+                 base_url: str = None, provider: str = "openai",
+                 tool_profile: str = None):
+        self._model = model
+        self._provider = provider
+
+        # Crear cliente OpenAI-compat
+        kwargs = {"api_key": api_key or "no-key"}
+        if base_url:
+            kwargs["base_url"] = base_url
+        self._client = OpenAI(**kwargs)
+
+        # Determinar perfil de herramientas
+        if tool_profile is None:
+            tool_profile = self.PROVIDER_PROFILES.get(provider, "full")
+
         self._tool_profile = tool_profile
         self._tools_enabled = tool_profile != "none"
         self._tool_fail_count = 0
@@ -118,7 +136,7 @@ class Agent:
 
     # ── Compactación ──────────────────────────────────────────────────────────
 
-    def compactar_historial(self, client, model_name):
+    def compactar_historial(self):
         if len(self.messages) <= self.MAX_MENSAJES:
             return False
         print(f"📦 Compactando historial ({len(self.messages)} mensajes)...")
@@ -134,8 +152,8 @@ class Agent:
                     textos.append(f"Asistente: {msg.get('content', '')[:200]}")
         if textos:
             try:
-                resp = client.responses.create(
-                    model=model_name,
+                resp = self._client.responses.create(
+                    model=self._model,
                     input=[{"role": "user", "content":
                             "Resume en 2-3 oraciones:\n" + "\n".join(textos[:20])}]
                 )
@@ -211,6 +229,14 @@ class Agent:
             {"type": "function", "name": "listar_skills",
              "description": "Lista las skills disponibles",
              "parameters": {"type": "object", "properties": {}, "required": []}},
+            {"type": "function", "name": "crear_skill",
+             "description": "Crea una nueva skill persistente con instrucciones y opcionalmente un script Python. La skill queda disponible de inmediato sin reiniciar.",
+             "parameters": {"type": "object", "properties": {
+                 "nombre": {"type": "string", "description": "Identificador de la skill (slug, ej: 'youtube-downloader')"},
+                 "instrucciones": {"type": "string", "description": "Contenido del SKILL.md — describe qué hace la skill, cómo usarla y ejemplos"},
+                 "script_nombre": {"type": "string", "description": "Nombre del archivo .py opcional (ej: 'run.py')"},
+                 "script_code": {"type": "string", "description": "Código Python del script opcional"},
+             }, "required": ["nombre", "instrucciones"]}},
             {"type": "function", "name": "activar_skill",
              "description": "Carga las instrucciones de una skill al contexto",
              "parameters": {"type": "object", "properties": {
@@ -245,6 +271,23 @@ class Agent:
             {"type": "function", "name": "listar_wiki",
              "description": "Lista todas las páginas del wiki (lee index.md)",
              "parameters": {"type": "object", "properties": {}, "required": []}},
+            {"type": "function", "name": "enviar_archivo_telegram",
+             "description": "Envía un archivo local al usuario por Telegram (máx 50 MB). Usar después de crear o descargar un archivo.",
+             "parameters": {"type": "object", "properties": {
+                 "ruta": {"type": "string", "description": "Ruta absoluta o relativa del archivo a enviar"},
+                 "caption": {"type": "string", "description": "Texto descriptivo opcional para acompañar el archivo"},
+             }, "required": ["ruta"]}},
+            {"type": "function", "name": "enviar_foto_telegram",
+             "description": (
+                 "Envía una imagen al usuario por Telegram usando una URL pública. "
+                 "Ideal para noticias: envía cada noticia como foto + titular en el caption. "
+                 "El caption soporta formato Markdown (*negrita*, _cursiva_). "
+                 "Llama esta función una vez por noticia."
+             ),
+             "parameters": {"type": "object", "properties": {
+                 "url": {"type": "string", "description": "URL pública de la imagen"},
+                 "caption": {"type": "string", "description": "Titular o descripción (máx 1024 chars, soporta Markdown)"},
+             }, "required": ["url"]}},
         ]
 
         if perfil == "local":
@@ -313,6 +356,15 @@ class Agent:
             result = self.skill_loader.ejecutar_script(
                 args.get("skill", ""), args.get("script", ""), args.get("args", "")
             )
+        elif fn_name == "crear_skill":
+            result = self.skill_loader.crear_skill(
+                nombre=args.get("nombre", ""),
+                instrucciones=args.get("instrucciones", ""),
+                script_nombre=args.get("script_nombre"),
+                script_code=args.get("script_code"),
+            )
+            # Actualizar system prompt para reflejar la nueva skill
+            self._actualizar_system_prompt()
         # ── Wiki ──────────────────────────────────────────────────────────────
         elif fn_name == "leer_wiki":
             result = self.wiki.leer(args.get("pagina", "")) if self.wiki else "Wiki no disponible"
@@ -324,6 +376,24 @@ class Agent:
             result = self.wiki.buscar(args.get("query", "")) if self.wiki else "Wiki no disponible"
         elif fn_name == "listar_wiki":
             result = self.wiki.listar() if self.wiki else "Wiki no disponible"
+        elif fn_name == "enviar_archivo_telegram":
+            ruta = args.get("ruta", "")
+            caption = args.get("caption", "")
+            cb = getattr(self, "_send_file_callback", None)
+            if cb:
+                ok = cb(ruta, caption)
+                result = f"✅ Archivo enviado: {ruta}" if ok else f"❌ No se pudo enviar: {ruta}"
+            else:
+                result = "⚠️ enviar_archivo_telegram no disponible fuera de Telegram."
+        elif fn_name == "enviar_foto_telegram":
+            url = args.get("url", "")
+            caption = args.get("caption", "")
+            cb = getattr(self, "_send_photo_url_callback", None)
+            if cb:
+                ok = cb(url, caption)
+                result = f"✅ Foto enviada: {url[:80]}" if ok else f"❌ No se pudo enviar foto: {url[:80]}"
+            else:
+                result = "⚠️ enviar_foto_telegram no disponible fuera de Telegram."
         else:
             result = f"Herramienta desconocida: {fn_name}"
 
@@ -332,6 +402,61 @@ class Agent:
         if len(result_str) > MAX_LEN:
             result_str = result_str[:MAX_LEN] + "\n... [TRUNCADO]"
         return result_str
+
+    # ── API pública ───────────────────────────────────────────────────────────
+
+    def limpiar_historial(self):
+        """Borra el historial de conversación (mantiene solo el system prompt)."""
+        self.messages = []
+        self._actualizar_system_prompt()
+
+    def chat(self, mensaje: str, progress_callback=None,
+             send_file_callback=None, send_photo_url_callback=None) -> str:
+        """Procesa un mensaje del usuario y retorna la respuesta final.
+
+        Ejecuta el loop de tool calls de forma interna hasta que el LLM
+        entregue una respuesta sin herramientas.
+        """
+        self._send_file_callback = send_file_callback
+        self._send_photo_url_callback = send_photo_url_callback
+        self._actualizar_system_prompt()
+        self.messages.append({"role": "user", "content": mensaje})
+        self.compactar_historial()
+
+        last_reply = ""
+        max_tokens = int(os.getenv("TELEGRAM_MAX_OUTPUT_TOKENS", "8192"))
+
+        while True:
+            kwargs = {
+                "model": self._model,
+                "input": self.messages,
+                "max_output_tokens": max_tokens,
+            }
+            if self.tools:
+                kwargs["tools"] = self.tools
+
+            try:
+                response = self._client.responses.create(**kwargs)
+            except Exception as e:
+                logger.error(f"Error llamando al LLM: {e}", exc_info=True)
+                raise
+
+            # Capturar el texto de la respuesta antes de procesar tool calls
+            for out in response.output:
+                if out.type == "message":
+                    texto = "\n".join(p.text for p in out.content)
+                    if texto:
+                        last_reply = texto
+
+            hubo_tool = self.process_response(
+                response,
+                texto_ya_impreso=False,
+                progress_callback=progress_callback,
+            )
+            if not hubo_tool:
+                break
+
+        return last_reply
 
     # ── process_response ─────────────────────────────────────────────────────
 

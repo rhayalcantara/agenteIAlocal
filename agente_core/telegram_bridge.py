@@ -26,8 +26,10 @@ class TelegramBridge:
     """Una instancia por sesión de chat."""
 
     def __init__(self, chat_id: int, model: str, api_key: str,
-                 base_url: str = None, provider: str = "openai"):
+                 base_url: str = None, provider: str = "openai",
+                 notifier=None):
         self.chat_id = chat_id
+        self._notifier = notifier
         self._agente = Agent(
             model=model,
             api_key=api_key,
@@ -83,8 +85,22 @@ class TelegramBridge:
             if progress_callback:
                 progress_callback(tool_name)
 
+        # Callback para enviar archivos al chat activo
+        def _send_file_cb(ruta: str, caption: str = "") -> bool:
+            if self._notifier:
+                return self._notifier.enviar_archivo(self.chat_id, ruta, caption)
+            return False
+
+        # Callback para enviar fotos por URL al chat activo
+        def _send_photo_url_cb(url: str, caption: str = "") -> bool:
+            if self._notifier:
+                return self._notifier.enviar_foto_url(self.chat_id, url, caption)
+            return False
+
         try:
-            return self._agente.chat(mensaje, progress_callback=_cb)
+            return self._agente.chat(mensaje, progress_callback=_cb,
+                                     send_file_callback=_send_file_cb,
+                                     send_photo_url_callback=_send_photo_url_cb)
         except _LoopLimitError as e:
             logger.warning(f"[bridge] Loop detectado: {e}")
             return (
@@ -117,7 +133,8 @@ _bridges: dict[int, TelegramBridge] = {}
 
 
 def obtener_bridge(chat_id: int, model: str, api_key: str,
-                   base_url: str = None, provider: str = "openai") -> TelegramBridge:
+                   base_url: str = None, provider: str = "openai",
+                   notifier=None) -> TelegramBridge:
     """Retorna (o crea) el bridge para un chat_id."""
     if chat_id not in _bridges:
         logger.info(f"Creando bridge para chat_id={chat_id}")
@@ -127,5 +144,6 @@ def obtener_bridge(chat_id: int, model: str, api_key: str,
             api_key=api_key,
             base_url=base_url,
             provider=provider,
+            notifier=notifier,
         )
     return _bridges[chat_id]

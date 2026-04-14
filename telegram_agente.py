@@ -88,6 +88,7 @@ _TOOL_LABELS: dict[str, str] = {
     "buscar_wiki":            "🔍 Buscando en wiki...",
     "listar_wiki":            "📖 Listando wiki...",
     "enviar_archivo_telegram": "📤 Enviando archivo...",
+    "enviar_foto_telegram":    "🖼️ Enviando foto...",
 }
 
 _AYUDA = """🤖 *Comandos disponibles*
