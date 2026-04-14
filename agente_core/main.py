@@ -7,6 +7,10 @@ _dir = os.path.dirname(os.path.abspath(__file__))
 if _dir not in sys.path:
     sys.path.insert(0, _dir)
 
+# Cargar .env desde la raíz del proyecto (un nivel arriba de agente_core/)
+from dotenv import load_dotenv
+load_dotenv(os.path.join(_dir, "..", ".env"))
+
 from provider_config import obtener_configuracion
 from agent import Agent
 from logger import get_logger
@@ -23,6 +27,9 @@ def main():
         config = obtener_configuracion()
     except KeyboardInterrupt:
         print("\nCancelado.")
+        return
+
+    if config is None:
         return
 
     agente = Agent(
