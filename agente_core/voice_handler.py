@@ -58,34 +58,62 @@ def transcribir(audio_path: str, language: str = None) -> str:
 
 
 def _limpiar_texto_tts(texto: str) -> str:
-    """Elimina caracteres especiales de Markdown y símbolos que el TTS leería en voz alta."""
-    # Bloques de código (``` ... ```)
+    """Elimina caracteres especiales, Markdown y símbolos que el TTS leería en voz alta."""
+    # 1. Bloques de código — eliminar completamente
     texto = re.sub(r"```[\s\S]*?```", "", texto)
-    # Código inline (`...`)
     texto = re.sub(r"`[^`]*`", "", texto)
-    # Negrita/cursiva: ***texto***, **texto**, *texto*, ___texto___, __texto__, _texto_
-    texto = re.sub(r"\*{1,3}|_{1,3}", "", texto)
-    # Encabezados Markdown (# Título)
-    texto = re.sub(r"^#{1,6}\s*", "", texto, flags=re.MULTILINE)
-    # Tachado (~~texto~~)
-    texto = re.sub(r"~~", "", texto)
-    # Citas (> texto)
-    texto = re.sub(r"^>\s*", "", texto, flags=re.MULTILINE)
-    # Listas con -, + o * al inicio de línea
-    texto = re.sub(r"^\s*[-+*]\s+", "", texto, flags=re.MULTILINE)
-    # Listas numeradas (1. texto)
-    texto = re.sub(r"^\s*\d+\.\s+", "", texto, flags=re.MULTILINE)
-    # Links Markdown [texto](url) → solo el texto
-    texto = re.sub(r"\[([^\]]+)\]\([^\)]*\)", r"\1", texto)
-    # Imágenes ![alt](url)
+
+    # 2. URLs completas — eliminar (se leerían letra por letra)
+    texto = re.sub(r"https?://\S+", "", texto)
+
+    # 3. Imágenes Markdown y links — conservar solo el texto visible
     texto = re.sub(r"!\[[^\]]*\]\([^\)]*\)", "", texto)
-    # Líneas horizontales (---, ___, ***)
+    texto = re.sub(r"\[([^\]]+)\]\([^\)]*\)", r"\1", texto)
+
+    # 4. Encabezados al inicio de línea (# ## ### …)
+    texto = re.sub(r"^#{1,6}\s*", "", texto, flags=re.MULTILINE)
+
+    # 5. Tachado
+    texto = re.sub(r"~~([^~]*)~~", r"\1", texto)
+    texto = re.sub(r"~~", "", texto)
+
+    # 6. Negrita/cursiva — extraer el contenido, luego barrer restos
+    texto = re.sub(r"\*{1,3}([^\*\n]*)\*{1,3}", r"\1", texto)
+    texto = re.sub(r"_{2}([^_\n]*)_{2}", r"\1", texto)
+    texto = re.sub(r"_([^_\n]*)_", r"\1", texto)
+    # Asteriscos y underscores sueltos que hayan quedado
+    texto = re.sub(r"[\*_]+", "", texto)
+
+    # 7. Citas
+    texto = re.sub(r"^>\s*", "", texto, flags=re.MULTILINE)
+
+    # 8. Listas (guion, punto, bala unicode •)
+    texto = re.sub(r"^\s*[-+•·]\s+", "", texto, flags=re.MULTILINE)
+    texto = re.sub(r"^\s*\d+[.)]\s+", "", texto, flags=re.MULTILINE)
+
+    # 9. Líneas horizontales
     texto = re.sub(r"^[\s]*[-_*]{3,}[\s]*$", "", texto, flags=re.MULTILINE)
-    # Pipes de tablas
+
+    # 10. Pipes de tablas
     texto = re.sub(r"\|", " ", texto)
-    # Caracteres sueltos que no aportan al habla
-    texto = re.sub(r"[\\<>\[\]{}~^]", "", texto)
-    # Múltiples espacios/saltos → un solo espacio o salto
+
+    # 11. Hashtags (#palabra) en cualquier posición del texto
+    texto = re.sub(r"#\w+", "", texto)
+
+    # 12. Caracteres sueltos que no aportan al habla
+    texto = re.sub(r"[#\\<>\[\]{}~^@=+]", "", texto)
+
+    # 13. Emojis y símbolos Unicode (bloques U+1F000–U+1FFFF y similares)
+    texto = re.sub(
+        r"[\U0001F000-\U0001FFFF"   # Emoticons, símbolos varios
+        r"\U00002600-\U000027BF"     # Símbolos misceláneos, flechas, etc.
+        r"\U0000FE00-\U0000FE0F"     # Selectores de variación
+        r"\U00002300-\U000023FF"     # Símbolos técnicos
+        r"\U00002B00-\U00002BFF]+",  # Flechas suplementarias
+        " ", texto
+    )
+
+    # 14. Espacios y saltos redundantes
     texto = re.sub(r"\n{3,}", "\n\n", texto)
     texto = re.sub(r" {2,}", " ", texto)
     return texto.strip()
