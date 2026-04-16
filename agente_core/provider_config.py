@@ -5,6 +5,11 @@ from logger import get_logger
 
 logger = get_logger("provider_config")
 
+# Sentinel para Gemini: si GEMINI_BASE_URL tiene este valor
+# se reemplaza por el endpoint OpenAI-compat de Google.
+_GEMINI_SDK_SENTINEL = "gemini-sdk"
+_GEMINI_COMPAT_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+
 # Definición de proveedores disponibles
 _PROVEEDORES = {
     "openrouter": {
@@ -30,7 +35,7 @@ _PROVEEDORES = {
         "nombre": "LM Studio (local)",
         "base_url_env": "LMSTUDIO_BASE_URL",
         "base_url": "http://localhost:1234/v1",
-        "api_key_env": "",
+        "api_key_env": "LMSTUDIO_API_KEY",
         "model_env": "LMSTUDIO_MODEL",
         "model_default": "local-model",
         "headers": {},
@@ -43,6 +48,15 @@ _PROVEEDORES = {
         "model_default": "claude-sonnet-4-5",
         "headers": {},
     },
+    "gemini": {
+        "nombre": "Google Gemini",
+        "base_url_env": "GEMINI_BASE_URL",
+        "base_url": _GEMINI_COMPAT_URL,
+        "api_key_env": "GEMINI_API_KEY",
+        "model_env": "GEMINI_MODEL",
+        "model_default": "gemini-2.0-flash",
+        "headers": {},
+    },
 }
 
 
@@ -52,25 +66,34 @@ def cargar_proveedores() -> dict:
     for key, cfg in _PROVEEDORES.items():
         api_key_env = cfg.get("api_key_env", "")
         api_key = os.getenv(api_key_env, "") if api_key_env else "no-key"
-        if api_key:
-            model_env = cfg.get("model_env", "")
-            model = os.getenv(model_env, cfg["model_default"]) if model_env else cfg["model_default"]
-            base_url = os.getenv(cfg.get("base_url_env", ""), cfg["base_url"])
-            disponibles[key] = {
-                "nombre": cfg["nombre"],
-                "base_url": base_url,
-                "api_key": api_key,
-                "model": model,
-                "headers": cfg.get("headers", {}),
-            }
+        if not api_key:
+            continue
+        model_env = cfg.get("model_env", "")
+        model = os.getenv(model_env, cfg["model_default"]) if model_env else cfg["model_default"]
+        base_url = os.getenv(cfg.get("base_url_env", ""), cfg["base_url"])
+        # Resolver sentinel gemini-sdk → endpoint OpenAI-compat de Google
+        if base_url == _GEMINI_SDK_SENTINEL:
+            base_url = _GEMINI_COMPAT_URL
+        disponibles[key] = {
+            "nombre": cfg["nombre"],
+            "base_url": base_url,
+            "api_key": api_key,
+            "model": model,
+            "headers": cfg.get("headers", {}),
+        }
     return disponibles
 
 
 def crear_cliente(config: dict) -> OpenAI:
     """Crea un cliente OpenAI compatible con la configuración dada."""
+    # Timeout alto para modelos locales (Ollama, LM Studio) que pueden tardar
+    # varios minutos en generar una respuesta larga.
+    # Configurable con AGENT_TIMEOUT_SECONDS en .env (default 300 seg).
+    timeout = float(os.getenv("AGENT_TIMEOUT_SECONDS", "300"))
     kwargs = {
         "base_url": config["base_url"],
         "api_key": config["api_key"],
+        "timeout": timeout,
     }
     if config.get("headers"):
         kwargs["default_headers"] = config["headers"]
@@ -102,8 +125,12 @@ def seleccionar_proveedor(proveedores: dict, default: str = None) -> str:
         print("Opción inválida.")
 
 
-def obtener_configuracion():
-    """Carga proveedores, selecciona el default o pide elección interactiva."""
+def obtener_configuracion(non_interactive: bool = False) -> dict | None:
+    """Carga proveedores, selecciona el default o pide elección interactiva.
+
+    Retorna un dict con claves: model, api_key, base_url, provider, nombre.
+    Retorna None si no hay proveedores configurados.
+    """
     proveedores = cargar_proveedores()
     if not proveedores:
         print("ERROR: No hay proveedores configurados en .env")
@@ -114,9 +141,18 @@ def obtener_configuracion():
         provider_key = default_key
     elif len(proveedores) == 1:
         provider_key = list(proveedores.keys())[0]
+    elif non_interactive:
+        provider_key = list(proveedores.keys())[0]
+        logger.warning(f"PROVIDER_DEFAULT no configurado — usando '{provider_key}' por defecto.")
     else:
         provider_key = seleccionar_proveedor(proveedores)
 
-    config = proveedores[provider_key]
-    client = crear_cliente(config)
-    return client, config["model"], provider_key, proveedores
+    cfg = proveedores[provider_key]
+    return {
+        "provider": provider_key,
+        "nombre": cfg["nombre"],
+        "model": cfg["model"],
+        "api_key": cfg["api_key"],
+        "base_url": cfg["base_url"],
+        "headers": cfg.get("headers", {}),
+    }

@@ -1,0 +1,7 @@
+[
+  {"id": 1, "nombre": "Juan Pérez", "puesto": "Desarrollador Senior", "departamento": "IT"},
+  {"id": 2, "nombre": "María García", "puesto": "Analista de Datos", "departamento": "Data Science"},
+  {"id": 3, "nombre": "Carlos Rodríguez", "puesto": "Gerente de Proyecto", "departamento": "Operaciones"},
+  {"id": 4, "nombre": "Ana Martínez", "puesto": "Diseñadora UI/UX", "departamento": "Diseño"},
+  {"id": 5, "nombre": "Luis López", "puesto": "DevOps Engineer", "departamento": "IT"}
+]

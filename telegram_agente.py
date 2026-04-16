@@ -89,16 +89,23 @@ _TOOL_LABELS: dict[str, str] = {
     "listar_wiki":            "📖 Listando wiki...",
     "enviar_archivo_telegram": "📤 Enviando archivo...",
     "enviar_foto_telegram":    "🖼️ Enviando foto...",
+    "browser_navegar":         "🌐 Abriendo página...",
+    "browser_screenshot":      "📸 Tomando screenshot...",
+    "browser_click":           "🖱️ Haciendo clic...",
+    "browser_escribir":        "⌨️ Escribiendo en formulario...",
+    "browser_obtener_texto":   "📄 Leyendo página...",
+    "browser_ejecutar_js":     "⚡ Ejecutando JavaScript...",
 }
 
 _AYUDA = """🤖 *Comandos disponibles*
 
-/limpiar — Borra el historial de conversación
-/memoria — Muestra las memorias guardadas
-/wiki    — Estadísticas de la base de conocimiento
-/voz on  — Activa respuestas en voz
-/voz off — Desactiva respuestas en voz
-/ayuda   — Esta lista de comandos
+/limpiar   — Borra el historial de conversación
+/compactar — Reduce el historial resumiendo mensajes antiguos
+/memoria   — Muestra las memorias guardadas
+/wiki      — Estadísticas de la base de conocimiento
+/voz on    — Activa respuestas en voz
+/voz off   — Desactiva respuestas en voz
+/ayuda     — Esta lista de comandos
 
 Puedes enviar mensajes de texto o *mensajes de voz* 🎙️"""
 
@@ -144,6 +151,12 @@ def _manejar_comando(texto: str, chat_id: int, notifier: TelegramNotifier) -> bo
             notifier.enviar(chat_id, f"🎙️ Voz actualmente *{estado}*. Usa `/voz on` o `/voz off`.")
         return True
 
+    if cmd == "/compactar":
+        bridge = obtener_bridge(chat_id, MODEL, API_KEY, BASE_URL, PROVIDER, notifier)
+        resultado = bridge.compactar_historial()
+        notifier.enviar(chat_id, resultado)
+        return True
+
     if cmd == "/ayuda":
         notifier.enviar(chat_id, _AYUDA)
         return True
@@ -167,6 +180,9 @@ def _worker(cola: queue.Queue, notifier: TelegramNotifier):
         texto      = item["text"]
         audio_path = item.get("audio_path")
         es_voz     = item.get("es_voz", False)
+        image_path = item.get("image_path")
+        doc_path   = item.get("doc_path")
+        doc_name   = item.get("doc_name", "")
 
         # ── STT: transcribir audio si viene de voz ─────────────────────
         if es_voz and audio_path:
@@ -180,6 +196,17 @@ def _worker(cola: queue.Queue, notifier: TelegramNotifier):
             logger.info(f"Transcripción: {texto[:100]}")
             # Confirmar al usuario lo que se entendió
             notifier.enviar(chat_id, f"🗣️ Entendí: _{texto}_")
+
+        # ── Documento: leer contenido e inyectar en el texto ──────────
+        if doc_path and os.path.exists(doc_path):
+            try:
+                with open(doc_path, "r", encoding="utf-8", errors="ignore") as _f:
+                    contenido = _f.read(8000)   # máx 8k chars para no saturar el contexto
+                texto = f"{texto}\n\n[Contenido de {doc_name}]:\n{contenido}"
+                logger.info(f"Documento leído: {doc_name} ({len(contenido)} chars)")
+            except Exception as _e:
+                logger.warning(f"No se pudo leer el documento {doc_name}: {_e}")
+                texto = f"{texto}\n\n[Archivo adjunto: {doc_name} — no se pudo leer el contenido]"
 
         if not texto:
             cola.task_done()
@@ -208,7 +235,8 @@ def _worker(cola: queue.Queue, notifier: TelegramNotifier):
 
         bridge = obtener_bridge(chat_id, MODEL, API_KEY, BASE_URL, PROVIDER, notifier)
         try:
-            respuesta = bridge.procesar(texto, progress_callback=progress_callback)
+            respuesta = bridge.procesar(texto, progress_callback=progress_callback,
+                                        image_path=image_path)
         except Exception as e:
             logger.error(f"Error en bridge.procesar: {e}", exc_info=True)
             respuesta = f"❌ Error inesperado: {e}"
@@ -271,6 +299,10 @@ def main():
 
                 if es_voz:
                     logger.info(f"Voz de {msg['user']} ({chat_id})")
+                elif msg.get("image_path"):
+                    logger.info(f"Foto de {msg['user']} ({chat_id}): caption='{texto[:40]}'")
+                elif msg.get("doc_path"):
+                    logger.info(f"Documento de {msg['user']} ({chat_id}): {msg.get('doc_name','?')}")
                 else:
                     logger.info(f"Texto de {msg['user']} ({chat_id}): {texto[:80]}")
 

@@ -1,0 +1,88 @@
+[
+  {
+    "role": "system",
+    "content": "Fecha y hora: 2026-04-15 13:31\n\n# Agente IA — Rhay\n\n## Rol\nEres un agente autónomo, ingeniero senior especializado en Python y desarrollo de software. Ejecutas tareas directamente usando las herramientas disponibles. Eres conciso — respondes en 2-4 oraciones máximo, sin explicaciones innecesarias.\n\n## Ambiente\n- Sistema operativo: macOS (Darwin)\n- Proyecto en: `/Users/rhayalcantara/proyectosia/agenteIAlocal_nuevo`\n- El terminal bash siempre arranca en el root del proyecto\n- Entorno virtual activo: `.venv/` (python3 y pip ya apuntan al venv)\n\n---\n\n## ESTRATEGIA DE PERMISOS\n\nAntes de pedir autorización para cualquier acción, **consulta primero el archivo de permisos**:\n\n```\nread_file(\"agente_core/data/permisos.json\")\n```\n\n- Si la acción está en `acciones_autorizadas` → **ejecuta sin preguntar**\n- Si la acción está en `requieren_confirmacion` → **pide confirmación al usuario**\n- Si el usuario da permiso para algo nuevo → guárdalo con:\n  ```\n  guardar_memoria(contenido=\"El usuario autorizó: <acción>\", categoria=\"instruccion\")\n  ```\n  Y la próxima vez que sea la misma acción, búscala en memoria con `consultar_memoria` antes de preguntar.\n\n**Nunca pidas permiso dos veces por la misma acción.** Si ya está en `permisos.json` o en la memoria como \"instruccion\", procede directamente.\n\n---\n\n## FLUJO DE TRABAJO: PLAN + TAREAS\n\nPara cualquier tarea que tenga más de un paso, **antes de ejecutar**:\n\n1. **Crea un plan** con una lista de tareas numeradas:\n   ```\n   📋 Plan:\n   [ ] 1. Verificar archivo X\n   [ ] 2. Instalar dependencia Y\n   [ ] 3. Ejecutar script Z\n   ```\n\n2. **Ejecuta tarea por tarea** usando las herramientas.\n\n3. **Marca cada tarea al terminarla**:\n   ```\n   [✓] 1. Verificar archivo X — listo\n   [ ] 2. Instalar dependencia Y\n   ```\n\n4. **Solo responde al usuario cuando TODO el plan esté completo.** No interrumpas con preguntas a mitad del plan a menos que encuentres un bloqueo real.\n\n5. Si hay un error en una tarea → analiza la causa, corrígela, y continúa. No reinicies el plan desde cero.\n\n---\n\n## REGLAS DE EJECUCIÓN\n\n- \"ejecuta\", \"corre\", \"instala\", \"descarga\", \"busca\", \"abre\" → **autorización implícita**, ejecuta de inmediato\n- Solo detente para pedir confirmación si la acción está en `requieren_confirmacion`\n- Si el usuario ya mencionó una herramienta o comando explícitamente → úsala sin preguntar\n- No repitas lo que acabas de hacer en la respuesta — el usuario puede ver el resultado\n\n## HERRAMIENTAS DISPONIBLES\n\n- Archivos: `list_files_in_dir`, `read_file`, `edit_file`\n- Terminal: `execute_bash`, `execute_command`\n- Web: `buscar_en_internet`, `leer_pagina_web`\n- Browser real: `browser_navegar`, `browser_screenshot`, `browser_click`, `browser_escribir`, `browser_obtener_texto`, `browser_ejecutar_js`\n- Memoria: `guardar_memoria`, `consultar_memoria`\n- Wiki: `leer_wiki`, `escribir_wiki`, `buscar_wiki`, `listar_wiki`\n- Skills: `listar_skills`, `activar_skill`, `crear_skill`, `ejecutar_script_skill`\n- Telegram: `enviar_archivo_telegram`, `enviar_foto_telegram`\n\n## SEGURIDAD\n- Nunca borres archivos sin confirmación explícita\n- Nunca hagas git push, git reset --hard, ni modifiques .env sin confirmación\n- Si un comando falla 2 veces con el mismo error → detente y reporta al usuario\n\n\n## Resumen de conversación anterior\nAplica sus capacidades.\n\n## Skills disponibles\n- **agent-browser**: ---\n- **telegram-agent-monitor**: Monitorea la salud del agente de Telegram: detecta instancias duplicadas, analiz\n- **gmail-reader**: Esta skill permite buscar y leer correos electrónicos de Gmail utilizando la API\n- **descargavideoytraduce**: Esta skill automatiza el proceso de descargar un video de YouTube, extraer su au\n- **buscar-noticias**: Esta skill permite extraer automáticamente los titulares más recientes y sus imá\n- **youtube-downloader**: Descarga, transcribe y traduce videos de YouTube al español usando yt-dlp, Whisp\n- **estado-clima**: Esta skill permite obtener un resumen actualizado del pronóstico meteorológico e"
+  },
+  "ResponseReasoningItem(id='rs_xlqkne3ga7amjap4zyb9q', summary=[], type='reasoning', content=[Content(text='\\n', type='reasoning_text')], encrypted_content=None, status='completed')",
+  "ResponseFunctionToolCall(arguments='{\"command\":\"python3 skills/buscar-noticias/run.py\"}', call_id='call_2535029870721490', name='execute_bash', type='function_call', id='fc_5t2xxhjz3qbw1e790creq', namespace=None, status='completed')",
+  {
+    "type": "function_call_output",
+    "call_id": "call_2535029870721490",
+    "output": "{\"files\": \"\\u00c9xito: Se encontraron 20 noticias. Archivo creado: reporte_diariolibre.md\"}"
+  },
+  "ResponseReasoningItem(id='rs_ij6605x97wav6a05hpa7p', summary=[], type='reasoning', content=[Content(text='\\n', type='reasoning_text')], encrypted_content=None, status='completed')",
+  "ResponseOutputMessage(id='msg_wctrai91kqqifi8wc642ti', content=[ResponseOutputText(annotations=[], text='[✓] 1. Ejecutar el scraper de noticias — listo\\n\\nHe generado el reporte con las últimas noticias de Diario Libre. Puedes encontrar los titulares y sus enlaces en el archivo `reporte_diariolibre.md`.', type='output_text', logprobs=[])], role='assistant', status='completed', type='message', phase=None)",
+  {
+    "role": "user",
+    "content": "envia me lo por telegram"
+  },
+  "ResponseReasoningItem(id='rs_3zlaz3zj3z531wtd7dgiec', summary=[], type='reasoning', content=[Content(text='\\n', type='reasoning_text')], encrypted_content=None, status='completed')",
+  "ResponseFunctionToolCall(arguments='{\"caption\":\"Aquí tienes el reporte diario de noticias de Diario Libre.\",\"ruta\":\"reporte_diariolibre.md\"}', call_id='call_2535029870721491', name='enviar_archivo_telegram', type='function_call', id='fc_xezs88kqwqib5fmqbf7ewu', namespace=None, status='completed')",
+  {
+    "type": "function_call_output",
+    "call_id": "call_2535029870721491",
+    "output": "{\"files\": \"\\u2705 Archivo enviado: reporte_diariolibre.md\"}"
+  },
+  "ResponseOutputMessage(id='msg_w90g512jp8fi02iyqiaga', content=[ResponseOutputText(annotations=[], text='[✓] 2. Enviar archivo por Telegram — listo\\n\\nEl reporte ya ha sido enviado a tu Telegram.', type='output_text', logprobs=[])], role='assistant', status='completed', type='message', phase=None)",
+  {
+    "role": "user",
+    "content": "Busca informacion de las lista de cumplimiento de bancos"
+  },
+  "ResponseReasoningItem(id='rs_2mkks733gi3bajfipk6rg9', summary=[], type='reasoning', content=[Content(text='\\n', type='reasoning_text')], encrypted_content=None, status='completed')",
+  "ResponseFunctionToolCall(arguments='{\"path\":\"agente_core/data/permisos.json\"}', call_id='call_2535029870721492', name='read_file', type='function_call', id='fc_bpqn2zteg7q5xbffzuz06i', namespace=None, status='completed')",
+  {
+    "type": "function_call_output",
+    "call_id": "call_2535029870721492",
+    "output": "{\"files\": \"{\\n  \\\"acciones_autorizadas\\\": [\\n    \\\"ejecutar scripts python del proyecto\\\",\\n    \\\"leer archivos del proyecto\\\",\\n    \\\"editar archivos existentes del proyecto\\\",\\n    \\\"crear archivos nuevos en el proyecto\\\",\\n    \\\"instalar paquetes con pip\\\",\\n    \\\"ejecutar comandos bash de lectura (ls, cat, find, grep, ps, tail)\\\",\\n    \\\"buscar en internet con DuckDuckGo\\\",\\n    \\\"leer p\\u00e1ginas web con scrape_url\\\",\\n    \\\"navegar con el browser (browser_navegar)\\\",\\n    \\\"tomar screenshots con el browser\\\",\\n    \\\"guardar y consultar memoria\\\",\\n    \\\"leer y escribir en la wiki\\\",\\n    \\\"crear y activar skills\\\",\\n    \\\"enviar archivos y fotos por Telegram\\\",\\n    \\\"ejecutar scripts de skills existentes\\\",\\n    \\\"listar directorios y archivos\\\"\\n  ],\\n  \\\"requieren_confirmacion\\\": [\\n    \\\"borrar archivos o directorios\\\",\\n    \\\"modificar .env\\\",\\n    \\\"instalar software del sistema (brew, apt, etc.)\\\",\\n    \\\"ejecutar git push o git reset --hard\\\",\\n    \\\"eliminar entradas de memoria o wiki\\\",\\n    \\\"acceder a APIs externas con credenciales nuevas no mencionadas\\\"\\n  ]\\n}\\n\"}"
+  },
+  "ResponseReasoningItem(id='rs_3x5z3yumsd43vwo2vgipzb', summary=[], type='reasoning', content=[Content(text='\\n', type='reasoning_text')], encrypted_content=None, status='completed')",
+  "ResponseOutputMessage(id='msg_wpzi23b490i3nlmiwucvdv', content=[ResponseOutputText(annotations=[], text='📋 Plan:\\n[ ] 1. Buscar información sobre listas de cumplimiento bancario en internet\\n[ ] 2. Sintetizar la información encontrada\\n\\nEjecutando tarea 1...\\n\\n', type='output_text', logprobs=[])], role='assistant', status='completed', type='message', phase=None)",
+  "ResponseFunctionToolCall(arguments='{\"query\":\"listas de cumplimiento bancario (AML/KYC) principales del mundo y requerimientos\"}', call_id='call_2535029870721493', name='buscar_en_internet', type='function_call', id='fc_ij2ek5p8zihvmne1fr2ao', namespace=None, status='completed')",
+  {
+    "type": "function_call_output",
+    "call_id": "call_2535029870721493",
+    "output": "{\"files\": \"No se encontraron resultados.\"}"
+  },
+  "ResponseReasoningItem(id='rs_f7fku95ruk5wgj5tb8q71m', summary=[], type='reasoning', content=[Content(text='\\n', type='reasoning_text')], encrypted_content=None, status='completed')",
+  "ResponseFunctionToolCall(arguments='{\"query\":\"banking compliance lists AML KYC global regulations\"}', call_id='call_2535029870721494', name='buscar_en_internet', type='function_call', id='fc_9q4zas3y3kvblxr8gddui', namespace=None, status='completed')",
+  {
+    "type": "function_call_output",
+    "call_id": "call_2535029870721494",
+    "output": "{\"files\": \"No se encontraron resultados.\"}"
+  },
+  "ResponseReasoningItem(id='rs_3wogq59nz45vrc0ck3x46c', summary=[], type='reasoning', content=[Content(text='\\n', type='reasoning_text')], encrypted_content=None, status='completed')",
+  "ResponseFunctionToolCall(arguments='{\"query\":\"major global banking compliance watchlists OFAC PEP SDN list\"}', call_id='call_2535029870721495', name='buscar_en_internet', type='function_call', id='fc_2q15a0ijxyucrrs6y2lfx', namespace=None, status='completed')",
+  {
+    "type": "function_call_output",
+    "call_id": "call_2535029870721495",
+    "output": "{\"files\": \"1. major\\u662f\\u4ec0\\u4e48\\uff1f\\u7537\\u670b\\u53cb\\u8bf4\\u4ed6\\u53bb\\u53c2\\u52a0major\\u4e86? - \\u77e5\\u4e4e\\n   https://www.zhihu.com/question/369337065\\n   major\\u5206\\u522b\\u662fCSGO\\u548cDOTA2\\u4e24\\u4e2a\\u9879\\u76ee\\u7684\\u8d5b\\u4e8b\\uff0c\\u90fd\\u662f\\u7531V\\u793e\\u4e3b\\u529e\\u7684\\u56fd\\u9645\\u6027\\u8d5b\\u4e8b \\u4ee5CSGO major \\u4e3a\\u4f8b\\u5b50\\uff0c\\u662fCSGO\\u4e2d\\u542b\\u91d1\\u91cf\\u6700\\u9ad8\\u7684\\u8d5b\\u4e8b\\uff0c\\u8ba4\\u53ef\\u5ea6\\u5173\\u6ce8\\u5ea6\\u4e5f\\u5360\\u636e\\u7b2c\\u4e00\\uff0c\\u76ee\\u524d\\u5168\\u56fd\\u53ea\\u6709\\u4e00\\u652f\\u6218\\u961f\\u6253\\u8fdb\\u8fc7major\\u6b63 \\u2026\\n\\n2. \\u8bba\\u6587\\u6536\\u5230major revision\\u7ed3\\u679c\\u65f6\\uff0c\\u4f60\\u662f\\u9ad8\\u5174\\u8fd8\\u662f\\u96be\\u8fc7\\uff1f - \\u77e5\\u4e4e\\n   https://www.zhihu.com/question/407091585\\n   \\u7ed3\\u8bba\\uff1a\\u5982\\u679c\\u662f\\u9876\\u520a\\uff0cmajor revision\\u6709\\u4e00\\u5b9a\\u6982\\u7387\\u88ab\\u62d2\\uff1b\\u4f46\\u5982\\u679c\\u662f\\u4e00\\u822c\\u671f\\u520a\\uff0cAccepted=Accept\\uff0cminor revision = nearly Accepted\\uff0cmajor revision = will be accepted soon\\u3002 3\\u3001\\u5e38\\u89c1\\u5ba1\\u7a3f\\u610f\\u89c1\\u7684\\u4fee\\u6539\\u65b9\\u6cd5  \\u2026\\n\\n3. 2025 \\u5e74\\u4f60\\u89c9\\u5f97 NIKO \\u8fd8\\u6709\\u673a\\u4f1a\\u62ff Major \\u51a0\\u519b\\u5417\\uff1f - \\u77e5\\u4e4e\\n   https://www.zhihu.com/question/1910419748614813434/answers/updated\\n   \\u7537\\u4eba\\u4e00\\u751f\\u53ea\\u54ed\\u5341\\u516b\\u6b21\\uff1aNiko\\u68a6\\u788e \\u514b\\u5362\\u65e5\\u7eb3\\u6ce2\\u5361Major \\u3001Niko\\u68a6\\u788e\\u54e5\\u4f26\\u5e03Major\\u3001Niko\\u68a6\\u788e\\u79d1\\u9686Major\\u3001Niko\\u68a6\\u788e\\u4e9a\\u7279\\u5170\\u5927Major\\u3001Niko\\u68a6\\u788e\\u514b\\u62c9\\u79d1\\u592bMajor\\u3001Niko\\u68a6\\u788e\\u6ce2\\u58eb\\u987fMajor\\u3001Niko\\u68a6\\u788e\\u4f26\\u6566Major \\u2026\\n\\n4. \\u4e3a\\u4ec0\\u4e48\\u5f3a\\u5982 Simple \\u548c ZywOo \\u4e5f\\u90fd\\u53ea\\u62ff\\u8fc7\\u4e00\\u6b21\\u300aCS\\u300b\\u7684 Major ...\\n   https://www.zhihu.com/question/1888737644927771806/answers/updated\\n   ZywOo \\u5df2\\u7ecf\\u4e24\\u4e2a major\\u51a0\\u519b\\uff0c2\\u4e2a major MVP\\uff0c24\\u5c81\\u76ee\\u524d27\\u4e2a S\\u8d5bMVP \\uff08\\u622a\\u6b62\\u52302024\\u5e746\\u670824\\u65e5\\uff09\\uff0c\\u4e4b\\u540e\\u8363\\u8a89\\u6570\\u636e\\u8fd8\\u5728\\u65b0\\u589e\\u6ca1\\u89c1\\u9876\\u3002 simple \\u4ee5\\u524d\\u662f\\u5f3a\\uff0c\\u4f46\\u662f\\u73b0\\u5728\\u5c31\\u662f\\u8def\\u8fb9\\u4e00\\u6761\\uff0c\\u8bba\\u8363\\u8a89\\u8bba\\u6210\\u7ee9\\u90fd\\u4e0d \\u2026\\n\\n5. 2025 \\u5e74\\u4f60\\u89c9\\u5f97 NIKO \\u8fd8\\u6709\\u673a\\u4f1a\\u62ff Major \\u51a0\\u519b\\u5417\\uff1f - \\u77e5\\u4e4e\\n   https://www.zhihu.com/question/1910419748614813434\\n   \\u5728\\u8fd9\\u91cc\\u5f15\\u7528\\u73a9\\u673a\\u5668\\u7684\\u4e00\\u53e5\\u8bdd\\u3002 Niko\\u662f\\u4e00\\u5b9a\\u4f1a\\u62ffmajor\\u51a0\\u519b\\u7684\\uff0c\\u53ea\\u4e0d\\u8fc7\\u53ef\\u80fd\\u4e0d\\u662f\\u4f5c\\u4e3a\\u7a81\\u7834\\u624b\\u6216\\u8005\\u6b65\\u67aa\\u624b\\u3002 \\u66f4\\u53ef\\u80fd\\u662f\\u7b49\\u4ee5\\u540e\\u5e74\\u9f84\\u5927\\u4e86\\u4ee5\\u540e\\u8f6c\\u53bb\\u6307\\u6325\\uff0c\\u9760\\u4ed6\\u7684\\u7ecf\\u9a8c\\u53bb\\u62ffmajor\\u3002 \\u867d\\u7136\\u603b\\u662f\\u8bb2Niko\\u7684\\u8da3\\u4e8b\\uff0c\\u4f46\\u662f\\u8fd9\\u4e5f\\u7b97 \\u2026\"}"
+  },
+  "ResponseReasoningItem(id='rs_mkyztpyn083we92w6wbj6', summary=[], type='reasoning', content=[Content(text='\\n', type='reasoning_text')], encrypted_content=None, status='completed')",
+  "ResponseFunctionToolCall(arguments='{\"query\":\"AML KYC banking compliance lists OFAC PEP UN Sanctions list FATF high risk jurisdictions\"}', call_id='call_2535029870721496', name='buscar_en_internet', type='function_call', id='fc_lybd99wkwuqmcsit2lt11p', namespace=None, status='completed')",
+  {
+    "type": "function_call_output",
+    "call_id": "call_2535029870721496",
+    "output": "{\"files\": \"No se encontraron resultados.\"}"
+  },
+  "ResponseReasoningItem(id='rs_b77xfr4mges8k3dfa7nuu5', summary=[], type='reasoning', content=[Content(text='\\n', type='reasoning_text')], encrypted_content=None, status='completed')",
+  "ResponseFunctionToolCall(arguments='{\"query\":\"listas de sanciones internacionales para bancos AML/KYC (OFAC, ONU, UE)\"}', call_id='call_2535029870721497', name='buscar_en_internet', type='function_call', id='fc_6tk9lkws1geidxgh0739mp', namespace=None, status='completed')",
+  {
+    "type": "function_call_output",
+    "call_id": "call_2535029870721497",
+    "output": "{\"files\": \"No se encontraron resultados.\"}"
+  },
+  "ResponseReasoningItem(id='rs_vom2izi48ra9f123s5ur8', summary=[], type='reasoning', content=[Content(text='\\n', type='reasoning_text')], encrypted_content=None, status='completed')",
+  "ResponseFunctionToolCall(arguments='{\"query\":\"AML KYC compliance watchlists OFAC UN EU sanctions list PEP FATF high risk jurisdictions banking\"}', call_id='call_2535029870721498', name='buscar_en_internet', type='function_call', id='fc_390lsd6caudx2vkackt23l', namespace=None, status='completed')",
+  {
+    "type": "function_call_output",
+    "call_id": "call_2535029870721498",
+    "output": "{\"files\": \"No se encontraron resultados.\"}"
+  },
+  "ResponseReasoningItem(id='rs_3j852reww874c37ff3ktj7', summary=[], type='reasoning', content=[Content(text='\\n', type='reasoning_text')], encrypted_content=None, status='completed')",
+  "ResponseFunctionToolCall(arguments='{\"query\":\"list of international sanctions lists for AML/KYC compliance (OFAC, UN, EU)\"}', call_id='call_2535029870721499', name='buscar_en_internet', type='function_call', id='fc_1plxnyarsddhaex4i15w8o', namespace=None, status='completed')",
+  {
+    "type": "function_call_output",
+    "call_id": "call_2535029870721499",
+    "output": "{\"files\": \"No se encontraron resultados.\"}"
+  }
+]

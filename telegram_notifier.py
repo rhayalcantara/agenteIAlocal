@@ -47,6 +47,11 @@ class TelegramNotifier:
                 "parse_mode": parse_mode,
             }
             result = _post("sendMessage", payload)
+            if not result and parse_mode:
+                # Fallback: reenviar sin formato si falla el parsing de entidades
+                logger.warning("Reintentando envío sin parse_mode por error de entidades")
+                payload_plain = {"chat_id": chat_id, "text": chunk}
+                result = _post("sendMessage", payload_plain)
             if result:
                 last_id = result["result"]["message_id"]
         return last_id
@@ -60,6 +65,10 @@ class TelegramNotifier:
             "parse_mode": parse_mode,
         }
         result = _post("editMessageText", payload)
+        if not result and parse_mode:
+            # Fallback: editar sin formato si falla el parsing de entidades
+            payload_plain = {"chat_id": chat_id, "message_id": message_id, "text": texto[:MAX_CHARS]}
+            result = _post("editMessageText", payload_plain)
         return result is not None
 
     def enviar_archivo(self, chat_id: int, ruta: str, caption: str = "") -> bool:

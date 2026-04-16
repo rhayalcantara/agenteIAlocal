@@ -1,0 +1,27 @@
+# Secretos y credenciales
+.env
+*.json.bak
+token.json
+credentials.json
+credentials_google.json
+gmail_manager/token.json
+gmail_manager/credentials.json
+gmail_manager/credentials_google.json
+
+# Logs con posibles secretos
+agente_core/logs/agente.log
+agente_core/logs/agente.log.*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+.venv/
+venv/
+
+# Archivos temporales / multimedia grandes
+audio_output.mp3
+*.mp4
+
+# Archivos de datos locales sensibles
+agente_core/data/permisos.json

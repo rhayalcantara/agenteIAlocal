@@ -80,7 +80,14 @@ class BashTerminal:
         self._iniciar()
 
     def _iniciar(self):
+        import os
         try:
+            env = os.environ.copy()
+            # Inyectar el venv del proyecto para que python3/pip usen el entorno correcto
+            _project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            _venv_bin = os.path.join(_project_root, ".venv", "bin")
+            env["PATH"] = _venv_bin + ":/usr/local/bin:" + env.get("PATH", "")
+            env["VIRTUAL_ENV"] = os.path.join(_project_root, ".venv")
             self._proceso = subprocess.Popen(
                 ["/bin/bash"],
                 stdin=subprocess.PIPE,
@@ -88,6 +95,8 @@ class BashTerminal:
                 stderr=subprocess.STDOUT,
                 text=True,
                 bufsize=1,
+                env=env,
+                cwd=_project_root,
             )
             logger.info("Terminal bash persistente iniciada")
         except Exception as e:

@@ -1,0 +1,28 @@
+{
+  "acciones_autorizadas": [
+    "ejecutar scripts python del proyecto",
+    "leer archivos del proyecto",
+    "editar archivos existentes del proyecto",
+    "crear archivos nuevos en el proyecto",
+    "instalar paquetes con pip",
+    "ejecutar comandos bash de lectura (ls, cat, find, grep, ps, tail)",
+    "buscar en internet con DuckDuckGo",
+    "leer páginas web con scrape_url",
+    "navegar con el browser (browser_navegar)",
+    "tomar screenshots con el browser",
+    "guardar y consultar memoria",
+    "leer y escribir en la wiki",
+    "crear y activar skills",
+    "enviar archivos y fotos por Telegram",
+    "ejecutar scripts de skills existentes",
+    "listar directorios y archivos"
+  ],
+  "requieren_confirmacion": [
+    "borrar archivos o directorios",
+    "modificar .env",
+    "instalar software del sistema (brew, apt, etc.)",
+    "ejecutar git push o git reset --hard",
+    "eliminar entradas de memoria o wiki",
+    "acceder a APIs externas con credenciales nuevas no mencionadas"
+  ]
+}

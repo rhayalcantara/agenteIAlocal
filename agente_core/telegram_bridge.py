@@ -62,7 +62,7 @@ class TelegramBridge:
 
     # ── API pública ────────────────────────────────────────────────────────
 
-    def procesar(self, mensaje: str, progress_callback=None) -> str:
+    def procesar(self, mensaje: str, progress_callback=None, image_path: str = None) -> str:
         """
         Procesa un mensaje del usuario. Retorna la respuesta final del agente.
 
@@ -100,7 +100,8 @@ class TelegramBridge:
         try:
             return self._agente.chat(mensaje, progress_callback=_cb,
                                      send_file_callback=_send_file_cb,
-                                     send_photo_url_callback=_send_photo_url_cb)
+                                     send_photo_url_callback=_send_photo_url_cb,
+                                     image_path=image_path)
         except _LoopLimitError as e:
             logger.warning(f"[bridge] Loop detectado: {e}")
             return (
@@ -110,11 +111,19 @@ class TelegramBridge:
             )
         except Exception as e:
             logger.error(f"[bridge] Error inesperado: {e}", exc_info=True)
-            return f"❌ Error interno del agente: {e}"
+            return f"❌ Error interno del agente:\n```\n{e}\n```"
 
     def limpiar_historial(self):
         self._agente.limpiar_historial()
         self._reset_loop_counters()
+
+    def compactar_historial(self) -> str:
+        antes = len(self._agente.messages)
+        compactado = self._agente.compactar_historial(forzar=True)
+        despues = len(self._agente.messages)
+        if compactado:
+            return f"📦 Historial compactado: {antes} → {despues} mensajes."
+        return f"ℹ️ Historial ya compacto ({antes} mensajes, límite {self._agente.MAX_MENSAJES})."
 
     def obtener_memoria(self) -> str:
         return self._agente.memoria.obtener_contexto()

@@ -1,0 +1,52 @@
+[
+  {
+    "role": "system",
+    "content": "Fecha y hora: 2026-04-15 15:04\n\n# Agente IA — Rhay\n\n## Rol\nEres un agente autónomo, ingeniero senior especializado en Python y desarrollo de software. Ejecutas tareas directamente usando las herramientas disponibles. Eres conciso — respondes en 2-4 oraciones máximo, sin explicaciones innecesarias.\n\n## Ambiente\n- Sistema operativo: macOS (Darwin)\n- Proyecto en: `/Users/rhayalcantara/proyectosia/agenteIAlocal_nuevo`\n- El terminal bash siempre arranca en el root del proyecto\n- Entorno virtual activo: `.venv/` (python3 y pip ya apuntan al venv)\n\n---\n\n## ESTRATEGIA DE PERMISOS\n\nAntes de pedir autorización para cualquier acción, **consulta primero el archivo de permisos**:\n\n```\nread_file(\"agente_core/data/permisos.json\")\n```\n\n- Si la acción está en `acciones_autorizadas` → **ejecuta sin preguntar**\n- Si la acción está en `requieren_confirmacion` → **pide confirmación al usuario**\n- Si el usuario da permiso para algo nuevo → guárdalo con:\n  ```\n  guardar_memoria(contenido=\"El usuario autorizó: <acción>\", categoria=\"instruccion\")\n  ```\n  Y la próxima vez que sea la misma acción, búscala en memoria con `consultar_memoria` antes de preguntar.\n\n**Nunca pidas permiso dos veces por la misma acción.** Si ya está en `permisos.json` o en la memoria como \"instruccion\", procede directamente.\n\n---\n\n## FLUJO DE TRABAJO: PLAN + TAREAS\n\nPara cualquier tarea que tenga más de un paso, **antes de ejecutar**:\n\n1. **Crea un plan** con una lista de tareas numeradas:\n   ```\n   📋 Plan:\n   [ ] 1. Verificar archivo X\n   [ ] 2. Instalar dependencia Y\n   [ ] 3. Ejecutar script Z\n   ```\n\n2. **Ejecuta tarea por tarea** usando las herramientas.\n\n3. **Marca cada tarea al terminarla**:\n   ```\n   [✓] 1. Verificar archivo X — listo\n   [ ] 2. Instalar dependencia Y\n   ```\n\n4. **Solo responde al usuario cuando TODO el plan esté completo.** No interrumpas con preguntas a mitad del plan a menos que encuentres un bloqueo real.\n\n5. Si hay un error en una tarea → analiza la causa, corrígela, y continúa. No reinicies el plan desde cero.\n\n---\n\n## REGLAS DE EJECUCIÓN\n\n- \"ejecuta\", \"corre\", \"instala\", \"descarga\", \"busca\", \"abre\" → **autorización implícita**, ejecuta de inmediato\n- Solo detente para pedir confirmación si la acción está en `requieren_confirmacion`\n- Si el usuario ya mencionó una herramienta o comando explícitamente → úsala sin preguntar\n- No repitas lo que acabas de hacer en la respuesta — el usuario puede ver el resultado\n\n## HERRAMIENTAS DISPONIBLES\n\n- Archivos: `list_files_in_dir`, `read_file`, `edit_file`\n- Terminal: `execute_bash`, `execute_command`\n- Web: `buscar_en_internet`, `leer_pagina_web`\n- Browser real: `browser_navegar`, `browser_screenshot`, `browser_click`, `browser_escribir`, `browser_obtener_texto`, `browser_ejecutar_js`\n- Memoria: `guardar_memoria`, `consultar_memoria`\n- Wiki: `leer_wiki`, `escribir_wiki`, `buscar_wiki`, `listar_wiki`\n- Skills: `listar_skills`, `activar_skill`, `crear_skill`, `ejecutar_script_skill`\n- Telegram: `enviar_archivo_telegram`, `enviar_foto_telegram`\n\n## SEGURIDAD\n- Nunca borres archivos sin confirmación explícita\n- Nunca hagas git push, git reset --hard, ni modifiques .env sin confirmación\n- Si un comando falla 2 veces con el mismo error → detente y reporta al usuario\n\n\n## Resumen de conversación anterior\nSolicitud de búsqueda y envío de listas de cumplimiento bancario vía Telegram.\n\n## Skills disponibles\n- **agent-browser**: ---\n- **telegram-agent-monitor**: Monitorea la salud del agente de Telegram: detecta instancias duplicadas, analiz\n- **gmail-reader**: Esta skill permite buscar y leer correos electrónicos de Gmail utilizando la API\n- **descargavideoytraduce**: Esta skill automatiza el proceso de descargar un video de YouTube, extraer su au\n- **buscar-noticias**: Esta skill permite extraer automáticamente los titulares más recientes y sus imá\n- **youtube-downloader**: Descarga, transcribe y traduce videos de YouTube al español usando yt-dlp, Whisp\n- **estado-clima**: Esta skill permite obtener un resumen actualizado del pronóstico meteorológico e"
+  },
+  {
+    "role": "user",
+    "content": "Hola"
+  },
+  "ResponseReasoningItem(id='rs_2sk97rvkdh2atjpugv9m9l', summary=[], type='reasoning', content=[Content(text='\\n', type='reasoning_text')], encrypted_content=None, status='completed')",
+  "ResponseOutputMessage(id='msg_csl624morjl127a1z6pd48', content=[ResponseOutputText(annotations=[], text='¡Hola! ¿En qué puedo ayudarte hoy?', type='output_text', logprobs=[])], role='assistant', status='completed', type='message', phase=None)",
+  {
+    "role": "user",
+    "content": "Busca informacion de las lista de cumplimiento de bancos"
+  },
+  "ResponseReasoningItem(id='rs_x995lzoy8umt6fcoegcd3', summary=[], type='reasoning', content=[Content(text='\\n', type='reasoning_text')], encrypted_content=None, status='completed')",
+  "ResponseFunctionToolCall(arguments='{\"path\":\"agente_core/data/permisos.json\"}', call_id='call_2535029870721500', name='read_file', type='function_call', id='fc_zgyg4zkvteonm76clwr', namespace=None, status='completed')",
+  {
+    "type": "function_call_output",
+    "call_id": "call_2535029870721500",
+    "output": "{\"files\": \"{\\n  \\\"acciones_autorizadas\\\": [\\n    \\\"ejecutar scripts python del proyecto\\\",\\n    \\\"leer archivos del proyecto\\\",\\n    \\\"editar archivos existentes del proyecto\\\",\\n    \\\"crear archivos nuevos en el proyecto\\\",\\n    \\\"instalar paquetes con pip\\\",\\n    \\\"ejecutar comandos bash de lectura (ls, cat, find, grep, ps, tail)\\\",\\n    \\\"buscar en internet con DuckDuckGo\\\",\\n    \\\"leer p\\u00e1ginas web con scrape_url\\\",\\n    \\\"navegar con el browser (browser_navegar)\\\",\\n    \\\"tomar screenshots con el browser\\\",\\n    \\\"guardar y consultar memoria\\\",\\n    \\\"leer y escribir en la wiki\\\",\\n    \\\"crear y activar skills\\\",\\n    \\\"enviar archivos y fotos por Telegram\\\",\\n    \\\"ejecutar scripts de skills existentes\\\",\\n    \\\"listar directorios y archivos\\\"\\n  ],\\n  \\\"requieren_confirmacion\\\": [\\n    \\\"borrar archivos o directorios\\\",\\n    \\\"modificar .env\\\",\\n    \\\"instalar software del sistema (brew, apt, etc.)\\\",\\n    \\\"ejecutar git push o git reset --hard\\\",\\n    \\\"eliminar entradas de memoria o wiki\\\",\\n    \\\"acceder a APIs externas con credenciales nuevas no mencionadas\\\"\\n  ]\\n}\\n\"}"
+  },
+  "ResponseReasoningItem(id='rs_qyco9yzawpo91wjnqaggta', summary=[], type='reasoning', content=[Content(text='\\n', type='reasoning_text')], encrypted_content=None, status='completed')",
+  "ResponseOutputMessage(id='msg_sv18alh3h3kjxprczsemwr', content=[ResponseOutputText(annotations=[], text='📋 Plan:\\n[ ] 1. Buscar información sobre listas de cumplimiento bancario en internet.\\n[ ] 2. Sintetizar la información encontrada y presentar un resumen.\\n\\nEjecutando tarea 1...\\n\\n', type='output_text', logprobs=[])], role='assistant', status='completed', type='message', phase=None)",
+  "ResponseFunctionToolCall(arguments='{\"query\":\"listas de cumplimiento bancario (AML/KYC) principales del mundo y requisitos\"}', call_id='call_2535029870721501', name='buscar_en_internet', type='function_call', id='fc_ojg0jjej36biisq03zmdt', namespace=None, status='completed')",
+  {
+    "type": "function_call_output",
+    "call_id": "call_2535029870721501",
+    "output": "{\"files\": \"No se encontraron resultados.\"}"
+  },
+  "ResponseReasoningItem(id='rs_q4to1rkzcrqdy0716rxlmh', summary=[], type='reasoning', content=[Content(text='\\n', type='reasoning_text')], encrypted_content=None, status='completed')",
+  "ResponseFunctionToolCall(arguments='{\"query\":\"listas de cumplimiento bancario AML KYC OFAC PEP listas oficiales\"}', call_id='call_2535029870721502', name='buscar_en_internet', type='function_call', id='fc_1baiak2jwy9gs64jzx2y1n', namespace=None, status='completed')",
+  {
+    "type": "function_call_output",
+    "call_id": "call_2535029870721502",
+    "output": "{\"files\": \"No se encontraron resultados.\"}"
+  },
+  "ResponseReasoningItem(id='rs_q1f1qe7653dsc9h0uixe', summary=[], type='reasoning', content=[Content(text='\\n', type='reasoning_text')], encrypted_content=None, status='completed')",
+  "ResponseFunctionToolCall(arguments='{\"query\":\"qué son las listas de cumplimiento bancario AML/KYC ejemplos y tipos de sanciones (OFAC, ONU, PEP)\"}', call_id='call_2535029870721503', name='buscar_en_internet', type='function_call', id='fc_b66jlgy3jjo3iszlg6dxox', namespace=None, status='completed')",
+  {
+    "type": "function_call_output",
+    "call_id": "call_2535029870721503",
+    "output": "{\"files\": \"No se encontraron resultados.\"}"
+  },
+  "ResponseReasoningItem(id='rs_2h8irb4r4bvezcpvlz37io', summary=[], type='reasoning', content=[Content(text='\\n', type='reasoning_text')], encrypted_content=None, status='completed')",
+  "ResponseFunctionToolCall(arguments='{\"query\":\"listas de cumplimiento bancario AML KYC OFAC ONU PEP ejemplos\"}', call_id='call_2535029870721504', name='buscar_en_internet', type='function_call', id='fc_tcf3xkqxamavf9jrfsb7f', namespace=None, status='completed')",
+  {
+    "type": "function_call_output",
+    "call_id": "call_2535029870721504",
+    "output": "{\"files\": \"No se encontraron resultados.\"}"
+  }
+]

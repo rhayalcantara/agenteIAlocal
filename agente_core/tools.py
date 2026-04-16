@@ -13,7 +13,7 @@ class Tool:
 
     # ── Bash persistente ──────────────────────────────────────────────────────
 
-    def execute_bash(self, command: str, timeout: float = 120) -> str:
+    def execute_bash(self, command: str, timeout: float = 600) -> str:
         """Ejecuta un comando en la terminal bash persistente con filtro de seguridad."""
         logger.info(f"execute_bash: {command[:100]}")
         print(f"=== Terminal Bash ===\n$ {command}")
@@ -103,7 +103,10 @@ class Tool:
         logger.info(f"web_search: {query}")
         print(f"   🔍 Buscando: {query}")
         try:
-            from duckduckgo_search import DDGS
+            try:
+                from ddgs import DDGS
+            except ImportError:
+                from duckduckgo_search import DDGS
             with DDGS() as ddgs:
                 resultados = list(ddgs.text(query, max_results=int(max_results)))
             if not resultados:
@@ -117,7 +120,7 @@ class Tool:
                 )
             return "\n\n".join(salida)
         except ImportError:
-            return "Error: instala duckduckgo-search (pip install duckduckgo-search)"
+            return "Error: instala ddgs (pip install ddgs)"
         except Exception as e:
             logger.error(f"Error en búsqueda: {e}")
             return f"Error en búsqueda: {e}"

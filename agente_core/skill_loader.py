@@ -65,6 +65,7 @@ class SkillLoader:
         return skill["contenido"] if skill else None
 
     def ejecutar_script(self, nombre: str, script: str, args: str = "") -> str:
+        import sys
         skill = self.skills.get(nombre)
         if not skill:
             return f"Error: skill '{nombre}' no encontrada."
@@ -72,7 +73,7 @@ class SkillLoader:
         if not os.path.exists(script_path):
             return f"Error: script '{script}' no encontrado en skill '{nombre}'."
         try:
-            cmd = ["python", script_path] + (args.split() if args else [])
+            cmd = [sys.executable, script_path] + (args.split() if args else [])
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
             output = result.stdout + result.stderr
             return output[:4000] or "(sin salida)"
@@ -80,6 +81,57 @@ class SkillLoader:
             return "Error: script excedió el timeout de 60s."
         except Exception as e:
             return f"Error ejecutando script: {e}"
+
+    def recargar(self):
+        """Recarga todas las skills desde disco (hot-reload sin reiniciar)."""
+        self.skills = {}
+        self._cargar()
+        logger.info(f"Skills recargadas: {list(self.skills.keys())}")
+
+    def crear_skill(self, nombre: str, instrucciones: str,
+                    script_nombre: str = None, script_code: str = None) -> str:
+        """Crea una nueva skill en disco y la carga de inmediato (hot-reload).
+
+        Args:
+            nombre: identificador de la skill (slug, ej: 'youtube-downloader')
+            instrucciones: contenido del SKILL.md
+            script_nombre: nombre del archivo .py opcional (ej: 'run.py')
+            script_code: código Python del script opcional
+
+        Returns:
+            Mensaje de éxito o error.
+        """
+        if not nombre or not nombre.strip():
+            return "Error: el nombre de la skill no puede estar vacío."
+
+        nombre = nombre.strip().lower().replace(" ", "-")
+        skill_path = os.path.join(self.skills_dir, nombre)
+
+        try:
+            os.makedirs(skill_path, exist_ok=True)
+
+            # Escribir SKILL.md
+            skill_md_path = os.path.join(skill_path, SKILL_FILENAME)
+            with open(skill_md_path, "w", encoding="utf-8") as f:
+                f.write(instrucciones)
+
+            # Escribir script opcional
+            if script_nombre and script_code:
+                if not script_nombre.endswith(".py"):
+                    script_nombre += ".py"
+                script_path = os.path.join(skill_path, script_nombre)
+                with open(script_path, "w", encoding="utf-8") as f:
+                    f.write(script_code)
+
+            # Hot-reload
+            self.recargar()
+
+            scripts_info = f" + script {script_nombre}" if script_nombre else ""
+            return f"✅ Skill '{nombre}' creada{scripts_info} y cargada. Total skills: {len(self.skills)}"
+
+        except Exception as e:
+            logger.error(f"Error creando skill '{nombre}': {e}")
+            return f"Error creando skill '{nombre}': {e}"
 
     def generar_resumen_para_prompt(self) -> str:
         if not self.skills:
