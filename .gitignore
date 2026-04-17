@@ -26,5 +26,9 @@ venv/
 *.wav
 *.m4a
 
+# Transcripciones de audio
+audio*.txt
+transcripcion*.txt
+
 # Archivos de datos locales sensibles
 agente_core/data/permisos.json
