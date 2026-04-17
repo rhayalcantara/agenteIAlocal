@@ -19,9 +19,12 @@ __pycache__/
 .venv/
 venv/
 
-# Archivos temporales / multimedia grandes
-audio_output.mp3
+# Archivos multimedia
+*.mp3
 *.mp4
+*.ogg
+*.wav
+*.m4a
 
 # Archivos de datos locales sensibles
 agente_core/data/permisos.json
