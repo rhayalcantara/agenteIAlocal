@@ -8,9 +8,9 @@ gmail_manager/token.json
 gmail_manager/credentials.json
 gmail_manager/credentials_google.json
 
-# Logs con posibles secretos
-agente_core/logs/agente.log
-agente_core/logs/agente.log.*
+# Logs
+agente_core/logs/
+logs/
 
 # Python
 __pycache__/
