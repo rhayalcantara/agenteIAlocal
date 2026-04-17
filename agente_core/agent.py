@@ -14,6 +14,7 @@ import json
 import re
 import traceback
 import time
+import threading
 from datetime import datetime
 
 try:
@@ -112,7 +113,9 @@ class Agent:
                                                "ejecutar_script": lambda s, *a: "No disponible",
                                                "generar_resumen_para_prompt": lambda s: ""})()
 
+        self._ultima_ejecucion: dict = {}
         self._system_message_base = ""
+        self._compaction_thread: "threading.Thread | None" = None
         system_content = "Eres un asistente útil que habla español y eres muy conciso."
 
         agent_md = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "agent.md")
@@ -550,6 +553,14 @@ class Agent:
 
     # ── API pública ───────────────────────────────────────────────────────────
 
+    @property
+    def bash_proceso_activo(self) -> dict | None:
+        """Retorna info del comando bash en ejecución, o None si no hay ninguno.
+
+        Estructura: {"comando": str, "inicio": datetime, "pid": int}
+        """
+        return getattr(iatools.terminal, "proceso_activo", None)
+
     def limpiar_historial(self):
         """Borra el historial de conversación (mantiene solo el system prompt)."""
         self._rename_messages_debug("limpiado")
@@ -559,15 +570,27 @@ class Agent:
 
     def chat(self, mensaje: str, progress_callback=None,
              send_file_callback=None, send_photo_url_callback=None,
-             image_path: str = None) -> str:
+             image_path: str = None, contexto: dict = None) -> str:
         """Procesa un mensaje del usuario y retorna la respuesta final.
 
         Ejecuta el loop de tool calls de forma interna hasta que el LLM
         entregue una respuesta sin herramientas.
+
+        Args:
+            contexto: dict opcional con metadata del turno (fuente, usuario, etc.)
+                      Se inyecta como prefijo en el mensaje enviado al LLM.
+                      Ejemplo: {"fuente": "telegram", "usuario": "rhay", "chat_id": 123}
         """
         self._send_file_callback = send_file_callback
         self._send_photo_url_callback = send_photo_url_callback
         self._actualizar_system_prompt()
+
+        # Prefijo de contexto si viene metadata del turno
+        if contexto:
+            partes = " | ".join(f"{k}={v}" for k, v in contexto.items())
+            mensaje_llm = f"[Contexto: {partes}]\n{mensaje}"
+        else:
+            mensaje_llm = mensaje
 
         # Construir mensaje de usuario (visión si hay imagen)
         if image_path and os.path.exists(image_path):
@@ -581,17 +604,24 @@ class Agent:
                 "role": "user",
                 "content": [
                     {"type": "input_image", "image_url": f"data:image/{_mime};base64,{_b64}"},
-                    {"type": "input_text", "text": mensaje},
+                    {"type": "input_text", "text": mensaje_llm},
                 ]
             })
         else:
-            self.messages.append({"role": "user", "content": mensaje})
-        self.compactar_historial()
+            self.messages.append({"role": "user", "content": mensaje_llm})
+
+        # Esperar compactación anterior si aún está en progreso
+        if self._compaction_thread and self._compaction_thread.is_alive():
+            print("⏳ Finalizando compactación...", flush=True)
+            self._compaction_thread.join(timeout=30)
 
         last_reply = ""
         max_tokens = int(os.getenv("TELEGRAM_MAX_OUTPUT_TOKENS", "8192"))
+        _herramientas_usadas: list = []
+        _iteraciones: int = 0
 
         while True:
+            _iteraciones += 1
             self._save_messages_debug()
             kwargs = {
                 "model": self._model,
@@ -609,6 +639,8 @@ class Agent:
                     texto = "\n".join(p.text for p in out.content)
                     if texto:
                         last_reply = texto
+                elif out.type == "function_call":
+                    _herramientas_usadas.append(out.name)
 
             hubo_tool = self.process_response(
                 response,
@@ -617,6 +649,20 @@ class Agent:
             )
             if not hubo_tool:
                 break
+
+        self._ultima_ejecucion = {
+            "herramientas_usadas": _herramientas_usadas,
+            "iteraciones": _iteraciones,
+            "tokens_aprox": self._contar_tokens(),
+        }
+
+        # Compactar en background si es necesario (no bloquea al usuario)
+        tokens = self._contar_tokens()
+        if len(self.messages) > self.MAX_MENSAJES or tokens >= self.MAX_TOKENS:
+            self._compaction_thread = threading.Thread(
+                target=self.compactar_historial, kwargs={"forzar": True}, daemon=True
+            )
+            self._compaction_thread.start()
 
         return last_reply
 
@@ -629,7 +675,10 @@ class Agent:
         Ejecuta TODOS los tool calls de la respuesta antes de retornar.
         Returns True si se ejecutó al menos una herramienta.
         """
-        self.messages += response.output
+        self.messages += [
+            item.model_dump() if hasattr(item, "model_dump") else item
+            for item in response.output
+        ]
         hubo_tool_call = False
 
         for output in response.output:
