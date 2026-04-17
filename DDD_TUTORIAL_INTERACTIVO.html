@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprende DDD Interactivo</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #475569;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --success: #22c55e;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        h1 { color: var(--primary); text-align: center; border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
+        h2 { color: var(--secondary); margin-top: 30px; border-left: 4px solid var(--primary); padding-left: 15px; }
+        
+        .card {
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        code {
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        pre {
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        /* Quiz Styles */
+        .quiz-section {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 3px solid var(--primary);
+        }
+
+        .question {
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .option-label {
+            display: block;
+            background: white;
+            border: 2px solid #e2e8f0;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-label:hover { background: #f1f5f9; border-color: var(--primary); }
+        input[type="radio"] { margin-right: 10px; }
+
+        button#submit-btn {
+            display: block;
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        button#submit-btn:hover { opacity: 0.9; }
+
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .correct { background: #dcfce7; color: #16653 margin: 0; padding: 20px; border-radius: 8px; display: block !important; }
+        .incorrect { background: #fee2e2; color: #991b1b; margin: 0; padding: 20px; border-radius: 8px; display: block !important; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Mastering DDD 🚀</h1>
+    
+    <section id="content">
+        <h2>1. El Corazón del Dominio</h2>
+        <p>DDD se centra en modelar la lógica de negocio compleja para que el código sea un espejo de la realidad.</p>
+        <div class="card">
+            <strong>Concepto Clave: Lenguaje Ubicuo</strong><br>
+            Es el idioma común entre técnicos y expertos de negocio. Evita términos técnicos innecesarios en el modelo.
+        </div>
+
+        <h2>2. Elementos de Diseño</h2>
+        <ul>
+            <li><strong>Entidades:</strong> Tienen identidad propia (ej. <code>Usuario</code>).</li>
+            <li><strong>Value Objects:</strong> Se definen por sus atributos (ej. <code>Direccion</code>).</li>
+            <li><strong>Agregados:</strong> Un conjunto de objetos que se guardan juntos bajo una raíz (<code>Aggregate Root</code>).</li>
+        </ul>
+
+        <h2>3. Estructura de Capas</h2>
+        <p>Para mantener el orden, dividimos el sistema en:</p>
+        <div class="card">
+            1. <strong>Dominio:</strong> Reglas puras.<br>
+            2. <strong>Aplicación:</strong> Orquestación (Casos de uso).<br>
+            3. <strong>Infraestructura:</strong> Bases de datos y APIs externas.
+        </div>
+
+        <h2>4. Ejemplo Práctico</h2>
+        <pre><code class="language-python"># La lógica de negocio reside en el Agregado
+class Pedido:
+    def agregar_item(self, producto, precio):
+        self.items.append(producto)
+        self.total += precio</code></pre>
+    </section>
+
+    <section class="quiz-section">
+        <h2>🧠 Examen de Verificación</h2>
+        <form id="quiz-form">
+            <!-- Pregunta 1 -->
+            <div class="question">1. ¿Qué es el Lenguaje Ubicuo?</div>
+            <label class="option-label"><input type="radio" name="q1" value="a"> Un lenguaje de programación avanzado.</label>
+            <label class="option-label"><input type="radio" name="q1" value="b"> El lenguaje común entre técnicos y expertos de negocio.</label>
+            <label class="option-label"><input type="radio" name="q1" value="c"> Una librería para bases de datos SQL.</label>
+
+            <!-- Pregunta 2 -->
+            <div class="question">2. ¿Cuál es la principal diferencia entre una Entidad y un Value Object?</div>
+            <label class="option-label"><input type="radio" name="q2" value="a"> La Entidad tiene identidad única; el Value Object se define por sus valores.</label>
+            <label class="option-label"><input type="radio" name="q2" value="b"> El Value Object es más difícil de programar.</label>
+            <label class="option-label"><input type="radio" name="q2" value="c"> Las Entidades no pueden tener atributos.</label>
+
+            <!-- Pregunta 3 -->
+            <div class="question">3. ¿En qué capa debe residir la lógica de persistencia (como SQL)?</div>
+            <label class="option-label"><input type="radio" name="q3" value="a"> Capa de Dominio.</label>
+            <label class="option-label"><input type="radio" name="q3" value="b"> Capa de Aplicación.</label>
+            <label class="option-label"><input type="radio" name="q3" value="c"> Capa de Infraestructura.</label>
+
+            <button type="button" id="submit-btn">Finalizar Examen</button>
+        </form>
+
+        <div id="result"></div>
+    </section>
+</div>
+
+<script>
+    const form = document.getElementById('quiz-form');
+    const resultDiv = document.getElementById('rad-result'); // Error corregido abajo en la lógica
+    // Re-asignando correctamente para evitar errores de referencia
+    const resDiv = document.getElementById('result');
+    const btn = document.getElementById('submit-btn');
+
+    const answers = {
+        q1: 'b',
+        q2: 'a',
+        q3: 'c'
+    };
+
+    btn.addEventListener('click', () => {
+        let score = 0;
+        let total = Object.keys(answers).length;
+        let formData = new FormData(form);
+        
+        for (let [question, correctAnswer] of Object.entries(answers)) {
+            if (formData.get(question) === correctAnswer) {
+                score++;
+            }
+        }
+
+        resDiv.style.display = 'block';
+        if (score === total) {
+            resDiv.className = 'correct';
+            resDiv.innerHTML = `🎉 ¡Perfecto! Has acertado ${score}/${total}. ¡Eres un experto en DDD!`;
+        } else {
+            resDiv.className = 'incorrect';
+            resDiv.innerHTML = `❌ Has acertado ${score}/${total}. Revisa el tutorial e inténtalo de nuevo.`;
+        }
+    });
+</script>
+
+</body>
+</html>

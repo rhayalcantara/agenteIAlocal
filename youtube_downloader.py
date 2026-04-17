@@ -6,7 +6,8 @@ def download_youtube_video(url):
     Descarga un video de YouTube en la mejor calidad disponible.
     """
     # Configuración de la carpeta de descargas (Carpeta 'downloads' en el mismo directorio)
-    download_path = os    os.path.join(os.getcwd(), 'downloads')
+    download_path = os.path.join(os.getcwd(), 'downloads')
+
     if not os.path.exists(download_path):
         os.makedirs(download_path)
 

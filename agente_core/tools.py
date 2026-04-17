@@ -18,7 +18,6 @@ class Tool:
         logger.info(f"execute_bash: {command[:100]}")
         print(f"=== Terminal Bash ===\n$ {command}")
         resultado = self.terminal.ejecutar(command, timeout=timeout)
-        print(resultado)
         return resultado
 
     def cerrar_terminal(self):

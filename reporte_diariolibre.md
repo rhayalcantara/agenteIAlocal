@@ -1,55 +1,55 @@
 # Reporte de Noticias - Diario Libre
 
-[La seducción a menores es el delito sexual más denunciado](https://www.diariolibre.com/actualidad/justicia/2024/08/29/se-han-reportado-1146-casos-de-seduccion-a-menores-en-2024/2833018?utm_source=relacionadas&utm_medium=portada&utm_campaign=relacionadas)
+[Fuego desata pánico y desesperación entre comerciantes del mercado binacional de Dajabón](https://www.diariolibre.com/actualidad/sucesos/2026/04/15/incendio-afecta-mercado-binacional-de-dajabon/3503478?utm_source=relacionadas&utm_medium=portada&utm_campaign=relacionadas)
 
-![Silencio oficial sobre el cobro de la sanción por el apagón en el AILA](https://resources.diariolibre.com/images/2026/04/14/aerodom-y-el-apagon-en-el-aeropuerto-las-americas-se-pago-la-penalid-ef8a54fe-focus-0-0-546-350.jpg)
-[Silencio oficial sobre el cobro de la sanción por el apagón en el AILA](https://www.diariolibre.com/actualidad/nacional/2026/04/15/aerodom-y-el-apagon-en-el-aila-se-pago-la-penalidad/3502400)
+![Trump califica la guerra en Irán como una "pequeña intervención" que está por terminar](https://resources.diariolibre.com/images/2026/04/05/trump-insiste-con-desatar-el-infierno-en-iran-el-martes-si-no-reabre-52ac360f-focus-min0.03-0.28-546-350.jpg)
+[Trump califica la guerra en Irán como una "pequeña intervención" que está por terminar](https://www.diariolibre.com/mundo/estados-unidos/2026/04/16/trump-califica-guerra-en-iran-como-una-pequena-intervencion/3505205)
 
-[Disputas con Aerodom no irán a tribunales dominicanos, sino a arbitraje en Nueva York](https://www.diariolibre.com/actualidad/nacional/2026/02/02/en-caso-de-disputas-con-aerodom-rd-ira-a-tribunales-de-nueva-york/3423281?utm_source=relacionadas&utm_medium=portada&utm_campaign=relacionadas)
+[Trump asegura que Irán acordó entregar sus reservas de uranio enriquecido](https://www.diariolibre.com/videos/mundo/estados-unidos/2026/04/16/trump-dice-que-iran-acordo-entregar-reservas-de-uranio-enriquecido/3504797?utm_source=relacionadas&utm_medium=portada&utm_campaign=relacionadas)
 
-![Encuentran cadáver en descomposición de un hombre en vertedero de Santiago](https://resources.diariolibre.com/images/2026/04/15/hallan-cuerpo-en-descomposicion-en-vertedero-de-santiago-ddccdcb5-focus-0-0-405-208.jpg)
-[Encuentran cadáver en descomposición de un hombre en vertedero de Santiago](https://www.diariolibre.com/actualidad/sucesos/2026/04/15/hallan-cadaver-en-descomposicion-en-vertedero-de-santiago/3503055)
+![Anuncian que Disney Cruise Line incorporará a RD dentro de sus embarcaciones en noviembre](https://resources.diariolibre.com/images/2026/02/04/disney-cruise-line-llegara-a-rd-con-arribos-en-puerto-plata-dd38aaf3-focus-0-0-405-208.png)
+[Anuncian que Disney Cruise Line incorporará a RD dentro de sus embarcaciones en noviembre](https://www.diariolibre.com/economia/turismo/2026/04/16/disney-cruise-line-llegara-en-noviembre-a-rd/3504865)
 
-[Recicladores informales protestan tras ser desalojados del vertedero de Rafey](https://www.diariolibre.com/actualidad/nacional/2025/03/25/protestan-por-desalojos-en-vertedero-de-rafey/3047100?utm_source=relacionadas&utm_medium=portada&utm_campaign=relacionadas)
+[Exigirán a cruceros con casinos hasta RD$1.5 millones por una licencia de operación](https://www.diariolibre.com/economia/turismo/2026/04/12/exigiran-a-cruceros-con-casinos-hasta-rd15-millones-por-licencia/3498450?utm_source=relacionadas&utm_medium=portada&utm_campaign=relacionadas)
 
-![El haitiano Scheldeur guía al Cibao FC a la cima del fútbol dominicano](https://resources.diariolibre.com/images/2026/04/15/junior-scheldeur-el-haitiano-que-lidera-el-cibao-fc-66a5880a-focus-0-0-405-208.jpg)
-[El haitiano Scheldeur guía al Cibao FC a la cima del fútbol dominicano](https://www.diariolibre.com/deportes/futbol/2026/04/15/junior-scheldeur-el-haitiano-que-lidera-el-cibao-fc/3503009)
+![El COE sube a 21 las localidades en alerta amarilla y mantiene siete en verde por vaguada](https://resources.diariolibre.com/images/2026/04/11/clima-en-rd-coe-incrementa-los-niveles-de-alertas-por-lluvias-2e41d79b-focus-0-0-405-208.jpg)
+[El COE sube a 21 las localidades en alerta amarilla y mantiene siete en verde por vaguada](https://www.diariolibre.com/planeta/clima/2026/04/16/coe-eleva-el-nivel-de-alerta-amarilla-y-mantiene-el-verde-por-vaguada/3505080)
 
-[El entrenador del Cibao FC asegura que su equipo demostró poder jugar en el alto nivel](https://www.diariolibre.com/deportes/futbol/2025/02/13/futbol-el-entrenador-del-cibao-fc-asegura-que-demostraron-alto-nivel/2998238?utm_source=relacionadas&utm_medium=portada&utm_campaign=relacionadas)
+[Ceballos advierte fuerte actividad convectiva en poblados del este, noreste y centro del país](https://www.diariolibre.com/planeta/clima/2026/04/16/habra-tormentas-electricas-de-acuerdo-a-indomet/3504959?utm_source=relacionadas&utm_medium=portada&utm_campaign=relacionadas)
 
-![Edición impresa](https://resources.diariolibre.com/images/2026/04/15/portada15042026-09236fe4.jpg)
+![Edición impresa](https://resources.diariolibre.com/images/2026/04/16/portada16042026-407ddc15.jpg)
 [Edición impresa](https://epaper.diariolibre.com/epaper/)
 
-["En la Cruz Roja, somos mucho más que sangre y ambulancias"](https://www.diariolibre.com/actualidad/dialogo-libre/2026/04/15/en-la-cruz-roja-son-mucho-mas-que-sangre-y-ambulancias/3502348)
+[Techy Fatule incursiona en la música típica junto a Fefita la Grande](https://www.diariolibre.com/revista/musica/2026/04/16/techy-fatule-y-fefita-la-grande-sorprenden-con-primera-colaboracion/3505174)
 
-[¿Qué ha pasado con el Sistema Nacional de Alertas?](https://www.diariolibre.com/actualidad/nacional/2026/04/15/sistema-nacional-de-alertas-avances-y-desafios/3502461)
+[En junio será sentencia del caso de corrupción contra Adán Cáceres y otros militares](https://www.diariolibre.com/actualidad/justicia/2026/04/16/en-junio-sera-sentencia-de-caso-contra-adan-caceres-y-otros-militares/3505033)
 
-[Indomet pronostica aguaceros y vientos en la tarde del miércoles; el jueves llega una nueva vaguada](https://www.diariolibre.com/planeta/clima/2026/04/15/clima-en-rd-indomet-preve-volveran-las-lluvias-este-miercoles/3502641)
+[Delcy Rodríguez firma la nueva Ley de Minas y agradece a Trump por "la buena disposición"](https://www.diariolibre.com/mundo/america-latina/2026/04/16/delcy-rodriguez-firma-la-nueva-ley-de-minas/3505209)
 
-![Ágora](https://resources.diariolibre.com/images/2026/04/14/trump-4a5b158f-focus-min0.21-0.23-330-192.jpg)
+![Ágora](https://resources.diariolibre.com/images/2026/04/16/obra-educativa-de-fe-y-alegria-en-la-republica-dominicana-c029b3d6-focus-0-0-330-192.png)
 [Ágora](https://www.diariolibre.com/opinion/agora)
 
-![MAGA contra sí misma: la guerra, Israel y la fractura de una promesa](https://resources.diariolibre.com/images/2026/04/14/trump-4a5b158f-focus-min0.21-0.23-330-192.jpg)
-[MAGA contra sí misma: la guerra, Israel y la fractura de una promesa](https://www.diariolibre.com/opinion/agora/2026/04/14/maga-y-la-guerra-en-iran/3502024)
+![La obra educativa de Fe y Alegría en la República Dominicana](https://resources.diariolibre.com/images/2026/04/16/obra-educativa-de-fe-y-alegria-en-la-republica-dominicana-c029b3d6-focus-0-0-330-192.png)
+[La obra educativa de Fe y Alegría en la República Dominicana](https://www.diariolibre.com/opinion/agora/2026/04/15/obra-educativa-de-fe-y-alegria-en-la-republica-dominicana/3503585)
 
-![Cuando el territorio entró al aula (Clase 28)](https://resources.diariolibre.com/images/2026/04/15/whatsapp-image-2026-04-14-at-80834-pm3-6444abe1-focus-0-0-330-192.jpg)
-[Cuando el territorio entró al aula (Clase 28)](https://www.diariolibre.com/opinion/agora/2026/04/14/cuando-el-territorio-entro-al-aula-clase-28/3502523)
+![Menos información, más inteligencia: competir en el nuevo comercio global](https://resources.diariolibre.com/images/2026/04/15/shutterstock2576634085-a0e0da53-focus-0-0-330-192.jpg)
+[Menos información, más inteligencia: competir en el nuevo comercio global](https://www.diariolibre.com/opinion/agora/2026/04/15/menos-informacion-mas-inteligencia/3503740)
 
-![La amenaza de borrar una civilización](https://resources.diariolibre.com/images/2026/04/14/imagen-a20260129t170911m17222221882c72350309f-33ef4978-focus-0-0-330-192.jpg)
-[La amenaza de borrar una civilización](https://www.diariolibre.com/opinion/agora/2026/04/13/guerra-en-iran--la-amenaza-de-borrar-una-civilizacion/3501204)
+![Fundación Padrino enseña inglés en meses, mientras el sistema público falla por años](https://resources.diariolibre.com/images/2026/04/14/qjnki-ee176f78-focus-0-0-330-192.jpg)
+[Fundación Padrino enseña inglés en meses, mientras el sistema público falla por años](https://www.diariolibre.com/opinion/agora/2026/04/15/fundacion-padrino-lecciones-perifericas-de-ensenanza-de-ingles/3502046)
 
-![Repaso de la misión de un estadista](https://resources.diariolibre.com/images/2026/04/13/presidentes-aa0ed14f-focus-min0.25-0.16-330-192.jpg)
-[Repaso de la misión de un estadista](https://www.diariolibre.com/opinion/agora/2026/04/13/repaso-la-mision-de-un-estadista/3500686)
+![Cuando el Estado sanciona lo imposible](https://resources.diariolibre.com/images/2026/04/15/haitianos-c1cc3404-focus-0-0-330-192.jpg)
+[Cuando el Estado sanciona lo imposible](https://www.diariolibre.com/opinion/agora/2026/04/15/sancionar-lo-imposible-para-el-estado/3503595)
 
-![Videos](https://resources.diariolibre.com/images/2026/04/15/dominicano-dorny-romero-marca-un-gol-curioso-en-la-copa-libertadores-9c0bec69-focus-0-0-302-176.jpg)
+![Videos](https://resources.diariolibre.com/images/2026/04/16/hombre-encuentra-y-salva-a-bebe-abandonado-en-la-avenida-independencia-526108af-focus-min0.23-min0.43-302-176.jpg)
 [Videos](https://www.diariolibre.com/videos)
 
-![Dorny Romero fue el más 'tiguere' de la cancha y salvó a su equipo de una derrota en la Libertadores](https://resources.diariolibre.com/images/2026/04/15/dominicano-dorny-romero-marca-un-gol-curioso-en-la-copa-libertadores-9c0bec69-focus-0-0-302-176.jpg)
-[Dorny Romero fue el más 'tiguere' de la cancha y salvó a su equipo de una derrota en la Libertadores](https://www.diariolibre.com/videos/deportes/futbol/2026/04/15/dominicano-dorny-romero-marca-un-gol-curioso-en-la-copa-libertadores/3503007)
+![El llamado que llevó a un ciudadano a rescatar a un bebé que fue abandonado frente a su vivienda](https://resources.diariolibre.com/images/2026/04/16/hombre-encuentra-y-salva-a-bebe-abandonado-en-la-avenida-independencia-526108af-focus-min0.23-min0.43-302-176.jpg)
+[El llamado que llevó a un ciudadano a rescatar a un bebé que fue abandonado frente a su vivienda](https://www.diariolibre.com/actualidad/sucesos/2026/04/16/hombre-encuentra-y-salva-a-bebe-abandonado-en-la-avenida-independencia/3504480)
 
-![China afirma que "apoyará con firmeza" a Cuba ante la presión de EE. UU.](https://resources.diariolibre.com/images/2026/04/15/china-apoyara-a-cuba-ante-la-presion-de-ee-uu-536c6914-focus-0-0-302-176.jpg)
-[China afirma que "apoyará con firmeza" a Cuba ante la presión de EE. UU.](https://www.diariolibre.com/mundo/asia/2026/04/15/china-apoyara-a-cuba-ante-la-presion-de-ee-uu/3502951)
+![Trump asegura que Irán acordó entregar sus reservas de uranio enriquecido](https://resources.diariolibre.com/images/2026/04/16/trump-dice-que-iran-acordo-entregar-reservas-de-uranio-enriquecido-48411eb5-focus-0-0-302-176.jpg)
+[Trump asegura que Irán acordó entregar sus reservas de uranio enriquecido](https://www.diariolibre.com/videos/mundo/estados-unidos/2026/04/16/trump-dice-que-iran-acordo-entregar-reservas-de-uranio-enriquecido/3504797)
 
-![Izquierdista Roberto Sánchez trepa al segundo lugar en presidenciales de Perú](https://resources.diariolibre.com/images/2026/04/15/izquierdista-roberto-sanchez-posible-rival-de-keiko-fujimori-en-peru-af898fa2-focus-0-0-302-176.jpg)
-[Izquierdista Roberto Sánchez trepa al segundo lugar en presidenciales de Perú](https://www.diariolibre.com/videos/mundo/america-latina/2026/04/15/izquierdista-roberto-sanchez-posible-rival-de-keiko-fujimori-en-peru/3503073)
+![La sombrerería que inventó el bombín cumple 350 años con clientes como Churchill y Beckham](https://resources.diariolibre.com/images/2026/04/16/sombrereria-que-invento-el-bombin-cumple-350-anos-6ea8e527-focus-0-0-302-176.jpg)
+[La sombrerería que inventó el bombín cumple 350 años con clientes como Churchill y Beckham](https://www.diariolibre.com/videos/revista/cultura/2026/04/16/sombrereria-que-invento-el-bombin-cumple-350-anos/3504340)
 

@@ -7,6 +7,7 @@ están bloqueados para evitar pérdida accidental de datos o del proyecto.
 import re
 import subprocess
 import threading
+from datetime import datetime
 from logger import get_logger
 
 logger = get_logger("bash_terminal")
@@ -77,6 +78,7 @@ class BashTerminal:
     def __init__(self):
         self._lock = threading.Lock()
         self._proceso = None
+        self.proceso_activo: dict | None = None   # tracking del comando en vuelo
         self._iniciar()
 
     def _iniciar(self):
@@ -126,6 +128,11 @@ class BashTerminal:
         SENTINEL = "__CMD_DONE__"
 
         with self._lock:
+            self.proceso_activo = {
+                "comando": comando,
+                "inicio": datetime.now(),
+                "pid": self._proceso.pid,
+            }
             try:
                 self._proceso.stdin.write(comando + "\n")
                 self._proceso.stdin.write(f"echo {SENTINEL}\n")
@@ -140,6 +147,7 @@ class BashTerminal:
                     line = self._proceso.stdout.readline()
                     if SENTINEL in line:
                         break
+                    print(f"│ {line}", end="", flush=True)
                     lines.append(line)
 
                 return "".join(lines).rstrip()
@@ -148,6 +156,8 @@ class BashTerminal:
                 logger.error(f"Error ejecutando comando: {e}")
                 self._proceso = None
                 return f"Error en terminal bash: {e}"
+            finally:
+                self.proceso_activo = None
 
     def cerrar(self):
         if self._proceso and self._proceso.poll() is None:
