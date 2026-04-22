@@ -19,12 +19,16 @@ __pycache__/
 .venv/
 venv/
 
+# Ejecutables
+*.exe
+
 # Archivos multimedia
 *.mp3
 *.mp4
 *.ogg
 *.wav
 *.m4a
+*.png
 
 # Transcripciones de audio
 audio*.txt

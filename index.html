@@ -1,14 +1,80 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Partículas en el Espacio</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajedrez 2D - Historial</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <canvas id="canvas"></canvas>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-  <script src="script.js"></script>
+    <div class="container">
+        <div id="board" class="chessboard"></div>
+        <div class="sidebar">
+            <div class="clocks">
+                <div class="clock-box" id="clock-black">
+                    <span class="clock-label">Negras</span>
+                    <span class="clock-time" id="time-black">05:00</span>
+                </div>
+                <div class="clock-box" id="clock-white">
+                    <span class="clock-label">Blancas</span>
+                    <span class="clock-time" id="time-white">05:00</span>
+                </div>
+            </div>
+            <h2>Historial de Jugadas</h2>
+            <ul id="move-history"></ul>
+            <div class="turn-indicator" id="turn-indicator">Turno: Blancas</div>
+            <button class="btn-flip" onclick="flipBoard()">Girar Tablero</button>
+            <button class="btn-draw" onclick="handleDraw()">Proponer Tablas</button>
+            <button class="btn-resign" onclick="handleResign()">Rendirse</button>
+            <button class="btn-save" onclick="saveGame()">Guardar Partida</button>
+            <button class="btn-reset" onclick="resetGame()">Reiniciar</button>
+        </div>
+    </div>
+
+    <!-- Overlay lobby (configuración inicial) -->
+    <div id="lobby-overlay">
+        <div id="lobby-box">
+            <h1>Ajedrez</h1>
+            <div class="lobby-section">
+                <label>Jugar con:</label>
+                <div class="lobby-options" id="color-options">
+                    <button class="lobby-btn active" data-value="white" onclick="selectLobbyOption('color','white',this)">Blancas</button>
+                    <button class="lobby-btn"        data-value="black" onclick="selectLobbyOption('color','black',this)">Negras</button>
+                </div>
+            </div>
+            <div class="lobby-section">
+                <label>Dificultad:</label>
+                <div class="lobby-options" id="difficulty-options">
+                    <button class="lobby-btn"        data-value="easy"   onclick="selectLobbyOption('difficulty','easy',this)">Facil</button>
+                    <button class="lobby-btn active" data-value="medium" onclick="selectLobbyOption('difficulty','medium',this)">Medio</button>
+                    <button class="lobby-btn"        data-value="hard"   onclick="selectLobbyOption('difficulty','hard',this)">Dificil</button>
+                    <button class="lobby-btn"        data-value="expert" onclick="selectLobbyOption('difficulty','expert',this)">Experto</button>
+                    <button class="lobby-btn"        data-value="llm"    onclick="selectLobbyOption('difficulty','llm',this)">Claude AI</button>
+                </div>
+            </div>
+            <div class="lobby-section">
+                <label>Tiempo por jugador:</label>
+                <div class="lobby-options" id="time-options">
+                    <button class="lobby-btn" data-value="1"  onclick="selectLobbyOption('time','1',this)">1 min</button>
+                    <button class="lobby-btn" data-value="3"  onclick="selectLobbyOption('time','3',this)">3 min</button>
+                    <button class="lobby-btn active" data-value="5" onclick="selectLobbyOption('time','5',this)">5 min</button>
+                    <button class="lobby-btn" data-value="10" onclick="selectLobbyOption('time','10',this)">10 min</button>
+                    <button class="lobby-btn" data-value="15" onclick="selectLobbyOption('time','15',this)">15 min</button>
+                </div>
+            </div>
+            <button id="start-game-btn" onclick="startGame()">Comenzar Partida</button>
+        </div>
+    </div>
+
+    <!-- Overlay de fin de partida -->
+    <div id="game-end-overlay" class="hidden">
+        <div id="game-end-box">
+            <div id="game-end-icon"></div>
+            <p id="game-end-message"></p>
+            <button onclick="resetGame()">Nueva Partida</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

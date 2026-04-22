@@ -47,14 +47,19 @@ PROVIDER = _cfg["provider"]
 _voz_activa = os.getenv("VOZ_HABILITADO", "false").lower() == "true"
 _VOZ_DURACION = int(os.getenv("VOZ_DURACION_MAX", "12"))
 
+# ── Streaming ──────────────────────────────────────────────────────────────
+_STREAM_HABILITADO = os.getenv("STREAM_HABILITADO", "true").lower() == "true"
+
 print("=" * 52)
 print("  Agente IA Local")
 print("=" * 52)
 print(f"  Proveedor : {_cfg['nombre']}")
 print(f"  Modelo    : {MODEL}")
 print(f"  Endpoint  : {BASE_URL}")
-voz_str = "ON" if _voz_activa else "OFF"
+voz_str    = "ON" if _voz_activa else "OFF"
+stream_str = "ON" if _STREAM_HABILITADO else "OFF"
 print(f"  Modo voz  : {voz_str}  (cambia con /voz)")
+print(f"  Streaming : {stream_str}  (STREAM_HABILITADO en .env)")
 print("=" * 52)
 
 # ── Inicializar agente ─────────────────────────────────────────────────────
@@ -168,9 +173,19 @@ while True:
         pass
 
     # ── Llamada al agente ──────────────────────────────────────────────────
+    def _stream_cb(chunk):
+        """Imprime tokens del LLM en tiempo real. None = primer token (prefijo)."""
+        if chunk is None:
+            print("Asistente: ", end="", flush=True)
+        else:
+            print(chunk, end="", flush=True)
+
+    _usar_stream = _STREAM_HABILITADO and not _voz_activa
+
     try:
         respuesta = agent.chat(
             user_input,
+            stream_callback=_stream_cb if _usar_stream else None,
             contexto={"fuente": "local", "modo": "voz" if _voz_activa else "texto"},
         )
 

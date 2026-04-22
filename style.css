@@ -1,25 +1,206 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+:root {
+    /* --sq se adapta al viewport:
+       ancho disponible = 100vw menos sidebar(200) + gap(20) + padding(40) + borde(10) + margen(20) = 290px
+       alto disponible  = 100vh menos padding(40) + borde(10) + margen(10) = 60px
+       clamp(mínimo 30px, el menor de los dos ejes / 8, máximo 80px)          */
+    --sq: clamp(30px, min(calc((100vw - 290px) / 8), calc((100vh - 60px) / 8)), 80px);
 }
 
 body {
-  overflow: hidden;
-  background-color: #000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #2c3e50;
+    font-family: sans-serif;
 }
 
-canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: -1;
+.container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    background: #ecf0f1;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
+
+.chessboard {
+    display: grid;
+    grid-template-columns: repeat(8, var(--sq));
+    grid-template-rows: repeat(8, var(--sq));
+    border: 5px solid #34495e;
+    transition: grid-template-columns 0.2s, grid-template-rows 0.2s;
+}
+
+.square {
+    width: var(--sq);
+    height: var(--sq);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: calc(var(--sq) * 0.67);
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+
+.white { background-color: #ecf0f1; }
+.black { background-color: #95a5a6; }
+
+/* Etiquetas de coordenadas */
+.coord-label {
+    position: absolute;
+    font-size: calc(var(--sq) * 0.22);
+    font-weight: bold;
+    line-height: 1;
+    pointer-events: none;
+    opacity: 0.65;
+}
+.coord-file { bottom: 2px; right: 3px; }
+.coord-rank { top: 2px;    left: 3px; }
+.square.white .coord-label { color: #34495e; }
+.square.black .coord-label { color: #ecf0f1; }
+
+.sidebar {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(var(--sq) * 8 + 10px); /* iguala la altura del tablero */
+}
+
+h2 { font-size: 1.2rem; margin-top: 0; }
+
+/* --- Relojes --- */
+.clocks { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.clock-box {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #34495e; color: #ecf0f1; border-radius: 4px;
+    padding: 6px 10px; font-size: 0.85rem;
+}
+.clock-box.active-clock { background: #27ae60; box-shadow: 0 0 6px rgba(39,174,96,.6); }
+.clock-box.urgent { background: #e74c3c; animation: pulse-urgent 1s ease-in-out infinite; }
+.clock-time { font-family: monospace; font-size: 1.2rem; font-weight: bold; letter-spacing: .05em; }
+.clock-label { font-size: .75rem; opacity: .85; }
+@keyframes pulse-urgent { 0%,100% { opacity:1 } 50% { opacity:.7 } }
+
+#move-history {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex: 1;          /* crece para llenar el espacio disponible del sidebar */
+    min-height: 60px;
+    overflow-y: auto;
+    border: 1px solid #bdc3c7;
+    background: white;
+}
+
+#move-history li {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+}
+
+button {
+    margin-top: 10px;
+    padding: 9px;
+    cursor: pointer;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+.btn-draw    { background: #2980b9; }
+.btn-draw:hover { background: #1f6391; }
+.btn-resign  { background: #e67e22; }
+.btn-resign:hover { background: #ca6f1e; }
+.btn-save    { background: #16a085; }
+.btn-save:hover { background: #117a65; }
+.btn-reset   { background: #e74c3c; }
+.btn-reset:hover { background: #c0392b; }
+.btn-flip    { background: #8e44ad; }
+.btn-flip:hover { background: #6c3483; }
+
+.turn-indicator {
+    margin-top: 10px;
+    padding: 7px;
+    background: #34495e;
+    color: #ecf0f1;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+/* --- Lobby overlay --- */
+#lobby-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    display: flex; justify-content: center; align-items: center; z-index: 200;
+}
+#lobby-overlay.hidden { display: none; }
+#lobby-box {
+    background: #ecf0f1; border-radius: 12px; padding: 40px 50px;
+    text-align: center; min-width: 360px; box-shadow: 0 8px 32px rgba(0,0,0,.5);
+}
+#lobby-box h1 { margin: 0 0 28px; font-size: 2rem; color: #2c3e50; }
+.lobby-section { margin-bottom: 20px; text-align: left; }
+.lobby-section label {
+    display: block; font-weight: bold; font-size: .85rem; color: #7f8c8d;
+    margin-bottom: 8px; text-transform: uppercase; letter-spacing: .05em;
+}
+.lobby-options { display: flex; gap: 8px; flex-wrap: wrap; }
+.lobby-btn {
+    background: #bdc3c7; color: #2c3e50; border: 2px solid transparent;
+    border-radius: 4px; padding: 7px 14px; font-size: .9rem;
+    cursor: pointer; margin-top: 0; width: auto;
+}
+.lobby-btn:hover  { background: #95a5a6; }
+.lobby-btn.active { background: #2980b9; color: white; border-color: #1f6391; }
+#start-game-btn {
+    margin-top: 28px; background: #27ae60; font-size: 1.1rem;
+    padding: 12px 32px; width: 100%; border-radius: 6px;
+}
+#start-game-btn:hover { background: #1e8449; }
+
+/* Overlay fin de partida */
+#game-end-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+#game-end-overlay.hidden { display: none; }
+
+#game-end-box {
+    background: #ecf0f1;
+    border-radius: 10px;
+    padding: 36px 44px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    min-width: 280px;
+}
+
+#game-end-icon { font-size: 3rem; margin-bottom: 10px; }
+
+#game-end-message {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin: 0 0 20px;
+    color: #2c3e50;
+    font-weight: bold;
+}
+
+#game-end-box button {
+    background: #27ae60;
+    font-size: 1rem;
+    padding: 12px 24px;
+    width: auto;
+}
+#game-end-box button:hover { background: #1e8449; }

@@ -551,6 +551,38 @@ class Agent:
         logger.error(f"Error llamando al LLM tras {self._MAX_RETRIES} intentos: {ultimo_error}", exc_info=True)
         raise ultimo_error
 
+    def _llamar_llm_stream(self, kwargs: dict, text_callback=None):
+        """Llama al LLM con streaming. Imprime tokens via text_callback y retorna la respuesta final.
+
+        text_callback(chunk: str | None):
+          - None  → señal de primer token (imprimir prefijo "Asistente: ")
+          - str   → delta de texto a imprimir
+        """
+        ultimo_error = None
+        for intento in range(self._MAX_RETRIES):
+            try:
+                with self._client.responses.stream(**kwargs) as stream:
+                    texto_iniciado = False
+                    for event in stream:
+                        if (text_callback and
+                                getattr(event, "type", None) == "response.output_text.delta"):
+                            if not texto_iniciado:
+                                text_callback(None)   # prefijo
+                                texto_iniciado = True
+                            text_callback(event.delta)
+                    return stream.get_final_response(), texto_iniciado
+            except Exception as e:
+                ultimo_error = e
+                codigo = getattr(getattr(e, "response", None), "status_code", None)
+                if codigo not in self._RETRY_CODES:
+                    logger.error(f"Error LLM stream (no reintentable): {e}", exc_info=True)
+                    raise
+                espera = self._RETRY_DELAY * (2 ** intento)
+                logger.warning(f"Error LLM stream {codigo} (intento {intento+1}/{self._MAX_RETRIES}), reintentando en {espera:.0f}s")
+                time.sleep(espera)
+        logger.error(f"Error LLM stream tras {self._MAX_RETRIES} intentos: {ultimo_error}", exc_info=True)
+        raise ultimo_error
+
     # ── API pública ───────────────────────────────────────────────────────────
 
     @property
@@ -570,7 +602,8 @@ class Agent:
 
     def chat(self, mensaje: str, progress_callback=None,
              send_file_callback=None, send_photo_url_callback=None,
-             image_path: str = None, contexto: dict = None) -> str:
+             image_path: str = None, contexto: dict = None,
+             stream_callback=None) -> str:
         """Procesa un mensaje del usuario y retorna la respuesta final.
 
         Ejecuta el loop de tool calls de forma interna hasta que el LLM
@@ -631,7 +664,13 @@ class Agent:
             if self.tools:
                 kwargs["tools"] = self.tools
 
-            response = self._llamar_llm(kwargs)
+            if stream_callback:
+                response, texto_impreso = self._llamar_llm_stream(kwargs, stream_callback)
+                if texto_impreso:
+                    stream_callback("\n")   # salto de línea al terminar el bloque de texto
+            else:
+                response = self._llamar_llm(kwargs)
+                texto_impreso = False
 
             # Capturar el texto de la respuesta antes de procesar tool calls
             for out in response.output:
@@ -644,7 +683,7 @@ class Agent:
 
             hubo_tool = self.process_response(
                 response,
-                texto_ya_impreso=False,
+                texto_ya_impreso=texto_impreso,
                 progress_callback=progress_callback,
             )
             if not hubo_tool:
