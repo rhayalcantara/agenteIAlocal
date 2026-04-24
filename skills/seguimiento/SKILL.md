@@ -162,21 +162,43 @@ El sub-agente en cada ciclo:
 
 ## Detección automática en lectura de correos
 
-Cuando el sub-agente lee correos periódicamente (agenda diaria de correos), debe evaluar si algún correo es una notificación de estado rastreable. Señales clave:
+Cuando el sub-agente lee correos periódicamente, **SIEMPRE** debe evaluar si algún correo contiene una notificación rastreable. Si la encuentra, **activa el seguimiento automáticamente sin preguntar** (el usuario lo pidió al crear la agenda de correos).
+
+### Señales de activación automática
 
 **Correos de envío:**
-- Asunto contiene: "enviado", "en camino", "tu pedido", "shipment", "tracking"
-- Remitente: amazon.com, dhl.com, fedex.com, ups.com, correos.com
+- Asunto: "enviado", "en camino", "tu pedido", "shipment", "tracking", "ha sido enviado"
+- Remitente: amazon.com, dhl.com, fedex.com, ups.com, correos.com, estafeta.com
 
-**Correos de transacción:**
-- Asunto contiene: "transferencia", "pago procesado", "débito", "transacción", "comprobante"
-- Remitente: un banco, PayPal, fintech
+**Correos de transacción bancaria:**
+- Asunto: "transferencia", "pago procesado", "débito", "transacción", "comprobante", "acreditado"
+- Remitente: cualquier banco, PayPal, fintech
 
 **Correos de solicitud/trámite:**
-- Asunto contiene: "solicitud recibida", "en revisión", "aprobación pendiente", "estatus"
+- Asunto: "solicitud recibida", "en revisión", "aprobación pendiente", "estatus de tu solicitud"
 
-Si se detecta uno, preguntar al usuario si desea activar el seguimiento,
-o si el sub-agente tiene instrucción de activarlo automáticamente, proceder con el flujo completo.
+### Qué hacer al detectar uno
+
+1. Extraer del correo: empresa, número de referencia/tracking, URL de seguimiento, estado mencionado
+2. Verificar si ya existe un seguimiento activo con esa referencia:
+   ```
+   ejecutar_script_skill("seguimiento", "run.py", "listar")
+   ```
+3. Si NO existe: crear el seguimiento Y crear la agenda de monitoreo (flujo completo arriba)
+4. Si YA existe: actualizar el estado directamente:
+   ```
+   ejecutar_script_skill("seguimiento", "run.py", "actualizar --id X --estado '[estado]' --fuente email")
+   ```
+
+### Uso de [SILENCIOSO] en seguimientos
+
+Cuando `actualizar` retorna un texto que comienza con `[SILENCIOSO]`, significa que no hubo cambio.
+El sub-agente debe propagar ese prefijo en su respuesta para que el scheduler no notifique al usuario:
+```
+[SILENCIOSO] Verifiqué seguimiento #X, sin cambios. Estado: En tránsito.
+```
+
+Cuando SÍ hay cambio (o estado final), responder SIN el prefijo [SILENCIOSO] para que el scheduler notifique.
 
 ---
 

@@ -234,7 +234,17 @@ class AgendaScheduler(threading.Thread):
             prompt_con_contexto = (
                 f"[Ejecución automática de agenda — acción: {nombre}]\n\n"
                 f"{accion['prompt']}\n\n"
-                "Al terminar, responde con un resumen breve de lo que hiciste."
+                "Al terminar, responde con un resumen breve de lo que hiciste.\n\n"
+                "REGLA DE NOTIFICACIÓN: Si no hay novedades relevantes para el usuario "
+                "(sin cambios, sin información nueva, todo igual que antes), inicia tu "
+                "respuesta EXACTAMENTE con el prefijo [SILENCIOSO] — el sistema suprimirá "
+                "la notificación automáticamente. Usa [SILENCIOSO] solo cuando no haya "
+                "nada útil que comunicar.\n\n"
+                "DETECCIÓN AUTOMÁTICA DE SEGUIMIENTOS: Si durante tu ejecución encuentras "
+                "correos o información sobre envíos, transacciones bancarias, reservas o "
+                "cualquier proceso con número de referencia/tracking que esté cambiando de "
+                "estado, usa el skill 'seguimiento' (ejecutar_script_skill) para registrar "
+                "o actualizar ese seguimiento automáticamente."
             )
 
             # Ejecutar el agente con timeout en un sub-thread
@@ -268,13 +278,21 @@ class AgendaScheduler(threading.Thread):
             resultado = resultado_container[0] or "(sin respuesta del agente)"
             exito = True
 
-            # Enviar resultado al usuario
-            if self._notifier and chat_id:
-                self._notifier.enviar(
-                    chat_id,
-                    f"📅 *Agenda — {nombre}*\n\n{resultado}"
-                )
-            logger.info(f"Acción #{accion_id} completada exitosamente.")
+            # Detectar prefijo [SILENCIOSO]: el sub-agente indica que no hay novedades
+            _PREFIJO_SILENCIOSO = "[SILENCIOSO]"
+            silencioso = resultado.strip().upper().startswith(_PREFIJO_SILENCIOSO)
+            if silencioso:
+                # Guardar el texto sin el prefijo (para el historial)
+                resultado = resultado.strip()[len(_PREFIJO_SILENCIOSO):].strip()
+                logger.info(f"Acción #{accion_id} completada sin novedades (silenciosa).")
+            else:
+                # Enviar resultado al usuario solo si hay novedades
+                if self._notifier and chat_id:
+                    self._notifier.enviar(
+                        chat_id,
+                        f"📅 *Agenda — {nombre}*\n\n{resultado}"
+                    )
+                logger.info(f"Acción #{accion_id} completada y notificada.")
 
         except TimeoutError as e:
             resultado = str(e)

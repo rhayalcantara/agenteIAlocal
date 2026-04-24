@@ -269,7 +269,10 @@ def cmd_actualizar(args) -> str:
             """, (args.id, nuevo_estado, args.descripcion or "", now, args.fuente or "auto"))
 
     if not hubo_cambio:
-        return f"ℹ️ Sin cambio en seguimiento #{args.id}. Estado: {estado_anterior}"
+        return (
+            f"[SILENCIOSO] Sin cambio en seguimiento #{args.id} ({r['titulo']}). "
+            f"Estado actual: {estado_anterior}"
+        )
 
     es_final = _es_estado_final(r["tipo"], nuevo_estado, r["estado_final"] or "")
 
