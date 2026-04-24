@@ -1,74 +1,228 @@
+"""
+Skill gmail-reader: Lee y busca correos de Gmail via API OAuth2.
+
+Uso (via ejecutar_script_skill o directo):
+    python run.py leer [--cantidad N]
+    python run.py buscar --query "from:amazon.com"
+    python run.py resumen
+    python run.py ver --id <message_id>
+"""
 import os
+import sys
+import json
 import argparse
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
+import base64
+import re
 
-# Si modificas estos SCOPES, elimina el archivo token.json.
-SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+# Rutas de credenciales — siempre relativas al root del proyecto
+_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+CREDENTIALS_FILE = os.path.join(_ROOT, "gmail_manager", "credentials.json")
+TOKEN_FILE = os.path.join(_ROOT, "gmail_manager", "token.json")
+SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
-def main():
-    parser = argparse.ArgumentParser(description='Leer correos de Gmail')
-    parser.add_argument('--label', type=str, help='Filtrar por etiqueta específica')
-    args = parser.parse_args()
 
-    creds = None
-    # El archivo token.json almacena los tokens de acceso y actualización del usuario.
-    # Se crea automáticamente después del primer inicio de sesión.
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-    
-    # Si no hay credenciales válidas, deja que el usuario inicie sesión.
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            if not os.path.exists('credentials.json'):
-                print("Error: 'credentials.json' no encontrado. Por favor, coloca tus credenciales en la raíz.")
-                return
-            flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
-        # Guarda las credenciales para la próxima ejecución.
-        with open('token.json', 'wh') as token:
-            token.write(creds.to_json())
-
+def _get_service():
+    """Obtiene el servicio de Gmail autenticado."""
     try:
-        service = build('gmailapi', 'v1', credentials=creds)
+        from google.auth.transport.requests import Request
+        from google.oauth2.credentials import Credentials
+        from googleapiclient.discovery import build
+    except ImportError:
+        print("ERROR: Instala google-api-python-client y google-auth-oauthlib")
+        sys.exit(1)
 
-        # Construir la query de búsqueda
-        query = ''
-        if args.label:
-            query += f' label:{args.label}'
+    if not os.path.exists(TOKEN_FILE):
+        print(f"ERROR: No existe token de autenticación en {TOKEN_FILE}")
+        print("Ejecuta primero: python gmail_manager/main.py")
+        sys.exit(1)
 
-        print(f"Buscando correos con la query: {query}\n")
+    creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
+    if not creds.valid:
+        if creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+            with open(TOKEN_FILE, "w") as f:
+                f.write(creds.to_json())
+        else:
+            print("ERROR: Token expirado. Ejecuta: python gmail_manager/main.py")
+            sys.exit(1)
 
-        # Llamada a la API para listar mensajes
-        results = service.users().messages().list(userId='me', q=query, maxResults=10).execute()
-        messages = results.get('messages', [])
+    from googleapiclient.discovery import build
+    return build("gmail", "v1", credentials=creds)
 
-        if not messages:
-            print('No se encontraron mensajes nuevos.')
+
+def _extract_body(payload) -> str:
+    """Extrae el cuerpo del mensaje (texto plano preferido)."""
+    if "parts" in payload:
+        for part in payload["parts"]:
+            if part.get("mimeType") == "text/plain":
+                data = part.get("body", {}).get("data", "")
+                if data:
+                    return base64.urlsafe_b64decode(data + "==").decode("utf-8", errors="replace")
+        # Si no hay text/plain, buscar recursivo
+        for part in payload["parts"]:
+            text = _extract_body(part)
+            if text:
+                return text
+    else:
+        data = payload.get("body", {}).get("data", "")
+        if data:
+            return base64.urlsafe_b64decode(data + "==").decode("utf-8", errors="replace")
+    return ""
+
+
+def _get_header(headers: list, name: str) -> str:
+    for h in headers:
+        if h["name"].lower() == name.lower():
+            return h["value"]
+    return ""
+
+
+def _format_message(service, msg_id: str, incluir_cuerpo: bool = False) -> dict:
+    """Obtiene y formatea un mensaje por ID."""
+    from googleapiclient.errors import HttpError
+    try:
+        msg = service.users().messages().get(
+            userId="me", id=msg_id, format="full"
+        ).execute()
+        headers = msg["payload"]["headers"]
+        data = {
+            "id": msg_id,
+            "de": _get_header(headers, "From"),
+            "asunto": _get_header(headers, "Subject"),
+            "fecha": _get_header(headers, "Date"),
+            "snippet": msg.get("snippet", ""),
+        }
+        if incluir_cuerpo:
+            data["cuerpo"] = _extract_body(msg["payload"])[:3000]
+        return data
+    except HttpError as e:
+        return {"id": msg_id, "error": str(e)}
+
+
+# ── Comandos ──────────────────────────────────────────────────────────────────
+
+def cmd_leer(args):
+    """Lee los últimos N correos del inbox."""
+    service = _get_service()
+    from googleapiclient.errors import HttpError
+    try:
+        resp = service.users().messages().list(
+            userId="me",
+            labelIds=["INBOX"],
+            maxResults=args.cantidad
+        ).execute()
+        mensajes = resp.get("messages", [])
+        if not mensajes:
+            print("No hay correos en el inbox.")
             return
 
-        for msg in messages:
-            msg_data = service.users().messages().get(userId='me', id=msg['id']).execute()
-            payload = msg_data.get('payload', {})
-            headers = payload.get('headers', [])
-            
-            subject = "Sin asunto"
-            sender = "Desconocido"
-            
-            for header in headers:
-                if header['name'] == 'Subject':
-                    subject = header['value']
-                if header['name'] == 'From':
-                    sender = header['value']
-            
-            print(f"ID: {msg['id']} | Subject: {subject} | From: {sender}")
+        resultados = []
+        for m in mensajes:
+            resultados.append(_format_message(service, m["id"], incluir_cuerpo=args.cuerpo))
 
-    except Exception as error:
-        print(f'Ocurrió un error: {error}')
+        print(json.dumps(resultados, ensure_ascii=False, indent=2))
+    except HttpError as e:
+        print(f"ERROR Gmail API: {e}")
+        sys.exit(1)
 
-if __name__ == '__main__':
+
+def cmd_buscar(args):
+    """Busca correos con query de Gmail."""
+    service = _get_service()
+    from googleapiclient.errors import HttpError
+    try:
+        resp = service.users().messages().list(
+            userId="me",
+            q=args.query,
+            maxResults=args.cantidad
+        ).execute()
+        mensajes = resp.get("messages", [])
+        if not mensajes:
+            print(f"Sin resultados para: {args.query}")
+            return
+
+        resultados = []
+        for m in mensajes:
+            resultados.append(_format_message(service, m["id"], incluir_cuerpo=args.cuerpo))
+
+        print(json.dumps(resultados, ensure_ascii=False, indent=2))
+    except HttpError as e:
+        print(f"ERROR Gmail API: {e}")
+        sys.exit(1)
+
+
+def cmd_resumen(args):
+    """Muestra conteo de correos no leídos y remitentes frecuentes."""
+    service = _get_service()
+    from googleapiclient.errors import HttpError
+    try:
+        # No leídos
+        resp_unread = service.users().messages().list(
+            userId="me", labelIds=["UNREAD", "INBOX"], maxResults=50
+        ).execute()
+        no_leidos = resp_unread.get("resultSizeEstimate", 0)
+        mensajes_unread = resp_unread.get("messages", [])
+
+        # Remitentes frecuentes en no leídos
+        from collections import Counter
+        remitentes = Counter()
+        for m in mensajes_unread[:20]:
+            info = _format_message(service, m["id"])
+            # Extraer solo el dominio/nombre del remitente
+            de = info.get("de", "")
+            remitentes[de] += 1
+
+        resumen = {
+            "no_leidos_inbox": no_leidos,
+            "muestra_remitentes": [
+                {"remitente": r, "cantidad": c}
+                for r, c in remitentes.most_common(10)
+            ],
+        }
+        print(json.dumps(resumen, ensure_ascii=False, indent=2))
+    except HttpError as e:
+        print(f"ERROR Gmail API: {e}")
+        sys.exit(1)
+
+
+def cmd_ver(args):
+    """Ver un correo completo por ID."""
+    service = _get_service()
+    info = _format_message(service, args.id, incluir_cuerpo=True)
+    print(json.dumps(info, ensure_ascii=False, indent=2))
+
+
+# ── Main ──────────────────────────────────────────────────────────────────────
+
+def main():
+    parser = argparse.ArgumentParser(description="Skill gmail-reader")
+    sub = parser.add_subparsers(dest="cmd", required=True)
+
+    # leer
+    p_leer = sub.add_parser("leer", help="Lee correos del inbox")
+    p_leer.add_argument("--cantidad", type=int, default=10)
+    p_leer.add_argument("--cuerpo", action="store_true", help="Incluir cuerpo completo")
+    p_leer.set_defaults(func=cmd_leer)
+
+    # buscar
+    p_buscar = sub.add_parser("buscar", help="Busca correos por query Gmail")
+    p_buscar.add_argument("--query", "-q", required=True)
+    p_buscar.add_argument("--cantidad", type=int, default=10)
+    p_buscar.add_argument("--cuerpo", action="store_true")
+    p_buscar.set_defaults(func=cmd_buscar)
+
+    # resumen
+    p_res = sub.add_parser("resumen", help="Conteo de no leídos y remitentes")
+    p_res.set_defaults(func=cmd_resumen)
+
+    # ver
+    p_ver = sub.add_parser("ver", help="Ver correo completo por ID")
+    p_ver.add_argument("--id", required=True)
+    p_ver.set_defaults(func=cmd_ver)
+
+    args = parser.parse_args()
+    args.func(args)
+
+
+if __name__ == "__main__":
     main()

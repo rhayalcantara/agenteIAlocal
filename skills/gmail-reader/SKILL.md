@@ -1,31 +1,89 @@
-# Gmail Reader Skill
+# Skill: gmail-reader
 
-Esta skill permite buscar y leer correos electrónicos de Gmail utilizando la API de Google. 
+Lee y busca correos de Gmail via API OAuth2. Usa credenciales de `gmail_manager/`.
 
-## Funcionalidades
-- **Listar correos no leídos**: Por defecto, busca los últimos mensajes que no han sido leídos (`is:unread`).
-- **Filtrar por etiqueta**: Permite especificar una etiqueta (ej. "Work", "Invoices") para limitar la búsqueda usando el argumento `--label`.
+## Cuándo usar esta skill
 
-## Uso
+- Leer los últimos correos del inbox
+- Buscar correos con filtros (remitente, asunto, fecha, etc.)
+- Obtener resumen de no leídos
+- Ver el contenido completo de un correo por ID
 
-### 1. Listar los últimos correos no leídos
-Para obtener una lista de los mensajes más recientes que no has abierto:
-```bash
-python3 gmail_manager/main.py
+**IMPORTANTE:** Esta skill se invoca SIEMPRE con `ejecutar_script_skill`, NO con import de Python.
+
+## Cómo invocar
+
+```
+ejecutar_script_skill("gmail-reader", "run.py", "[subcomando] [args]")
 ```
 
-### 2. Listar correos no leídos de una etiqueta específica
-Si quieres buscar solo los correos sin leer dentro de una categoría (por ejemplo, "Trabajo"):
-```bash
-python3 gmail_manager/main.py --label "Work"
+---
+
+## Subcomandos
+
+### leer — Inbox reciente
 ```
+ejecutar_script_skill("gmail-reader", "run.py", "leer")
+ejecutar_script_skill("gmail-reader", "run.py", "leer --cantidad 20")
+ejecutar_script_skill("gmail-reader", "run.py", "leer --cantidad 5 --cuerpo")
+```
+
+### buscar — Filtrar correos (sintaxis de Gmail)
+```
+ejecutar_script_skill("gmail-reader", "run.py", 'buscar --query "from:amazon.com"')
+ejecutar_script_skill("gmail-reader", "run.py", 'buscar --query "subject:enviado after:2026/04/01"')
+ejecutar_script_skill("gmail-reader", "run.py", 'buscar --query "from:banco is:unread" --cuerpo')
+ejecutar_script_skill("gmail-reader", "run.py", 'buscar --query "tracking OR pedido OR shipment" --cantidad 5')
+```
+
+### resumen — Conteo no leídos + remitentes frecuentes
+```
+ejecutar_script_skill("gmail-reader", "run.py", "resumen")
+```
+
+### ver — Correo completo por ID
+```
+ejecutar_script_skill("gmail-reader", "run.py", "ver --id <message_id>")
+```
+
+---
 
 ## Requisitos
-- Tener el archivo `credentials.json` en la raíz del proyecto.
-- Tener configurado el entorno con las librerías necesarias (`google-api-python-client`, `google-auth-oauthlib`, etc.).
 
-## Ejemplo de Salida
-```text
-ID: 18f2a... | Subject: Reunión Mañana | From: jefe@empresa.com
-ID: 17c9b... | Subject: Factura Pendiente | From: contabilidad@servicio.com
+- `gmail_manager/credentials.json` — credenciales OAuth2 de Google
+- `gmail_manager/token.json` — token generado tras autorización
+
+Si `token.json` no existe: ejecutar `python gmail_manager/main.py` primero.
+
+---
+
+## Sintaxis de query Gmail útil
+
+| Query | Significado |
+|-------|-------------|
+| `from:amazon.com` | De Amazon |
+| `subject:pedido` | Asunto contiene "pedido" |
+| `is:unread` | No leídos |
+| `after:2026/04/01` | Después del 1 abril 2026 |
+| `label:inbox` | En inbox |
+| `has:attachment` | Con adjunto |
+| `from:dhl.com OR from:fedex.com` | De DHL o FedEx |
+
+---
+
+## Salida
+
+Retorna JSON con lista de correos:
+```json
+[
+  {
+    "id": "18f3a...",
+    "de": "auto-confirm@amazon.com",
+    "asunto": "Tu pedido ha sido enviado",
+    "fecha": "Thu, 24 Apr 2026 10:30:00 -0500",
+    "snippet": "Tu pedido #123-456-789 fue enviado..."
+  }
+]
 ```
+
+Con `--cuerpo` incluye campo `"cuerpo"` con el texto completo (hasta 3000 chars).
