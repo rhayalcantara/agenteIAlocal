@@ -38,6 +38,7 @@ from agente_core.telegram_bridge import obtener_bridge
 from agente_core.logger import get_logger
 from agente_core.provider_config import obtener_configuracion
 from agente_core.voice_handler import transcribir, sintetizar, limpiar_audio_temp
+from agente_core.heartbeat import HeartbeatThread, escribir as _hb_escribir
 
 logger = get_logger("telegram_agente")
 
@@ -89,6 +90,8 @@ _TOOL_LABELS: dict[str, str] = {
     "listar_wiki":            "📖 Listando wiki...",
     "enviar_archivo_telegram": "📤 Enviando archivo...",
     "enviar_foto_telegram":    "🖼️ Enviando foto...",
+    "agenda":                  "📅 Gestionando agenda...",
+    "excel":                   "📊 Procesando Excel...",
     "browser_navegar":         "🌐 Abriendo página...",
     "browser_screenshot":      "📸 Tomando screenshot...",
     "browser_click":           "🖱️ Haciendo clic...",
@@ -255,6 +258,8 @@ def _worker(cola: queue.Queue, notifier: TelegramNotifier):
                 notifier.enviar_voz(chat_id, audio_resp)
                 limpiar_audio_temp(audio_resp)
 
+        # Informar al supervisor que el agente procesó exitosamente
+        _hb_escribir("running")
         cola.task_done()
 
 
@@ -271,6 +276,55 @@ def main():
     cola: queue.Queue = queue.Queue()
     worker_thread = threading.Thread(target=_worker, args=(cola, notifier), daemon=True)
     worker_thread.start()
+
+    # Iniciar heartbeat para el supervisor (cada 30s)
+    hb_thread = HeartbeatThread(intervalo=30)
+    hb_thread.start()
+
+    # ── Agenda Scheduler (acciones automáticas en segundo plano) ──────────────
+    try:
+        from agente_core.agenda_scheduler import AgendaScheduler
+        from agente_core.provider_config import obtener_configuracion as _get_cfg
+        _chat_id_default = next(iter(ALLOWED_CHAT_IDS), 0) if ALLOWED_CHAT_IDS else 0
+
+        # Proveedor opcional para el sub-agente de la agenda.
+        # Si AGENDA_PROVIDER está definido en .env, se usa ese modelo (más rápido/barato).
+        # Si no, el sub-agente usa el mismo modelo que el agente principal.
+        _agenda_cfg = None
+        _agenda_provider_env = os.getenv("AGENDA_PROVIDER", "").strip().lower()
+        if _agenda_provider_env:
+            from agente_core.provider_config import cargar_proveedores as _cargar_provs
+            _provs = _cargar_provs()
+            if _agenda_provider_env in _provs:
+                _p = _provs[_agenda_provider_env]
+                _agenda_cfg = {
+                    "model":    os.getenv("AGENDA_MODEL", _p["model"]),
+                    "api_key":  _p["api_key"],
+                    "base_url": _p["base_url"],
+                    "provider": _agenda_provider_env,
+                }
+                logger.info(f"Agenda sub-agente: {_agenda_provider_env}/{_agenda_cfg['model']}")
+            else:
+                logger.warning(f"AGENDA_PROVIDER='{_agenda_provider_env}' no configurado, usando proveedor principal.")
+
+        scheduler = AgendaScheduler(
+            notifier=notifier,
+            chat_id_default=_chat_id_default,
+            model=MODEL,
+            api_key=API_KEY,
+            base_url=BASE_URL,
+            provider=PROVIDER,
+            agenda_model=_agenda_cfg["model"] if _agenda_cfg else None,
+            agenda_api_key=_agenda_cfg["api_key"] if _agenda_cfg else None,
+            agenda_base_url=_agenda_cfg["base_url"] if _agenda_cfg else None,
+            agenda_provider=_agenda_cfg["provider"] if _agenda_cfg else None,
+        )
+        scheduler.start()
+        logger.info(f"AgendaScheduler iniciado (chat_id_default={_chat_id_default})")
+    except Exception as _e:
+        scheduler = None
+        logger.warning(f"AgendaScheduler no pudo iniciarse: {_e}")
+    # ── Fin Agenda Scheduler ───────────────────────────────────────────────────
 
     voz_str = "🔊 ON" if _voz_respuesta_global else "🔇 OFF"
     print(f"[Telegram Agente] Escuchando... modelo={MODEL} proveedor={PROVIDER} | voz={voz_str}")
@@ -310,6 +364,8 @@ def main():
 
     except KeyboardInterrupt:
         print("\nDeteniendo agente...")
+        if scheduler:
+            scheduler.detener()
         cola.put(None)
         worker_thread.join(timeout=5)
         logger.info("Agente detenido.")

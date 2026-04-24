@@ -66,6 +66,7 @@ class SkillLoader:
 
     def ejecutar_script(self, nombre: str, script: str, args: str = "") -> str:
         import sys
+        import shlex
         skill = self.skills.get(nombre)
         if not skill:
             return f"Error: skill '{nombre}' no encontrada."
@@ -73,7 +74,7 @@ class SkillLoader:
         if not os.path.exists(script_path):
             return f"Error: script '{script}' no encontrado en skill '{nombre}'."
         try:
-            cmd = [sys.executable, script_path] + (args.split() if args else [])
+            cmd = [sys.executable, script_path] + (shlex.split(args) if args else [])
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
             output = result.stdout + result.stderr
             return output[:4000] or "(sin salida)"

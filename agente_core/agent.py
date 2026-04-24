@@ -56,7 +56,9 @@ class Agent:
             "execute_bash", "guardar_memoria",
             "buscar_en_internet", "listar_skills", "activar_skill", "crear_skill",
             "leer_wiki", "buscar_wiki",
-            "enviar_archivo_telegram",
+            "enviar_archivo_telegram", "lista_compras", "distribucion_casa",
+            "ubicaciones", "recetas", "gastos", "mantenimiento",
+            "contactos_servicios", "documentos", "gmail", "agenda",
         ],
         "none": [],
     }
@@ -80,6 +82,24 @@ class Agent:
         if base_url:
             kwargs["base_url"] = base_url
         self._client = OpenAI(**kwargs)
+
+        # Proveedores locales solo soportan /v1/chat/completions.
+        # El adaptador hace que ese endpoint se vea como /v1/responses
+        # para que el resto del agente no necesite cambiar nada.
+        _API_MODE_POR_PROVEEDOR = {
+            "lmstudio": "chat",
+            "gateway":  "chat",
+            "openrouter": "responses",
+            "openai":     "responses",
+            "claude":     "responses",
+            "gemini":     "responses",
+        }
+        api_mode = (os.getenv("AGENT_API_MODE")
+                    or _API_MODE_POR_PROVEEDOR.get(provider, "responses"))
+        if api_mode == "chat":
+            from responses_adapter import ResponsesAdapter
+            self._client = ResponsesAdapter(self._client)
+            logger.info(f"Modo API: chat/completions (proveedor={provider})")
 
         # Determinar perfil de herramientas
         if tool_profile is None:
@@ -389,6 +409,329 @@ class Agent:
              "parameters": {"type": "object", "properties": {
                  "script": {"type": "string", "description": "Código JavaScript a ejecutar"},
              }, "required": ["script"]}},
+            # ── Excel ─────────────────────────────────────────────────────────
+            {"type": "function", "name": "excel",
+             "description": (
+                 "Herramienta completa para leer, crear y manipular archivos Excel (.xlsx). "
+                 "Operaciones disponibles:\n"
+                 "  LECTURA   : info, leer, leer_formulas, listar_hojas, buscar\n"
+                 "  ESCRITURA : escribir, crear, reemplazar\n"
+                 "  HOJAS     : crear_hoja, eliminar_hoja, renombrar_hoja, copiar_hoja, mover_hoja\n"
+                 "  ESTRUCTURA: insertar_filas, eliminar_filas, insertar_columnas, eliminar_columnas, ordenar\n"
+                 "  FORMATO   : formato_celdas, auto_ajustar_columnas, formato_condicional\n"
+                 "  OBJETOS   : crear_tabla, agregar_grafico, proteger_hoja, hipervinculo"
+             ),
+             "parameters": {"type": "object", "properties": {
+                 "operacion": {
+                     "type": "string",
+                     "description": "Operación a realizar (ver lista en descripción)",
+                     "enum": [
+                         "info", "leer", "leer_formulas", "listar_hojas", "buscar",
+                         "escribir", "crear", "reemplazar",
+                         "crear_hoja", "eliminar_hoja", "renombrar_hoja", "copiar_hoja", "mover_hoja",
+                         "insertar_filas", "eliminar_filas", "insertar_columnas", "eliminar_columnas", "ordenar",
+                         "formato_celdas", "auto_ajustar_columnas", "formato_condicional",
+                         "crear_tabla", "agregar_grafico", "proteger_hoja", "hipervinculo",
+                     ]
+                 },
+                 "ruta": {"type": "string", "description": "Ruta del archivo Excel (.xlsx)"},
+                 "hoja": {"type": "string", "description": "Nombre de la hoja (None = hoja activa)"},
+                 "rango": {"type": "string", "description": "Rango de celdas ej: 'A1:D10'"},
+                 "datos": {"type": "array", "description": "Lista de listas para escribir [[col1,col2],[val1,val2]]"},
+                 "celda_inicio": {"type": "string", "description": "Celda de inicio para escribir, ej: 'A1'"},
+                 "hojas": {"type": "array", "description": "Lista de nombres de hojas para crear"},
+                 "texto": {"type": "string", "description": "Texto a buscar"},
+                 "texto_buscar": {"type": "string", "description": "Texto a buscar para reemplazar"},
+                 "texto_reemplazar": {"type": "string", "description": "Texto de reemplazo"},
+                 "nombre": {"type": "string", "description": "Nombre de hoja o tabla"},
+                 "nombre_actual": {"type": "string", "description": "Nombre actual de la hoja"},
+                 "nombre_nuevo": {"type": "string", "description": "Nuevo nombre de la hoja"},
+                 "origen": {"type": "string", "description": "Hoja de origen para copiar"},
+                 "destino": {"type": "string", "description": "Nombre de la hoja destino al copiar"},
+                 "posicion": {"type": "number", "description": "Posición (índice) de la hoja"},
+                 "fila": {"type": "number", "description": "Número de fila (1-based)"},
+                 "columna": {"type": "number", "description": "Número de columna (1-based)"},
+                 "cantidad": {"type": "number", "description": "Cantidad de filas/columnas a insertar o eliminar"},
+                 "ascendente": {"type": "boolean", "description": "True = orden ascendente"},
+                 "fila_inicio": {"type": "number", "description": "Fila desde donde empezar a ordenar (default 2 para omitir encabezado)"},
+                 "negrita": {"type": "boolean", "description": "Aplicar negrita"},
+                 "cursiva": {"type": "boolean", "description": "Aplicar cursiva"},
+                 "color_fondo": {"type": "string", "description": "Color de fondo hex sin '#', ej: 'FFFF00'"},
+                 "color_texto": {"type": "string", "description": "Color de texto hex sin '#', ej: 'FF0000'"},
+                 "tamanio_fuente": {"type": "number", "description": "Tamaño de fuente en puntos"},
+                 "alineacion": {"type": "string", "enum": ["left", "center", "right"],
+                                "description": "Alineación horizontal"},
+                 "tipo": {"type": "string",
+                          "description": "Tipo de formato condicional: mayor_que|menor_que|igual_a|contiene|entre. O tipo de gráfico: barras|barras_apiladas|lineas|pastel|area|dispersion"},
+                 "valor": {"type": "string", "description": "Valor para formato condicional. Para 'entre' usar 'v1,v2'"},
+                 "estilo": {"type": "string", "description": "Estilo de tabla Excel, ej: 'TableStyleMedium9'"},
+                 "rango_datos": {"type": "string", "description": "Rango de datos para el gráfico, ej: 'A1:B10'"},
+                 "titulo": {"type": "string", "description": "Título del gráfico"},
+                 "celda_posicion": {"type": "string", "description": "Celda donde anclar el gráfico, ej: 'E2'"},
+                 "contrasena": {"type": "string", "description": "Contraseña para proteger la hoja (None = desproteger)"},
+                 "celda": {"type": "string", "description": "Celda donde insertar el hipervínculo, ej: 'A1'"},
+                 "url": {"type": "string", "description": "URL del hipervínculo"},
+                 "max_filas": {"type": "number", "description": "Máximo de filas a leer (default 100)"},
+             }, "required": ["operacion", "ruta"]}},
+            # ── Distribucion de la Casa ───────────────────────────────────────
+            {"type": "function", "name": "distribucion_casa",
+             "description": (
+                 "Mapa de areas del hogar/oficina. Registra cada area (sala, cocina, "
+                 "dormitorio, bano, etc.) con foto y descripcion. Base para ubicar objetos.\n"
+                 "Operaciones:\n"
+                 "  agregar_area  — Registra un area nueva con nombre, descripcion y foto\n"
+                 "  listar_areas  — Lista todas las areas registradas\n"
+                 "  ver_area      — Detalle de un area con su foto\n"
+                 "  editar_area   — Modifica nombre, descripcion o foto de un area\n"
+                 "  eliminar_area — Elimina un area del mapa\n\n"
+                 "Si el usuario envia una foto del area, pasa el image_path en 'imagen'."
+             ),
+             "parameters": {"type": "object", "properties": {
+                 "operacion": {
+                     "type": "string",
+                     "description": "Operacion a realizar",
+                     "enum": ["agregar_area", "listar_areas", "ver_area", "editar_area", "eliminar_area"]
+                 },
+                 "nombre": {"type": "string", "description": "Nombre del area (sala, cocina, dormitorio, etc.)"},
+                 "descripcion": {"type": "string", "description": "Descripcion del area"},
+                 "nuevo_nombre": {"type": "string", "description": "Nuevo nombre para renombrar el area (solo editar_area)"},
+                 "imagen": {"type": "string", "description": "Ruta de la imagen del area (image_path del mensaje Telegram)"},
+             }, "required": ["operacion"]}},
+            # ── Ubicaciones de Objetos ────────────────────────────────────────
+            {"type": "function", "name": "ubicaciones",
+             "description": (
+                 "Registro de objetos y su ubicacion en la casa/oficina. "
+                 "Vinculado al mapa de areas (distribucion_casa).\n"
+                 "Operaciones:\n"
+                 "  registrar — Registra un objeto con area, lugar exacto, descripcion y foto\n"
+                 "  buscar    — Busca un objeto por nombre (acepta coincidencia parcial)\n"
+                 "  listar    — Lista objetos (todos o filtrados por area)\n"
+                 "  mover     — Cambia la ubicacion de un objeto a otra area/lugar\n"
+                 "  eliminar  — Elimina un objeto del registro\n"
+                 "  resumen   — Resumen por areas y objetos mas reubicados\n\n"
+                 "Si el usuario envia foto del objeto/lugar, pasa el image_path en 'imagen'."
+             ),
+             "parameters": {"type": "object", "properties": {
+                 "operacion": {
+                     "type": "string",
+                     "description": "Operacion a realizar",
+                     "enum": ["registrar", "buscar", "listar", "mover", "eliminar", "resumen"]
+                 },
+                 "nombre": {"type": "string", "description": "Nombre del objeto (regleta, taladro, tijeras, etc.)"},
+                 "area": {"type": "string", "description": "Area de la casa donde esta el objeto (debe existir en distribucion_casa)"},
+                 "lugar_exacto": {"type": "string", "description": "Ubicacion precisa dentro del area (detras del escritorio, estante 2, cajon derecho, etc.)"},
+                 "descripcion": {"type": "string", "description": "Descripcion adicional del objeto"},
+                 "imagen": {"type": "string", "description": "Ruta de la imagen (image_path del mensaje Telegram)"},
+             }, "required": ["operacion"]}},
+            # ── Recetas ──────────────────────────────────────────────────────
+            {"type": "function", "name": "recetas",
+             "description": (
+                 "Registro de recetas de cocina con cruce a lista de compras.\n"
+                 "Operaciones:\n"
+                 "  agregar      — Guarda receta con ingredientes, pasos y foto\n"
+                 "  ver          — Muestra receta completa\n"
+                 "  listar       — Lista recetas (filtrar por categoria o ingrediente)\n"
+                 "  editar       — Modifica una receta existente\n"
+                 "  eliminar     — Elimina una receta\n"
+                 "  que_cocinar  — Sugiere recetas segun lo que tienes en lista_compras\n"
+                 "  preparar     — Revisa ingredientes, agrega faltantes a lista_compras\n"
+                 "  favoritas    — Muestra las recetas mas preparadas\n\n"
+                 "Los ingredientes son una lista de objetos: "
+                 '[{"nombre": "arroz", "cantidad": "2", "unidad": "tazas"}, ...]\n'
+                 "Los pasos son una lista de strings: "
+                 '["Lavar el arroz", "Hervir agua", ...]'
+             ),
+             "parameters": {"type": "object", "properties": {
+                 "operacion": {
+                     "type": "string",
+                     "description": "Operacion a realizar",
+                     "enum": ["agregar", "ver", "listar", "editar", "eliminar",
+                              "que_cocinar", "preparar", "favoritas"]
+                 },
+                 "nombre": {"type": "string", "description": "Nombre de la receta"},
+                 "nuevo_nombre": {"type": "string", "description": "Nuevo nombre (solo editar)"},
+                 "ingredientes": {
+                     "type": "array",
+                     "description": "Lista de ingredientes [{nombre, cantidad, unidad}, ...]",
+                     "items": {"type": "object", "properties": {
+                         "nombre": {"type": "string"},
+                         "cantidad": {"type": "string"},
+                         "unidad": {"type": "string"},
+                     }, "required": ["nombre"]}
+                 },
+                 "pasos": {
+                     "type": "array",
+                     "description": "Lista de pasos de preparacion",
+                     "items": {"type": "string"}
+                 },
+                 "categoria": {"type": "string", "description": "Categoria (desayuno, almuerzo, cena, postre, snack)"},
+                 "porciones": {"type": "number", "description": "Numero de porciones"},
+                 "ingrediente": {"type": "string", "description": "Ingrediente para filtrar en listar"},
+                 "imagen": {"type": "string", "description": "Ruta de la imagen (image_path del mensaje Telegram)"},
+             }, "required": ["operacion"]}},
+            # ── Gastos ───────────────────────────────────────────────────────
+            {"type": "function", "name": "gastos",
+             "description": (
+                 "Tracking de gastos personales con presupuestos.\n"
+                 "Operaciones:\n"
+                 "  registrar   — Registra un gasto (monto, categoria, descripcion, foto de recibo)\n"
+                 "  listar      — Lista gastos (filtrar por mes, categoria, ultimos N)\n"
+                 "  resumen     — Resumen mensual: totales, por categoria, top gastos\n"
+                 "  eliminar    — Elimina un gasto por ID\n"
+                 "  presupuesto — Define o consulta presupuesto mensual por categoria\n"
+                 "  comparar    — Compara gastos entre dos meses\n\n"
+                 "Si el usuario envia foto del recibo, pasa el image_path en 'imagen'."
+             ),
+             "parameters": {"type": "object", "properties": {
+                 "operacion": {
+                     "type": "string",
+                     "description": "Operacion a realizar",
+                     "enum": ["registrar", "listar", "resumen", "eliminar", "presupuesto", "comparar"]
+                 },
+                 "monto": {"type": "number", "description": "Monto del gasto"},
+                 "categoria": {"type": "string", "description": "Categoria (comida, transporte, servicios, entretenimiento, salud, etc.)"},
+                 "descripcion": {"type": "string", "description": "Descripcion del gasto"},
+                 "fecha": {"type": "string", "description": "Fecha del gasto ISO (default: hoy)"},
+                 "mes": {"type": "string", "description": "Mes en formato YYYY-MM (para listar, resumen, comparar)"},
+                 "mes1": {"type": "string", "description": "Primer mes para comparar (YYYY-MM)"},
+                 "mes2": {"type": "string", "description": "Segundo mes para comparar (YYYY-MM)"},
+                 "ultimos": {"type": "number", "description": "Mostrar solo los ultimos N gastos"},
+                 "id": {"type": "number", "description": "ID del gasto (para eliminar)"},
+                 "imagen": {"type": "string", "description": "Ruta de imagen del recibo (image_path)"},
+             }, "required": ["operacion"]}},
+            # ── Mantenimiento ────────────────────────────────────────────────
+            {"type": "function", "name": "mantenimiento",
+             "description": (
+                 "Calendario de mantenimiento de objetos/equipos del hogar.\n"
+                 "Operaciones:\n"
+                 "  registrar   — Registra item con frecuencia (dias) y area\n"
+                 "  listar      — Lista todos los items de mantenimiento\n"
+                 "  pendientes  — Muestra que esta atrasado o toca esta semana\n"
+                 "  completar   — Marca un mantenimiento como realizado hoy\n"
+                 "  historial   — Historial de mantenimientos de un item\n"
+                 "  eliminar    — Elimina un item del calendario\n\n"
+                 "Frecuencias comunes: 7=semanal, 30=mensual, 90=trimestral, 180=semestral, 365=anual"
+             ),
+             "parameters": {"type": "object", "properties": {
+                 "operacion": {
+                     "type": "string",
+                     "description": "Operacion a realizar",
+                     "enum": ["registrar", "listar", "pendientes", "completar", "historial", "eliminar"]
+                 },
+                 "nombre": {"type": "string", "description": "Nombre del item (filtro AC, aceite carro, limpieza nevera, etc.)"},
+                 "frecuencia_dias": {"type": "number", "description": "Frecuencia en dias (7=semanal, 30=mensual, 90=trimestral, 365=anual)"},
+                 "area": {"type": "string", "description": "Area de la casa donde esta el item"},
+                 "descripcion": {"type": "string", "description": "Descripcion de que hacer en el mantenimiento"},
+                 "nota": {"type": "string", "description": "Nota al completar un mantenimiento"},
+                 "ultimo_mantenimiento": {"type": "string", "description": "Fecha ISO del ultimo mantenimiento (default: hoy)"},
+             }, "required": ["operacion"]}},
+            # ── Contactos Servicios ──────────────────────────────────────────
+            {"type": "function", "name": "contactos_servicios",
+             "description": (
+                 "Directorio de proveedores de servicios (plomero, electricista, etc.).\n"
+                 "Operaciones:\n"
+                 "  agregar          — Registra contacto (nombre, oficio, telefono, email, notas, calificacion)\n"
+                 "  buscar           — Busca por nombre u oficio (parcial)\n"
+                 "  listar           — Lista contactos (filtrar por oficio)\n"
+                 "  editar           — Modifica datos de un contacto\n"
+                 "  registrar_visita — Registra que vino a hacer un trabajo (costo, nota)\n"
+                 "  historial        — Historial de visitas de un contacto\n"
+                 "  eliminar         — Elimina un contacto"
+             ),
+             "parameters": {"type": "object", "properties": {
+                 "operacion": {
+                     "type": "string",
+                     "description": "Operacion a realizar",
+                     "enum": ["agregar", "buscar", "listar", "editar", "registrar_visita", "historial", "eliminar"]
+                 },
+                 "nombre": {"type": "string", "description": "Nombre del contacto"},
+                 "nuevo_nombre": {"type": "string", "description": "Nuevo nombre (solo editar)"},
+                 "oficio": {"type": "string", "description": "Oficio o especialidad (plomero, electricista, AC, pintor, etc.)"},
+                 "telefono": {"type": "string", "description": "Numero de telefono"},
+                 "email": {"type": "string", "description": "Correo electronico"},
+                 "notas": {"type": "string", "description": "Notas sobre el contacto"},
+                 "calificacion": {"type": "number", "description": "Calificacion 1-5 estrellas"},
+                 "texto": {"type": "string", "description": "Texto a buscar (nombre u oficio)"},
+                 "trabajo": {"type": "string", "description": "Descripcion del trabajo realizado (para registrar_visita)"},
+                 "costo": {"type": "number", "description": "Costo del trabajo"},
+                 "nota": {"type": "string", "description": "Nota adicional sobre la visita"},
+             }, "required": ["operacion"]}},
+            # ── Documentos ───────────────────────────────────────────────────
+            {"type": "function", "name": "documentos",
+             "description": (
+                 "Registro de documentos importantes y su ubicacion fisica.\n"
+                 "Operaciones:\n"
+                 "  registrar — Registra documento con tipo, area, ubicacion exacta, foto\n"
+                 "  buscar    — Busca por nombre, tipo o descripcion (parcial)\n"
+                 "  ver       — Detalle completo con foto\n"
+                 "  listar    — Lista documentos (filtrar por tipo o area). Alerta vencimientos\n"
+                 "  mover     — Cambia la ubicacion fisica del documento\n"
+                 "  eliminar  — Elimina un documento del registro\n\n"
+                 "Tipos comunes: legal, financiero, medico, vehiculo, hogar, personal, educacion.\n"
+                 "Si el usuario envia foto del documento, pasa el image_path en 'imagen'."
+             ),
+             "parameters": {"type": "object", "properties": {
+                 "operacion": {
+                     "type": "string",
+                     "description": "Operacion a realizar",
+                     "enum": ["registrar", "buscar", "ver", "listar", "mover", "eliminar"]
+                 },
+                 "nombre": {"type": "string", "description": "Nombre del documento (escritura, pasaporte, seguro carro, etc.)"},
+                 "tipo": {"type": "string", "description": "Tipo de documento (legal, financiero, medico, vehiculo, hogar, personal)"},
+                 "area": {"type": "string", "description": "Area de la casa donde esta el documento"},
+                 "ubicacion_exacta": {"type": "string", "description": "Lugar preciso (carpeta azul, gaveta 2, sobre manila, etc.)"},
+                 "descripcion": {"type": "string", "description": "Descripcion adicional"},
+                 "fecha_vencimiento": {"type": "string", "description": "Fecha de vencimiento YYYY-MM-DD (pasaporte, seguro, etc.)"},
+                 "texto": {"type": "string", "description": "Texto a buscar"},
+                 "imagen": {"type": "string", "description": "Ruta de la imagen (image_path del mensaje Telegram)"},
+             }, "required": ["operacion"]}},
+            # ── Lista de Compras ──────────────────────────────────────────────
+            {"type": "function", "name": "lista_compras",
+             "description": (
+                 "Gestiona la lista de compras del supermercado. "
+                 "Operaciones:\n"
+                 "  agregar      — Agrega un item (con foto opcional si el usuario envia imagen)\n"
+                 "  listar       — Muestra items (filtro: todos, pendientes, comprados)\n"
+                 "  comprado     — Marca un item como comprado\n"
+                 "  ver_imagen   — Obtiene la foto guardada de un producto\n"
+                 "  eliminar     — Elimina un item de la lista\n"
+                 "  estadisticas — Resumen: productos frecuentes, categorias, tasa de compra\n"
+                 "  limpiar      — Elimina todos los items ya comprados\n\n"
+                 "Si el usuario envia una foto junto con el pedido de agregar un producto, "
+                 "pasa el image_path en el parametro 'imagen' para asociar la foto al item."
+             ),
+             "parameters": {"type": "object", "properties": {
+                 "operacion": {
+                     "type": "string",
+                     "description": "Operacion a realizar",
+                     "enum": ["agregar", "listar", "comprado", "ver_imagen", "eliminar", "estadisticas", "limpiar"]
+                 },
+                 "nombre": {"type": "string", "description": "Nombre del producto (para agregar, comprado, ver_imagen, eliminar)"},
+                 "cantidad": {"type": "number", "description": "Cantidad (default 1)"},
+                 "unidad": {"type": "string", "description": "Unidad de medida (kg, litros, paquetes, etc.)"},
+                 "categoria": {"type": "string", "description": "Categoria del producto (frutas, lacteos, limpieza, etc.)"},
+                 "filtro": {"type": "string", "enum": ["todos", "pendientes", "comprados"],
+                            "description": "Filtro para listar (default: todos)"},
+                 "imagen": {"type": "string", "description": "Ruta de la imagen del producto (image_path del mensaje Telegram)"},
+             }, "required": ["operacion"]}},
+            # ── Gmail Reader ─────────────────────────────────────────────────
+            {"type": "function", "name": "gmail",
+             "description": (
+                 "Lee correos de Gmail via API OAuth2.\n"
+                 "Operaciones:\n"
+                 "  leer    — Lee los ultimos N correos (default: 10 no leidos)\n"
+                 "  buscar  — Busca con query de Gmail (from:, subject:, after:, label:, etc.)\n"
+                 "  resumen — Cuantos no leidos + remitentes frecuentes"
+             ),
+             "parameters": {"type": "object", "properties": {
+                 "operacion": {
+                     "type": "string",
+                     "description": "Operacion a realizar",
+                     "enum": ["leer", "buscar", "resumen"]
+                 },
+                 "cantidad": {"type": "number", "description": "Cantidad de correos a leer (default 10, max 50)"},
+                 "query": {"type": "string", "description": "Query de Gmail (ej: 'from:banco', 'is:unread after:2026/04/01', 'subject:factura')"},
+             }, "required": ["operacion"]}},
             {"type": "function", "name": "enviar_foto_telegram",
              "description": (
                  "Envía una imagen al usuario por Telegram usando una URL pública. "
@@ -400,6 +743,53 @@ class Agent:
                  "url": {"type": "string", "description": "URL pública de la imagen"},
                  "caption": {"type": "string", "description": "Titular o descripción (máx 1024 chars, soporta Markdown)"},
              }, "required": ["url"]}},
+            # ── Agenda de Acciones ────────────────────────────────────────────
+            {"type": "function", "name": "agenda",
+             "description": (
+                 "Agenda de acciones automáticas programadas.\n"
+                 "Operaciones:\n"
+                 "  agregar    — Crea una nueva acción programada con un prompt para el agente\n"
+                 "  listar     — Muestra todas las acciones (filtro: todos|activas|inactivas)\n"
+                 "  ver        — Detalle completo de una acción por ID\n"
+                 "  activar    — Activa una acción pausada\n"
+                 "  desactivar — Pausa una acción temporalmente\n"
+                 "  eliminar   — Elimina una acción por ID\n"
+                 "  historial  — Últimas ejecuciones de una acción\n\n"
+                 "Tipos de acción:\n"
+                 "  diaria             — Todos los días (o días específicos) a una hora fija\n"
+                 "  recurrente_ventana — Cada N minutos dentro de un rango horario\n"
+                 "  recurrente         — Cada N minutos sin restricción de horario\n\n"
+                 "Días de semana: 1=lunes, 2=martes, ..., 7=domingo"
+             ),
+             "parameters": {"type": "object", "properties": {
+                 "operacion": {
+                     "type": "string",
+                     "enum": ["agregar", "listar", "ver", "activar", "desactivar", "eliminar", "historial"],
+                     "description": "Operación a realizar"
+                 },
+                 "id": {"type": "number", "description": "ID de la acción (para ver, activar, desactivar, eliminar, historial)"},
+                 "nombre": {"type": "string", "description": "Nombre corto descriptivo de la acción"},
+                 "tipo": {
+                     "type": "string",
+                     "enum": ["diaria", "recurrente_ventana", "recurrente"],
+                     "description": "Tipo de programación de la acción"
+                 },
+                 "prompt": {"type": "string", "description": "Instrucción completa que el agente ejecutará automáticamente"},
+                 "descripcion": {"type": "string", "description": "Descripción larga opcional"},
+                 "hora": {"type": "string", "description": "Hora de ejecución HH:MM (solo tipo 'diaria', ej: '08:30')"},
+                 "dias_semana": {
+                     "type": "array", "items": {"type": "number"},
+                     "description": "Días de la semana [1=lunes..7=domingo]. Omitir = todos los días"
+                 },
+                 "intervalo_minutos": {"type": "number", "description": "Minutos entre ejecuciones (tipos recurrentes)"},
+                 "hora_inicio": {"type": "string", "description": "Hora inicio de ventana HH:MM (tipo 'recurrente_ventana', ej: '09:00')"},
+                 "hora_fin": {"type": "string", "description": "Hora fin de ventana HH:MM (tipo 'recurrente_ventana', ej: '18:00')"},
+                 "filtro": {
+                     "type": "string", "enum": ["todos", "activas", "inactivas"],
+                     "description": "Filtro para la operación 'listar' (default: todos)"
+                 },
+                 "ultimas": {"type": "number", "description": "Cantidad de entradas a mostrar en 'historial' (default 5)"},
+             }, "required": ["operacion"]}},
         ]
 
         if perfil == "local":
@@ -500,6 +890,126 @@ class Agent:
             result = self.wiki.buscar(args.get("query", "")) if self.wiki else "Wiki no disponible"
         elif fn_name == "listar_wiki":
             result = self.wiki.listar() if self.wiki else "Wiki no disponible"
+        elif fn_name == "excel":
+            from excel_tool import ejecutar as excel_ejecutar
+            operacion = args.pop("operacion")
+            result = excel_ejecutar(operacion, **args)
+        elif fn_name == "distribucion_casa":
+            from distribucion_casa_tool import ejecutar as casa_ejecutar
+            operacion = args.pop("operacion")
+            # Inyectar imagen del turno si aplica
+            if operacion in ("agregar_area", "editar_area") and not args.get("imagen"):
+                img = getattr(self, "_current_image_path", None)
+                if img:
+                    args["imagen"] = img
+            result = casa_ejecutar(operacion, **args)
+            # Si ver_area retorna imagen, enviarla por Telegram
+            if operacion == "ver_area" and "IMAGEN:" in result:
+                lineas = result.split("\n")
+                texto_limpio = []
+                for linea in lineas:
+                    if linea.startswith("IMAGEN:"):
+                        ruta_img = linea[7:]
+                        cb = getattr(self, "_send_file_callback", None)
+                        if cb:
+                            cb(ruta_img, "")
+                    else:
+                        texto_limpio.append(linea)
+                result = "\n".join(texto_limpio) + "\nFoto enviada."
+        elif fn_name == "recetas":
+            from recetas_tool import ejecutar as recetas_ejecutar
+            operacion = args.pop("operacion")
+            if operacion in ("agregar", "editar") and not args.get("imagen"):
+                img = getattr(self, "_current_image_path", None)
+                if img:
+                    args["imagen"] = img
+            result = recetas_ejecutar(operacion, **args)
+            # Si ver retorna imagen, enviarla por Telegram
+            if operacion == "ver" and "IMAGEN:" in result:
+                lineas = result.split("\n")
+                texto_limpio = []
+                for linea in lineas:
+                    if linea.startswith("IMAGEN:"):
+                        ruta_img = linea[7:]
+                        cb = getattr(self, "_send_file_callback", None)
+                        if cb:
+                            cb(ruta_img, "")
+                    else:
+                        texto_limpio.append(linea)
+                result = "\n".join(texto_limpio) + "\nFoto enviada."
+        elif fn_name == "gastos":
+            from gastos_tool import ejecutar as gastos_ejecutar
+            operacion = args.pop("operacion")
+            if operacion == "registrar" and not args.get("imagen"):
+                img = getattr(self, "_current_image_path", None)
+                if img:
+                    args["imagen"] = img
+            result = gastos_ejecutar(operacion, **args)
+        elif fn_name == "mantenimiento":
+            from mantenimiento_tool import ejecutar as mant_ejecutar
+            operacion = args.pop("operacion")
+            result = mant_ejecutar(operacion, **args)
+        elif fn_name == "contactos_servicios":
+            from contactos_servicios_tool import ejecutar as cont_ejecutar
+            operacion = args.pop("operacion")
+            result = cont_ejecutar(operacion, **args)
+        elif fn_name == "documentos":
+            from documentos_tool import ejecutar as doc_ejecutar
+            operacion = args.pop("operacion")
+            if operacion in ("registrar", "mover") and not args.get("imagen"):
+                img = getattr(self, "_current_image_path", None)
+                if img:
+                    args["imagen"] = img
+            result = doc_ejecutar(operacion, **args)
+            if operacion in ("ver", "buscar") and "IMAGEN:" in result:
+                lineas = result.split("\n")
+                texto_limpio = []
+                for linea in lineas:
+                    if linea.startswith("IMAGEN:"):
+                        ruta_img = linea[7:]
+                        cb = getattr(self, "_send_file_callback", None)
+                        if cb:
+                            cb(ruta_img, "")
+                    else:
+                        texto_limpio.append(linea)
+                result = "\n".join(texto_limpio) + "\nFoto enviada."
+        elif fn_name == "ubicaciones":
+            from ubicaciones_tool import ejecutar as ubic_ejecutar
+            operacion = args.pop("operacion")
+            if operacion in ("registrar", "mover") and not args.get("imagen"):
+                img = getattr(self, "_current_image_path", None)
+                if img:
+                    args["imagen"] = img
+            result = ubic_ejecutar(operacion, **args)
+            # Si buscar retorna imagen, enviarla por Telegram
+            if operacion == "buscar" and "IMAGEN:" in result:
+                lineas = result.split("\n")
+                texto_limpio = []
+                for linea in lineas:
+                    if linea.startswith("IMAGEN:"):
+                        ruta_img = linea[7:]
+                        cb = getattr(self, "_send_file_callback", None)
+                        if cb:
+                            cb(ruta_img, "")
+                    else:
+                        texto_limpio.append(linea)
+                result = "\n".join(texto_limpio) + "\nFoto enviada."
+        elif fn_name == "lista_compras":
+            from lista_compras_tool import ejecutar as compras_ejecutar
+            operacion = args.pop("operacion")
+            # Si hay imagen en el turno y el LLM no la pasó, inyectarla para agregar
+            if operacion == "agregar" and not args.get("imagen"):
+                img = getattr(self, "_current_image_path", None)
+                if img:
+                    args["imagen"] = img
+            result = compras_ejecutar(operacion, **args)
+            # Si ver_imagen retorna una ruta, enviarla como foto por Telegram
+            if operacion == "ver_imagen" and result.startswith("IMAGEN:"):
+                ruta_img = result[7:]
+                cb = getattr(self, "_send_file_callback", None)
+                if cb:
+                    cb(ruta_img, "")
+                result = f"Foto de '{args.get('nombre', '')}' enviada."
         elif fn_name == "enviar_archivo_telegram":
             ruta = args.get("ruta", "")
             caption = args.get("caption", "")
@@ -509,6 +1019,23 @@ class Agent:
                 result = f"✅ Archivo enviado: {ruta}" if ok else f"❌ No se pudo enviar: {ruta}"
             else:
                 result = "⚠️ enviar_archivo_telegram no disponible fuera de Telegram."
+        elif fn_name == "gmail":
+            import importlib.util as _ilu
+            _spec = _ilu.spec_from_file_location(
+                "gmail_reader",
+                os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                             "skills", "gmail-reader", "run.py")
+            )
+            _mod = _ilu.module_from_spec(_spec)
+            _spec.loader.exec_module(_mod)
+            operacion = args.pop("operacion")
+            result = _mod.ejecutar(operacion, **args)
+        elif fn_name == "agenda":
+            from agenda_tool import ejecutar as agenda_ejecutar
+            operacion = args.pop("operacion")
+            if operacion == "agregar" and not args.get("chat_id"):
+                args["chat_id"] = getattr(self, "_current_chat_id", 0)
+            result = agenda_ejecutar(operacion, **args)
         elif fn_name == "enviar_foto_telegram":
             url = args.get("url", "")
             caption = args.get("caption", "")
@@ -603,7 +1130,7 @@ class Agent:
     def chat(self, mensaje: str, progress_callback=None,
              send_file_callback=None, send_photo_url_callback=None,
              image_path: str = None, contexto: dict = None,
-             stream_callback=None) -> str:
+             stream_callback=None, chat_id: int = None) -> str:
         """Procesa un mensaje del usuario y retorna la respuesta final.
 
         Ejecuta el loop de tool calls de forma interna hasta que el LLM
@@ -616,6 +1143,8 @@ class Agent:
         """
         self._send_file_callback = send_file_callback
         self._send_photo_url_callback = send_photo_url_callback
+        self._current_image_path = image_path
+        self._current_chat_id = chat_id or 0
         self._actualizar_system_prompt()
 
         # Prefijo de contexto si viene metadata del turno

@@ -101,7 +101,8 @@ class TelegramBridge:
             return self._agente.chat(mensaje, progress_callback=_cb,
                                      send_file_callback=_send_file_cb,
                                      send_photo_url_callback=_send_photo_url_cb,
-                                     image_path=image_path)
+                                     image_path=image_path,
+                                     chat_id=self.chat_id)
         except _LoopLimitError as e:
             logger.warning(f"[bridge] Loop detectado: {e}")
             return (

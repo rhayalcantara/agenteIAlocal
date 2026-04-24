@@ -1,0 +1,60 @@
+{
+  "acciones": [
+    {
+      "id": 1,
+      "nombre": "Resumen de correos cada 2 horas",
+      "descripcion": null,
+      "tipo": "recurrente_ventana",
+      "prompt": "Lee los últimos 10 correos no leídos. Si hay nuevos, genera un resumen con: número de correos nuevos, remitentes principales, asuntos clave. Si hay adjuntos, lista sus nombres. Envía el resumen por Telegram.",
+      "activa": true,
+      "chat_id": 5483766132,
+      "creada": "2026-04-24T14:19:28.892812",
+      "ultima_ejecucion": "2026-04-24T14:20:58.868779",
+      "ultimo_resultado": "Resumen de correos ejecutado: 10 nuevos, remitentes clave, adjunto `security_alert.pdf` enviado por Telegram.",
+      "ultimo_error": null,
+      "ejecuciones": [
+        {
+          "timestamp": "2026-04-24T14:20:58.868779",
+          "exito": true,
+          "resumen": "Resumen de correos ejecutado: 10 nuevos, remitentes clave, adjunto `security_alert.pdf` enviado por Telegram."
+        }
+      ],
+      "intervalo_minutos": 120,
+      "hora_inicio": "00:00",
+      "hora_fin": "23:59",
+      "dias_semana": null
+    },
+    {
+      "id": 2,
+      "nombre": "Buscar noticias diarias",
+      "descripcion": null,
+      "tipo": "diaria",
+      "prompt": "Ejecuta la skill 'buscar-noticias' para obtener los titulares más recientes y sus imágenes. Genera un resumen con: 3 titulares principales, enlaces, y una breve descripción de cada uno. Adjunta las imágenes. Envía el resumen por Telegram a las 8:00 AM.",
+      "activa": true,
+      "chat_id": 5483766132,
+      "creada": "2026-04-24T14:20:42.853457",
+      "ultima_ejecucion": null,
+      "ultimo_resultado": null,
+      "ultimo_error": null,
+      "ejecuciones": [],
+      "hora": "08:00",
+      "dias_semana": null
+    },
+    {
+      "id": 3,
+      "nombre": "Enviar resumen de noticias por la noche",
+      "descripcion": null,
+      "tipo": "diaria",
+      "prompt": "Ejecuta la skill 'buscar-noticias' para obtener los titulares más recientes y sus imágenes. Genera un resumen con: 3 titulares principales, enlaces, y una breve descripción de cada uno. Adjunta las imágenes. Envía el resumen por Telegram a las 8:00 PM.",
+      "activa": true,
+      "chat_id": 5483766132,
+      "creada": "2026-04-24T14:20:48.548117",
+      "ultima_ejecucion": null,
+      "ultimo_resultado": null,
+      "ultimo_error": null,
+      "ejecuciones": [],
+      "hora": "20:00",
+      "dias_semana": null
+    }
+  ]
+}
