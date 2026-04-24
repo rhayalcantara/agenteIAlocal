@@ -18,7 +18,10 @@ import re
 _ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 CREDENTIALS_FILE = os.path.join(_ROOT, "gmail_manager", "credentials.json")
 TOKEN_FILE = os.path.join(_ROOT, "gmail_manager", "token.json")
-SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
+SCOPES = [
+    "https://www.googleapis.com/auth/gmail.readonly",
+    "https://www.googleapis.com/auth/gmail.send",
+]
 
 
 def _get_service():
@@ -192,6 +195,45 @@ def cmd_ver(args):
     print(json.dumps(info, ensure_ascii=False, indent=2))
 
 
+def cmd_enviar(args):
+    """Envía un correo desde la cuenta de Gmail autenticada."""
+    import base64
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+    from googleapiclient.errors import HttpError
+
+    service = _get_service()
+
+    # Construir mensaje
+    msg = MIMEMultipart("alternative")
+    msg["To"] = args.para
+    msg["Subject"] = args.asunto
+
+    # Cuerpo en texto plano
+    cuerpo_txt = args.cuerpo
+    parte_txt = MIMEText(cuerpo_txt, "plain", "utf-8")
+    msg.attach(parte_txt)
+
+    # Cuerpo HTML opcional (si el texto tiene saltos de línea, hacerlo legible)
+    cuerpo_html = cuerpo_txt.replace("\n", "<br>")
+    parte_html = MIMEText(
+        f"<html><body style='font-family:sans-serif;line-height:1.6'>{cuerpo_html}</body></html>",
+        "html", "utf-8"
+    )
+    msg.attach(parte_html)
+
+    raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+
+    try:
+        sent = service.users().messages().send(
+            userId="me", body={"raw": raw}
+        ).execute()
+        print(f"Correo enviado OK. ID: {sent['id']} para: {args.para}")
+    except HttpError as e:
+        print(f"ERROR al enviar: {e}")
+        sys.exit(1)
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
@@ -219,6 +261,13 @@ def main():
     p_ver = sub.add_parser("ver", help="Ver correo completo por ID")
     p_ver.add_argument("--id", required=True)
     p_ver.set_defaults(func=cmd_ver)
+
+    # enviar
+    p_env = sub.add_parser("enviar", help="Envía un correo")
+    p_env.add_argument("--para", required=True, help="Destinatario (email)")
+    p_env.add_argument("--asunto", required=True, help="Asunto del correo")
+    p_env.add_argument("--cuerpo", required=True, help="Cuerpo del correo (texto plano)")
+    p_env.set_defaults(func=cmd_enviar)
 
     args = parser.parse_args()
     args.func(args)

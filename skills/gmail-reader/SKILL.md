@@ -46,6 +46,13 @@ ejecutar_script_skill("gmail-reader", "run.py", "resumen")
 ejecutar_script_skill("gmail-reader", "run.py", "ver --id <message_id>")
 ```
 
+### enviar — Enviar un correo
+```
+ejecutar_script_skill("gmail-reader", "run.py", 'enviar --para "destino@email.com" --asunto "Asunto aqui" --cuerpo "Texto del correo"')
+```
+El correo se envía desde la cuenta Gmail autenticada (rhayalcantara@gmail.com).
+El cuerpo se convierte automáticamente a HTML con formato legible.
+
 ---
 
 ## Requisitos

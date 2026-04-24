@@ -8,7 +8,10 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+SCOPES = [
+    'https://www.googleapis.com/auth/gmail.readonly',
+    'https://www.googleapis.com/auth/gmail.send',
+]
 CREDENTIALS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'credentials.json')
 TOKEN_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'token.json')
 
@@ -65,14 +68,14 @@ def _extraer_adjuntos(service, msg_id, payload, guardar_en):
 
 def main():
     parser = argparse.ArgumentParser(description='Gmail Manager')
-    parser.add_argument('--query', type=str, default='',
+    parser.add_argument('--query', type=str, default='is:unread',
                         help='Query de búsqueda (ej: "from:Promerica after:2026/03/31")')
     parser.add_argument('--limit', type=int, default=10,
                         help='Máximo de correos a mostrar (default: 10)')
     parser.add_argument('--download-attachments', action='store_true',
                         help='Descarga adjuntos de los correos encontrados')
-    parser.add_argument('--save-dir', type=str, default='/tmp',
-                        help='Directorio donde guardar los adjuntos (default: /tmp)')
+    parser.add_argument('--save-dir', type=str, default='output/attachments',
+                        help='Directorio donde guardar los adjuntos (default: output/attachments)')
     args = parser.parse_args()
 
     creds = get_credentials()
@@ -80,7 +83,7 @@ def main():
     try:
         service = build('gmail', 'v1', credentials=creds)
 
-        query = args.query if args.query else ''
+        query = args.query if args.query else 'is:unread'
         print(f"Buscando con query: '{query}'")
 
         messages = []
@@ -104,9 +107,15 @@ def main():
             print('No se encontraron mensajes.')
             return
 
-        print(f"\nSe encontraron {len(messages)} mensaje(s).\n")
+        print(f"\nSe encontraron {len(messages)} mensaje(s) no leídos.\n")
 
         todos_adjuntos = []
+        resumen = {
+            "total_correos": len(messages),
+            "correos_con_adjuntos": 0,
+            "adjuntos_descargados": [],
+            "detalles": []
+        }
 
         for i, message in enumerate(messages, 1):
             msg = service.users().messages().get(
@@ -135,6 +144,26 @@ def main():
                         _buscar_adjuntos(p['parts'])
             _buscar_adjuntos(msg.get('payload', {}).get('parts', []))
 
+            resumen["detalles"].append({
+                "id": message['id'],
+                "de": sender,
+                "asunto": subject,
+                "fecha": date_str,
+                "resumen": snippet[:150],
+                "tiene_adjuntos": tiene_adjuntos
+            })
+
+            if tiene_adjuntos:
+                resumen["correos_con_adjuntos"] += 1
+
+            if args.download_attachments and tiene_adjuntos:
+                os.makedirs(args.save_dir, exist_ok=True)
+                adjuntos = _extraer_adjuntos(
+                    service, message['id'], msg['payload'], args.save_dir
+                )
+                todos_adjuntos.extend(adjuntos)
+                resumen["adjuntos_descargados"].extend(adjuntos)
+
             print(f"--- CORREO #{i} ---")
             print(f"De: {sender}")
             print(f"Fecha: {date_str}")
@@ -143,20 +172,20 @@ def main():
             print(f"Adjuntos: {'Sí' if tiene_adjuntos else 'No'}")
             print("-" * 40)
 
-            if args.download_attachments and tiene_adjuntos:
-                os.makedirs(args.save_dir, exist_ok=True)
-                adjuntos = _extraer_adjuntos(
-                    service, message['id'], msg['payload'], args.save_dir
-                )
-                todos_adjuntos.extend(adjuntos)
-
         if args.download_attachments:
             if todos_adjuntos:
-                print(f"\n✅ {len(todos_adjuntos)} adjunto(s) descargado(s):")
+                print(f"\n✅ {len(todos_adjuntos)} adjunto(s) descargado(s) en {args.save_dir}:")
                 for a in todos_adjuntos:
                     print(f"  → {a}")
             else:
                 print("\nNo se encontraron adjuntos en los correos seleccionados.")
+
+        # Guardar resumen en archivo
+        with open('gmail_reader_output.json', 'w', encoding='utf-8') as f:
+            import json
+            json.dump(resumen, f, indent=2, ensure_ascii=False)
+
+        print(f"\n📌 Resumen guardado en: gmail_reader_output.json")
 
     except HttpError as error:
         print(f'Error de Gmail API: {error}')
