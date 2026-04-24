@@ -342,9 +342,11 @@ class Agent:
                  "name": {"type": "string"},
              }, "required": ["name"]}},
             {"type": "function", "name": "ejecutar_script_skill",
-             "description": "Ejecuta un script de una skill",
+             "description": "Ejecuta un script de una skill instalada. Ejemplo: skill='gmail-reader', script='run.py', args='buscar --query \"from:amazon.com\"'",
              "parameters": {"type": "object", "properties": {
-                 "skill": {"type": "string"}, "script": {"type": "string"}, "args": {"type": "string"},
+                 "skill":      {"type": "string", "description": "Nombre de la skill (ej: 'gmail-reader', 'seguimiento')"},
+                 "script":     {"type": "string", "description": "Nombre del script a ejecutar (ej: 'run.py')"},
+                 "args":       {"type": "string", "description": "Argumentos CLI para el script (ej: 'buscar --query \"from:amazon.com\"')"},
              }, "required": ["skill", "script"]}},
             # ── Wiki ──────────────────────────────────────────────────────────
             {"type": "function", "name": "leer_wiki",
@@ -870,9 +872,11 @@ class Agent:
                 disponibles = [s["name"] for s in self.skill_loader.listar()]
                 result = f"Skill '{nombre}' no encontrada. Disponibles: {', '.join(disponibles)}"
         elif fn_name == "ejecutar_script_skill":
-            result = self.skill_loader.ejecutar_script(
-                args.get("skill", ""), args.get("script", ""), args.get("args", "")
-            )
+            # Aceptar alias que LLMs locales tienden a usar
+            skill_name = args.get("skill") or args.get("skill_name") or args.get("nombre") or ""
+            script_file = args.get("script") or args.get("script_file") or args.get("archivo") or ""
+            script_args = args.get("args") or args.get("arguments") or args.get("argumentos") or ""
+            result = self.skill_loader.ejecutar_script(skill_name, script_file, script_args)
         elif fn_name == "crear_skill":
             result = self.skill_loader.crear_skill(
                 nombre=args.get("nombre", ""),
