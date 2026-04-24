@@ -75,7 +75,8 @@ class SkillLoader:
             return f"Error: script '{script}' no encontrado en skill '{nombre}'."
         try:
             cmd = [sys.executable, script_path] + (shlex.split(args) if args else [])
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            result = subprocess.run(cmd, capture_output=True, text=True,
+                                    encoding="utf-8", errors="replace", timeout=60)
             output = result.stdout + result.stderr
             return output[:4000] or "(sin salida)"
         except subprocess.TimeoutExpired:
