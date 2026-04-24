@@ -36,14 +36,21 @@ def _conectar():
             url         TEXT,
             estado_actual  TEXT DEFAULT 'Pendiente',
             estado_final   TEXT,
-            agenda_id   INTEGER,
-            chat_id     TEXT,
-            notas       TEXT,
-            activo      INTEGER DEFAULT 1,
-            creado      TEXT DEFAULT (datetime('now','localtime')),
-            actualizado TEXT DEFAULT (datetime('now','localtime'))
+            agenda_id         INTEGER,
+            chat_id           TEXT,
+            email_notificar   TEXT,
+            notas             TEXT,
+            activo            INTEGER DEFAULT 1,
+            creado            TEXT DEFAULT (datetime('now','localtime')),
+            actualizado       TEXT DEFAULT (datetime('now','localtime'))
         )
     """)
+    # Migración: agregar columna si la DB ya existe sin ella
+    try:
+        conn.execute("ALTER TABLE seguimientos ADD COLUMN email_notificar TEXT")
+        conn.commit()
+    except Exception:
+        pass  # Ya existe, ignorar
     conn.execute("""
         CREATE TABLE IF NOT EXISTS historial (
             id               INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -74,8 +81,8 @@ def agregar(**kwargs):
         c = conn.execute("""
             INSERT INTO seguimientos
                 (tipo, titulo, empresa, referencia, url, estado_actual, estado_final,
-                 chat_id, notas)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 chat_id, email_notificar, notas)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             tipo, titulo,
             kwargs.get('empresa'),
@@ -84,6 +91,7 @@ def agregar(**kwargs):
             estado_inicial,
             kwargs.get('estado_final'),
             kwargs.get('chat_id'),
+            kwargs.get('email_notificar'),
             kwargs.get('notas'),
         ))
         seg_id = c.lastrowid
@@ -103,11 +111,16 @@ def agregar(**kwargs):
             f"ejecutar_script_skill('seguimiento', 'run.py', 'actualizar --id {seg_id} "
             f"--estado \"[nuevo estado]\" --fuente web')"
         )
+        email_line = ""
+        if kwargs.get('email_notificar'):
+            email_line = f"\n   Notificar por email a: {kwargs['email_notificar']}"
+
         return (
             f"✅ Seguimiento #{seg_id} creado: {titulo}\n"
             f"   Empresa: {empresa} | Ref: {ref}\n"
             f"   Estado inicial: {estado_inicial}\n"
-            f"   Estado final esperado: {kwargs.get('estado_final', '—')}\n\n"
+            f"   Estado final esperado: {kwargs.get('estado_final', '—')}"
+            f"{email_line}\n\n"
             f"PROMPT PARA AGENDA DE MONITOREO:\n{prompt}"
         )
     except Exception as e:
@@ -178,6 +191,7 @@ def ver(**kwargs):
         f"   Estado final esperado: {row['estado_final'] or '—'}",
         f"   Agenda ID: {row['agenda_id'] or '—'}",
         f"   Chat ID: {row['chat_id'] or '—'}",
+        f"   Email notificar: {row['email_notificar'] or '—'}",
         f"   Creado: {row['creado']}",
         "",
         f"   Historial ({len(historial)} entradas):",
@@ -199,7 +213,7 @@ def actualizar(**kwargs):
 
     conn = _conectar()
     row = conn.execute(
-        "SELECT titulo, estado_actual, estado_final, agenda_id FROM seguimientos WHERE id = ?",
+        "SELECT titulo, estado_actual, estado_final, agenda_id, email_notificar FROM seguimientos WHERE id = ?",
         (seg_id,)
     ).fetchone()
 
@@ -235,20 +249,42 @@ def actualizar(**kwargs):
     if es_final:
         agenda_instruccion = ""
         if row['agenda_id']:
-            agenda_instruccion = (
-                f"\n3. Desactiva la agenda: agenda desactivar id={row['agenda_id']}"
+            agenda_instruccion = f"\n3. Desactiva la agenda: agenda desactivar id={row['agenda_id']}"
+
+        email_instruccion = ""
+        if row['email_notificar']:
+            em = row['email_notificar']
+            tit = row['titulo']
+            email_instruccion = (
+                f"\n4. Envia correo de confirmacion: ejecutar_script_skill('gmail-reader', 'run.py', "
+                f"'enviar --para \"{em}\" "
+                f"--asunto \"Tu pedido {tit} ha llegado\" "
+                f"--cuerpo \"Buenas noticias! Tu pedido ha sido entregado. Estado: {estado}\"')"
             )
+
         return (
-            f"🏁 ESTADO FINAL ALCANZADO en seguimiento #{seg_id}: {row['titulo']}\n"
+            f"ESTADO FINAL ALCANZADO en seguimiento #{seg_id}: {row['titulo']}\n"
             f"   Estado: {estado}\n\n"
             f"Acciones requeridas:\n"
             f"1. Notifica al usuario sobre el estado final\n"
             f"2. Cierra el seguimiento: ejecutar_script_skill('seguimiento', 'run.py', "
             f"'cerrar --id {seg_id}')"
             f"{agenda_instruccion}"
+            f"{email_instruccion}"
         )
 
-    return f"🔄 Seguimiento #{seg_id} actualizado: {estado_anterior} → {estado}"
+    email_instruccion = ""
+    if row['email_notificar']:
+        em = row['email_notificar']
+        tit = row['titulo']
+        email_instruccion = (
+            f"\nNOTIFICAR POR EMAIL: ejecutar_script_skill('gmail-reader', 'run.py', "
+            f"'enviar --para \"{em}\" "
+            f"--asunto \"Actualizacion de tu pedido: {tit}\" "
+            f"--cuerpo \"Estado actualizado: {estado}\"')"
+        )
+
+    return f"Seguimiento #{seg_id} actualizado: {estado_anterior} -> {estado}{email_instruccion}"
 
 
 def vincular_agenda(**kwargs):
