@@ -848,6 +848,9 @@ class Agent:
         elif fn_name == "browser_click":
             result = browser_click(**args)
         elif fn_name == "browser_escribir":
+            # Normalizar alias: el LLM a veces envía 'text' en lugar de 'texto'
+            if "text" in args and "texto" not in args:
+                args["texto"] = args.pop("text")
             result = browser_escribir(**args)
         elif fn_name == "browser_obtener_texto":
             result = browser_obtener_texto(**args)
