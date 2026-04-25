@@ -69,10 +69,12 @@ class SkillLoader:
         import shlex
         skill = self.skills.get(nombre)
         if not skill:
-            return f"Error: skill '{nombre}' no encontrada."
+            disponibles = ", ".join(sorted(self.skills.keys()))
+            return f"Error: skill '{nombre}' no encontrada. Skills disponibles: {disponibles}"
         script_path = os.path.join(skill["path"], script)
         if not os.path.exists(script_path):
-            return f"Error: script '{script}' no encontrado en skill '{nombre}'."
+            scripts = ", ".join(skill.get("scripts", []))
+            return f"Error: script '{script}' no encontrado en skill '{nombre}'. Scripts: {scripts}"
         try:
             cmd = [sys.executable, script_path] + (shlex.split(args) if args else [])
             result = subprocess.run(cmd, capture_output=True, text=True,
