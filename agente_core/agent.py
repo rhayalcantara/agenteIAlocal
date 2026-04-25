@@ -873,9 +873,13 @@ class Agent:
                 result = f"Skill '{nombre}' no encontrada. Disponibles: {', '.join(disponibles)}"
         elif fn_name == "ejecutar_script_skill":
             # Aceptar alias que LLMs locales tienden a usar
-            skill_name = args.get("skill") or args.get("skill_name") or args.get("nombre") or ""
-            script_file = args.get("script") or args.get("script_file") or args.get("archivo") or ""
-            script_args = args.get("args") or args.get("arguments") or args.get("argumentos") or ""
+            # (incluyendo nombres de crear_skill que el LLM confunde: script_nombre, script_code)
+            skill_name = (args.get("skill") or args.get("skill_name")
+                          or args.get("nombre") or "")
+            script_file = (args.get("script") or args.get("script_file")
+                           or args.get("archivo") or args.get("script_nombre") or "")
+            script_args = (args.get("args") or args.get("arguments")
+                           or args.get("argumentos") or args.get("script_code") or "")
             result = self.skill_loader.ejecutar_script(skill_name, script_file, script_args)
         elif fn_name == "crear_skill":
             result = self.skill_loader.crear_skill(
