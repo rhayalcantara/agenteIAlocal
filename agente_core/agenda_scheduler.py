@@ -306,7 +306,11 @@ class AgendaScheduler(threading.Thread):
         except Exception as e:
             resultado = f"{type(e).__name__}: {e}"
             logger.error(f"Error en acción #{accion_id}: {e}", exc_info=True)
-            if self._notifier and chat_id:
+
+            # Auto-recuperación: modelo no disponible
+            if self._intentar_recuperar_modelo(e, chat_id):
+                pass  # ya notificó al usuario con el nuevo modelo
+            elif self._notifier and chat_id:
                 self._notifier.enviar(
                     chat_id,
                     f"📅 *Agenda — {nombre}*\n\n❌ Error al ejecutar: {e}"
@@ -314,6 +318,135 @@ class AgendaScheduler(threading.Thread):
 
         finally:
             registrar_ejecucion(accion_id, resultado or "Error desconocido", exito)
+
+    # ── Auto-recuperación de modelo ───────────────────────────────────────────
+
+    def _intentar_recuperar_modelo(self, error: Exception, chat_id: int) -> bool:
+        """
+        Si el error es 503 model_not_available, selecciona el mejor modelo
+        disponible usando las evaluaciones y actualiza .env + self._agenda_model.
+        Retorna True si se recuperó (para suprimir el mensaje de error genérico).
+        """
+        import re
+        error_str = str(error)
+
+        if "model_not_available" not in error_str and "No hay workers disponibles" not in error_str:
+            return False
+
+        # Extraer lista de modelos disponibles del mensaje de error
+        match = re.search(r"Modelos disponibles:\s*([^\}'\"]+)", error_str)
+        if not match:
+            return False
+
+        disponibles = [m.strip() for m in match.group(1).split(",") if m.strip()]
+        logger.info(f"Modelos disponibles detectados: {disponibles}")
+
+        # Elegir el mejor según evaluaciones
+        mejor = self._mejor_modelo_por_evaluacion(disponibles)
+        if not mejor:
+            return False
+
+        modelo_anterior = self._agenda_model
+        self._agenda_model = mejor
+        self._actualizar_env("AGENDA_MODEL", mejor)
+
+        logger.info(f"Modelo de agenda cambiado: {modelo_anterior} → {mejor}")
+
+        if self._notifier and chat_id:
+            self._notifier.enviar(
+                chat_id,
+                f"⚙️ *Agenda — modelo no disponible*\n\n"
+                f"El modelo `{modelo_anterior}` ya no está cargado.\n"
+                f"Cambiado automáticamente a: `{mejor}`\n"
+                f"_(basado en evaluaciones previas)_"
+            )
+        return True
+
+    def _mejor_modelo_por_evaluacion(self, disponibles: list) -> str:
+        """
+        Lee los archivos evaluacion_llm_lmstudio_*.md y devuelve el modelo
+        disponible con mayor score. Ignora embeddings y TTS.
+        """
+        import glob
+        import re
+
+        # Filtrar modelos no-LLM
+        candidatos = [
+            m for m in disponibles
+            if not any(x in m.lower() for x in ("embedding", "tts", "nomic"))
+        ]
+        if not candidatos:
+            return disponibles[0] if disponibles else None
+
+        # Leer scores de evaluaciones
+        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        archivos = glob.glob(os.path.join(root, "evaluacion_llm_lmstudio_*.md"))
+
+        scores = {}  # modelo_eval → mejor_score
+        for path in archivos:
+            try:
+                with open(path, encoding="utf-8") as f:
+                    contenido = f.read()
+                m_model = re.search(r"# Evaluaci[oó]n LLM [—-] (.+)", contenido)
+                m_score = re.search(r"Score global:\*\*\s*([\d.]+)/5", contenido)
+                if m_model and m_score:
+                    nombre = m_model.group(1).strip()
+                    score = float(m_score.group(1))
+                    if nombre not in scores or scores[nombre] < score:
+                        scores[nombre] = score
+            except Exception:
+                continue
+
+        if not scores:
+            logger.warning("Sin archivos de evaluación — usando primer candidato.")
+            return candidatos[0]
+
+        # Cruzar candidatos con scores (matching flexible)
+        def _score_candidato(candidato: str) -> float:
+            c_norm = candidato.lower().replace("/", "-").replace(":", "-").replace(".", "-")
+            mejor = 0.0
+            for eval_name, sc in scores.items():
+                e_norm = eval_name.lower().replace("/", "-").replace(":", "-").replace(".", "-")
+                # Coincidencia si comparten tokens significativos (>3 chars)
+                c_tokens = set(t for t in c_norm.split("-") if len(t) > 3)
+                e_tokens = set(t for t in e_norm.split("-") if len(t) > 3)
+                if c_tokens & e_tokens:
+                    mejor = max(mejor, sc)
+            return mejor
+
+        ranked = sorted(candidatos, key=_score_candidato, reverse=True)
+        elegido = ranked[0]
+        logger.info(
+            f"Ranking modelos: "
+            + ", ".join(f"{m}({_score_candidato(m):.2f})" for m in ranked)
+        )
+        return elegido
+
+    def _actualizar_env(self, clave: str, valor: str):
+        """Actualiza una variable en el archivo .env del proyecto."""
+        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        env_path = os.path.join(root, ".env")
+        if not os.path.exists(env_path):
+            logger.warning(f".env no encontrado en {env_path}")
+            return
+        try:
+            with open(env_path, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+            encontrado = False
+            nuevas = []
+            for line in lines:
+                if line.startswith(f"{clave}="):
+                    nuevas.append(f"{clave}={valor}\n")
+                    encontrado = True
+                else:
+                    nuevas.append(line)
+            if not encontrado:
+                nuevas.append(f"{clave}={valor}\n")
+            with open(env_path, "w", encoding="utf-8") as f:
+                f.writelines(nuevas)
+            logger.info(f".env actualizado: {clave}={valor}")
+        except Exception as e:
+            logger.error(f"Error actualizando .env: {e}")
 
     def detener(self):
         """Graceful shutdown: señaliza el stop y espera hasta 5 segundos."""
