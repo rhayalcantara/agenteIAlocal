@@ -1,211 +1,101 @@
 # Skill: seguimiento
 
-Tracking universal de notificaciones con cambio de estado en el tiempo.
-Usa SQLite para persistencia robusta. Válido para: envíos, transacciones bancarias, reservas, solicitudes y cualquier proceso que avance por estados.
-
-## Cuándo usar esta skill
-
-- El usuario menciona un envío, paquete, pedido o número de tracking
-- El usuario pide monitorear una transacción bancaria, pago o transferencia
-- Se detecta en un correo un número de seguimiento, orden o referencia de proceso
-- El usuario quiere saber el estado actual de algo que se está procesando
-- El sub-agente de la agenda está ejecutando un ciclo de monitoreo
-
-## Tipos soportados
-
-| tipo         | Ejemplos                                              |
-|--------------|-------------------------------------------------------|
-| envio        | Paquete Amazon, DHL, FedEx, UPS, correo postal        |
-| transaccion  | Transferencia bancaria, pago en proceso, reembolso    |
-| reserva      | Cita médica, hotel, vuelo, restaurante                |
-| solicitud    | Trámite de VISA, seguro, crédito, documento oficial   |
-| otro         | Cualquier proceso con estados progresivos             |
-
-## Cómo invocar (via ejecutar_script_skill)
-
-```
-ejecutar_script_skill("seguimiento", "run.py", "[operacion] [args]")
-```
-
-Los args soportan comillas para valores con espacios:
-```
-ejecutar_script_skill("seguimiento", "run.py", 'agregar --tipo envio --titulo "Pedido Amazon #123" --empresa Amazon')
-```
+Tracking universal de procesos con cambio de estado en el tiempo.
+Válido para: envíos, transacciones bancarias, reservas, solicitudes y cualquier proceso que avance por estados.
 
 ---
 
-## Operaciones
+## INSTRUCCIÓN CRÍTICA PARA EL AGENTE
 
-### agregar — Registrar nuevo seguimiento
-```
-agregar --tipo [tipo] --titulo "[nombre]" --empresa "[empresa]"
-        --referencia "[tracking/orden]" --url "[url_tracking]"
-        --estado-inicial "[estado]" --estado-final "[palabra_clave_final]"
-        --chat-id [chat_id] --notas "[notas]"
-```
+**CUANDO EL USUARIO PIDA ALGO RELACIONADO CON SEGUIMIENTOS, TÚ DEBES:**
+1. Llamar a la herramienta `ejecutar_script_skill` INMEDIATAMENTE
+2. NO explicar cómo se usa la herramienta
+3. NO mostrar comandos al usuario
+4. Ejecutar y reportar el resultado
+
+**Parámetros correctos de la herramienta:**
+- skill: `seguimiento`
+- script: `run.py`
+- args: el subcomando con sus argumentos
+
+---
+
+## Cuándo activar
+
+- Usuario pregunta por un pedido, envío, paquete o tracking
+- Usuario pregunta por el estado de una transacción bancaria
+- Usuario quiere saber el estado de una reserva, cita o trámite
+- Correo detectado con número de tracking o referencia rastreable
+
+---
+
+## Operaciones disponibles (args para ejecutar_script_skill)
+
+### Listar seguimientos activos
+args: `listar`
+args: `listar --tipo envio`
+args: `listar --todos`
+
+### Ver detalle con historial
+args: `ver --id 3`
+
+### Registrar nuevo seguimiento
+args: `agregar --tipo envio --titulo "Pedido Amazon" --empresa Amazon --referencia "TBA123" --estado-final "Entregado" --chat-id 5483766132`
+args: `agregar --tipo envio --titulo "Pedido X" --empresa DHL --referencia "REF123" --email-notificar "correo@ejemplo.com"`
+
 Solo `--tipo` y `--titulo` son obligatorios.
 
-Retorna el ID del seguimiento y el **prompt sugerido para crear la agenda de monitoreo**.
-Después de crear la agenda, vincula con `vincular-agenda`.
+### Actualizar estado
+args: `actualizar --id 3 --estado "En tránsito" --fuente web`
+args: `actualizar --id 3 --estado "Entregado" --descripcion "Entrega exitosa" --fuente email`
 
-**Ejemplo:**
-```
-agregar --tipo envio --titulo "Pedido Amazon #123-456-789" --empresa Amazon
-        --referencia "TBA123456789" --url "https://tracking.amazon.com/..."
-        --estado-inicial "En tránsito" --estado-final "Entregado" --chat-id 5483766132
-```
+### Vincular agenda de monitoreo
+args: `vincular-agenda --id 3 --agenda-id 5`
 
----
+### Cerrar seguimiento
+args: `cerrar --id 3 --razon "Entregado"`
 
-### listar — Ver seguimientos activos
-```
-listar
-listar --tipo envio
-listar --todos
-```
+### Resumen ejecutivo
+args: `resumen`
 
 ---
 
-### ver — Detalle completo con historial
-```
-ver --id [id]
-```
-Muestra estado actual, URL, empresa, referencia y los últimos 15 cambios de estado.
+## Tipos de seguimiento
+
+| tipo | Ejemplos |
+|------|----------|
+| envio | Amazon, DHL, FedEx, UPS, correo postal |
+| transaccion | Transferencia bancaria, pago, reembolso |
+| reserva | Cita médica, hotel, vuelo, restaurante |
+| solicitud | VISA, seguro, crédito, documento oficial |
+| otro | Cualquier proceso con estados progresivos |
 
 ---
 
-### actualizar — Registrar nuevo estado (usar en ciclos de monitoreo)
-```
-actualizar --id [id] --estado "[nuevo estado]" --descripcion "[detalle]" --fuente [auto|email|web|manual]
-```
+## Flujo cuando el agente detecta un correo con tracking
 
-**Retorna si hubo cambio y si se alcanzó el estado final.**
-Cuando retorna "ESTADO FINAL ALCANZADO", el agente debe:
-1. Notificar al usuario con el mensaje relevante
-2. Ejecutar `cerrar --id [id]`
-3. Si hay agenda vinculada: `agenda desactivar id=[agenda_id]`
+1. Llama `listar` para verificar si ya existe ese seguimiento
+2. Si NO existe: llama `agregar` con los datos del correo
+3. Crea agenda de monitoreo con la herramienta `agenda`
+4. Llama `vincular-agenda` con el ID del seguimiento y el ID de la agenda
 
-**Ejemplo:**
-```
-actualizar --id 3 --estado "Entregado" --descripcion "Entrega exitosa en la puerta" --fuente web
-```
+## Ciclo de monitoreo automático (sub-agente de agenda)
 
----
+1. Llama `ver --id X` para conocer estado actual y URL
+2. Busca correos nuevos con gmail-reader o navega la URL de tracking
+3. Si hay nuevo estado: llama `actualizar --id X --estado "..." --fuente web`
+4. Si el resultado dice "ESTADO FINAL ALCANZADO": llama `cerrar --id X` y desactiva la agenda
+5. Si no hay cambio: el resultado empieza con [SILENCIOSO] — propagar ese prefijo en la respuesta
 
-### vincular-agenda — Asociar agenda al seguimiento
-```
-vincular-agenda --id [seguimiento_id] --agenda-id [agenda_id]
-```
-Permite que `actualizar` incluya instrucciones para desactivar la agenda automáticamente al finalizar.
+## Notificación por email
+
+Si el seguimiento tiene `email_notificar` configurado, el resultado de `actualizar`
+incluye automáticamente la instrucción de envío. Ejecútala con `gmail-reader enviar`.
 
 ---
 
-### cerrar — Cerrar manualmente
-```
-cerrar --id [id] --razon "[motivo]"
-```
-
----
-
-### resumen — Vista ejecutiva
-```
-resumen
-```
-Muestra conteo por tipo y los más recientemente actualizados.
-
----
-
-## Flujo completo: desde un correo hasta el monitoreo automático
-
-### Paso 1 — El agente lee un correo relevante
-
-El agente lee un correo de Amazon, DHL, un banco, etc. e identifica que contiene una notificación de estado. Extrae:
-- Empresa/remitente
-- Tipo de notificación (envío, transacción, etc.)
-- Número de referencia / tracking
-- URL de seguimiento (si existe)
-- Estado inicial mencionado
-
-### Paso 2 — Crear el seguimiento
-```
-ejecutar_script_skill("seguimiento", "run.py",
-  'agregar --tipo envio --titulo "Pedido Amazon #XXX" --empresa Amazon
-   --referencia "1Z9999..." --url "https://..." --estado-final "Entregado"
-   --chat-id [chat_id_del_usuario]')
-```
-
-### Paso 3 — Crear la agenda de monitoreo
-
-Usar la herramienta `agenda` con el prompt sugerido por el skill.
-Frecuencia recomendada:
-- Envíos nacionales: cada 4 horas
-- Envíos internacionales: cada 8 horas
-- Transacciones bancarias: cada 2 horas
-- Solicitudes/trámites: cada 24 horas
-
-### Paso 4 — Vincular la agenda al seguimiento
-```
-ejecutar_script_skill("seguimiento", "run.py",
-  "vincular-agenda --id [seg_id] --agenda-id [agenda_id]")
-```
-
-### Paso 5 — El sub-agente monitorea (cada ciclo de agenda)
-
-El sub-agente en cada ciclo:
-1. `ver --id [id]` para conocer estado actual y URL
-2. Visita la URL con `browser_navegar` o busca correos nuevos con `gmail buscar`
-3. Extrae el estado nuevo
-4. `actualizar --id [id] --estado "[nuevo]" --descripcion "[detalle]" --fuente web`
-5. Si retorna "ESTADO FINAL": notifica, cierra, desactiva agenda
-
----
-
-## Detección automática en lectura de correos
-
-Cuando el sub-agente lee correos periódicamente, **SIEMPRE** debe evaluar si algún correo contiene una notificación rastreable. Si la encuentra, **activa el seguimiento automáticamente sin preguntar** (el usuario lo pidió al crear la agenda de correos).
-
-### Señales de activación automática
-
-**Correos de envío:**
-- Asunto: "enviado", "en camino", "tu pedido", "shipment", "tracking", "ha sido enviado"
-- Remitente: amazon.com, dhl.com, fedex.com, ups.com, correos.com, estafeta.com
-
-**Correos de transacción bancaria:**
-- Asunto: "transferencia", "pago procesado", "débito", "transacción", "comprobante", "acreditado"
-- Remitente: cualquier banco, PayPal, fintech
-
-**Correos de solicitud/trámite:**
-- Asunto: "solicitud recibida", "en revisión", "aprobación pendiente", "estatus de tu solicitud"
-
-### Qué hacer al detectar uno
-
-1. Extraer del correo: empresa, número de referencia/tracking, URL de seguimiento, estado mencionado
-2. Verificar si ya existe un seguimiento activo con esa referencia:
-   ```
-   ejecutar_script_skill("seguimiento", "run.py", "listar")
-   ```
-3. Si NO existe: crear el seguimiento Y crear la agenda de monitoreo (flujo completo arriba)
-4. Si YA existe: actualizar el estado directamente:
-   ```
-   ejecutar_script_skill("seguimiento", "run.py", "actualizar --id X --estado '[estado]' --fuente email")
-   ```
-
-### Uso de [SILENCIOSO] en seguimientos
-
-Cuando `actualizar` retorna un texto que comienza con `[SILENCIOSO]`, significa que no hubo cambio.
-El sub-agente debe propagar ese prefijo en su respuesta para que el scheduler no notifique al usuario:
-```
-[SILENCIOSO] Verifiqué seguimiento #X, sin cambios. Estado: En tránsito.
-```
-
-Cuando SÍ hay cambio (o estado final), responder SIN el prefijo [SILENCIOSO] para que el scheduler notifique.
-
----
-
-## Notas importantes
+## Notas
 
 - La BD se crea automáticamente en `skills/seguimiento/seguimiento.db`
-- El campo `estado_final` es una palabra clave flexible (no exact match): "entregado" detecta "Entrega exitosa en tu domicilio"
-- Si no hay URL, el monitoreo puede hacerse buscando correos con `gmail buscar` usando empresa + referencia como query
-- Los seguimientos cerrados se conservan en la BD (útil para estadísticas futuras)
-- Concurrencia segura: la BD usa WAL mode para acceso desde agente principal y sub-agente simultáneamente
+- El campo `estado_final` hace matching flexible: "entregado" detecta "Entrega exitosa en tu domicilio"
+- Los seguimientos cerrados se conservan (estadísticas futuras)

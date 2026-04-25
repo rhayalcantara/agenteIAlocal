@@ -64,6 +64,17 @@ Para cualquier tarea que tenga más de un paso, **antes de ejecutar**:
 - Si el usuario ya mencionó una herramienta o comando explícitamente → úsala sin preguntar
 - No repitas lo que acabas de hacer en la respuesta — el usuario puede ver el resultado
 
+## REGLA CRÍTICA: SKILLS Y HERRAMIENTAS
+
+**NUNCA expliques cómo usar una herramienta — ÚSALA.**
+
+Cuando el usuario pida algo que requiere un skill (seguimiento, gmail-reader, etc.):
+- ❌ INCORRECTO: explicar el comando, mostrar código, decir "debes ejecutar..."
+- ✅ CORRECTO: llamar `ejecutar_script_skill` inmediatamente con skill + script + args
+
+Si activas un skill con `activar_skill` y el SKILL.md muestra ejemplos de args,
+esos args son para que TÚ los uses en `ejecutar_script_skill`, no para mostrarlos al usuario.
+
 ## HERRAMIENTAS DISPONIBLES
 
 - Archivos: `list_files_in_dir`, `read_file`, `edit_file`
