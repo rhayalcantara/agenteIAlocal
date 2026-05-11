@@ -53,12 +53,13 @@ class Agent:
         "full": None,
         "local": [
             "list_files_in_dir", "read_file", "edit_file",
-            "execute_bash", "guardar_memoria",
+            "execute_bash", "execute_long", "job_status", "job_list", "job_cancel",
+            "guardar_memoria",
             "buscar_en_internet", "listar_skills", "activar_skill", "crear_skill",
             "leer_wiki", "buscar_wiki",
             "enviar_archivo_telegram", "lista_compras", "distribucion_casa",
             "ubicaciones", "recetas", "gastos", "mantenimiento",
-            "contactos_servicios", "documentos", "gmail", "agenda",
+            "contactos_servicios", "documentos", "gmail", "agenda", "presencia", "google_tv",
         ],
         "none": [],
     }
@@ -109,6 +110,20 @@ class Agent:
         self._tools_enabled = tool_profile != "none"
         self._tool_fail_count = 0
         self.setup_tools(tool_profile)
+
+        # Tool Router: filtra herramientas por mensaje para reducir tokens
+        from tool_router import ToolRouter
+        _use_router = os.getenv("TOOL_ROUTER_ENABLED", "true").lower() == "true"
+        _router_llm = os.getenv("TOOL_ROUTER_LLM", "false").lower() == "true"
+        _router_model = os.getenv("TOOL_ROUTER_MODEL", "lfm2:latest")
+        _router_url = os.getenv("TOOL_ROUTER_URL", base_url)
+        _router_key = os.getenv("TOOL_ROUTER_KEY", api_key)
+        self._tool_router = ToolRouter(
+            model=_router_model,
+            use_llm=_router_llm,
+            base_url=_router_url,
+            api_key=_router_key,
+        ) if _use_router else None
 
         self.memoria = Memoria()
 
@@ -295,10 +310,47 @@ class Agent:
                  "prev_text": {"type": "string", "description": "Texto a reemplazar (vacío = archivo nuevo)"},
              }, "required": ["path", "new_text"]}},
             {"type": "function", "name": "execute_bash",
-             "description": "Ejecuta un comando bash persistente. Tiene filtro de comandos peligrosos.",
+             "description": (
+                 "Ejecuta un comando bash persistente. Solo para comandos rápidos (< 30s): "
+                 "ls, git status, cat, cd, grep, etc. Tiene filtro de comandos peligrosos. "
+                 "NO usar para: descargas (yt-dlp, wget largo), conversiones (ffmpeg), "
+                 "transcripciones (whisper), doblaje, scripts python pesados — esos van con execute_long."
+             ),
              "parameters": {"type": "object", "properties": {
                  "command": {"type": "string"}, "timeout": {"type": "number"},
              }, "required": ["command"]}},
+            {"type": "function", "name": "execute_long",
+             "description": (
+                 "Encola un proceso largo en el job_manager (corre en background, no bloquea el agente). "
+                 "Úsalo para: descargas, transcripciones, conversión de video/audio, doblaje, "
+                 "scripts Python que tarden más de 30 segundos. Retorna un job_id que puedes consultar "
+                 "luego con job_status. Si pasas 'steps', se ejecuta como pipeline secuencial respetando depends_on."
+             ),
+             "parameters": {"type": "object", "properties": {
+                 "name": {"type": "string", "description": "Nombre legible (e.g. 'video-doblaje-abril')"},
+                 "command": {"type": "string", "description": "Comando shell (omitir si usas steps)"},
+                 "steps": {"type": "array", "description": "Lista de pasos para pipeline; cada paso {id, command, depends_on?: [step_ids]}",
+                           "items": {"type": "object"}},
+                 "cwd": {"type": "string", "description": "Directorio de trabajo (default: root del proyecto)"},
+             }, "required": ["name"]}},
+            {"type": "function", "name": "job_status",
+             "description": "Consulta el estado de un job encolado (queued/running/done/failed/cancelled). Incluye últimas líneas de output si pides incluir_output=true.",
+             "parameters": {"type": "object", "properties": {
+                 "job_id": {"type": "string"},
+                 "incluir_output": {"type": "boolean", "description": "Si true, incluye últimas N líneas de stdout/stderr"},
+                 "lineas": {"type": "number", "description": "Cuántas líneas de output (default 30)"},
+             }, "required": ["job_id"]}},
+            {"type": "function", "name": "job_list",
+             "description": "Lista jobs recientes en el job_manager. Filtrable por estado.",
+             "parameters": {"type": "object", "properties": {
+                 "estado": {"type": "string", "enum": ["queued", "running", "done", "failed", "cancelled"]},
+                 "limite": {"type": "number"},
+             }, "required": []}},
+            {"type": "function", "name": "job_cancel",
+             "description": "Cancela un job en curso (manda SIGTERM, espera 5s, luego SIGKILL).",
+             "parameters": {"type": "object", "properties": {
+                 "job_id": {"type": "string"},
+             }, "required": ["job_id"]}},
             {"type": "function", "name": "execute_command",
              "description": "Ejecuta un comando simple (no persistente). Tiene filtro de seguridad.",
              "parameters": {"type": "object", "properties": {
@@ -373,10 +425,16 @@ class Agent:
              "description": "Lista todas las páginas del wiki (lee index.md)",
              "parameters": {"type": "object", "properties": {}, "required": []}},
             {"type": "function", "name": "enviar_archivo_telegram",
-             "description": "Envía un archivo local al usuario por Telegram (máx 50 MB). Usar después de crear o descargar un archivo.",
+             "description": (
+                 "Envía un ARCHIVO REAL existente en disco al usuario por Telegram (máx 50 MB). "
+                 "Solo úsalo cuando ACABAS de crear o descargar un archivo concreto y el usuario debe recibirlo. "
+                 "NO lo uses para enviar texto, resúmenes, listas, mensajes o respuestas conversacionales: "
+                 "esos van como texto de tu respuesta final y el sistema los entrega solo. "
+                 "Si no tienes una ruta válida que exista, NO llames esta herramienta."
+             ),
              "parameters": {"type": "object", "properties": {
-                 "ruta": {"type": "string", "description": "Ruta absoluta o relativa del archivo a enviar"},
-                 "caption": {"type": "string", "description": "Texto descriptivo opcional para acompañar el archivo"},
+                 "ruta": {"type": "string", "description": "Ruta absoluta o relativa de un archivo que EXISTE en disco"},
+                 "caption": {"type": "string", "description": "Texto descriptivo opcional para acompañar el archivo (no para enviar texto suelto)"},
              }, "required": ["ruta"]}},
             # ── Browser (Playwright) ──────────────────────────────────────────
             {"type": "function", "name": "browser_navegar",
@@ -475,6 +533,65 @@ class Agent:
                  "url": {"type": "string", "description": "URL del hipervínculo"},
                  "max_filas": {"type": "number", "description": "Máximo de filas a leer (default 100)"},
              }, "required": ["operacion", "ruta"]}},
+            # ── Google TV ─────────────────────────────────────────────────────
+            {"type": "function", "name": "google_tv",
+             "description": (
+                 "Control remoto de Google TVs por red local. Sin ADB ni modo desarrollador.\n"
+                 "Operaciones:\n"
+                 "  parear       — Inicia pairing con un TV (nombre + IP del TV)\n"
+                 "  confirmar    — Confirma codigo de pairing mostrado en el TV\n"
+                 "  estado       — Estado de TVs (encendido, app actual, volumen)\n"
+                 "  encender     — Enciende un TV por nombre\n"
+                 "  apagar       — Apaga un TV por nombre\n"
+                 "  volumen      — Controla volumen (subir, bajar, mute)\n"
+                 "  app          — Abre una app (youtube, netflix, disney+, spotify, etc.)\n"
+                 "  control      — Navegacion (arriba, abajo, ok, back, home, play, pausa)\n"
+                 "  escribir     — Escribe texto en el TV (busquedas)\n"
+                 "  apagar_todos — Apaga todos los TVs\n"
+                 "  listar       — Lista TVs registrados"
+             ),
+             "parameters": {"type": "object", "properties": {
+                 "operacion": {
+                     "type": "string",
+                     "description": "Operacion a realizar",
+                     "enum": ["parear", "confirmar", "estado", "encender", "apagar",
+                              "volumen", "app", "control", "escribir", "apagar_todos", "listar"]
+                 },
+                 "nombre": {"type": "string", "description": "Nombre del TV (TV Sala, TV Cuarto, etc.)"},
+                 "ip": {"type": "string", "description": "IP del TV en la red local (para parear)"},
+                 "codigo": {"type": "string", "description": "Codigo de pairing mostrado en el TV"},
+                 "accion": {"type": "string", "description": "Accion de volumen: subir, bajar, mute"},
+                 "nivel": {"type": "number", "description": "Pasos de volumen (default 1)"},
+                 "aplicacion": {"type": "string", "description": "App a abrir: youtube, netflix, disney+, spotify, prime, hbo, etc."},
+                 "comando": {"type": "string", "description": "Comando de control: arriba, abajo, ok, back, home, play, pausa, stop, mute"},
+                 "texto": {"type": "string", "description": "Texto a escribir en el TV"},
+             }, "required": ["operacion"]}},
+            # ── Presencia (WiFi Sensing) ──────────────────────────────────────
+            {"type": "function", "name": "presencia",
+             "description": (
+                 "Deteccion de personas por WiFi (RuView + ESP32). Sin camaras.\n"
+                 "Operaciones:\n"
+                 "  estado     — Quien esta en casa, en que areas\n"
+                 "  vitales    — Signos vitales: respiracion y pulso sin contacto\n"
+                 "  actividad  — Nivel de actividad por zona (area opcional)\n"
+                 "  historial  — Registro de presencia ultimas horas\n"
+                 "  alertas    — Caidas, inactividad prolongada, anomalias\n"
+                 "  sensores   — Estado de los ESP32 conectados\n"
+                 "  config     — Ver o modificar configuracion del servidor"
+             ),
+             "parameters": {"type": "object", "properties": {
+                 "operacion": {
+                     "type": "string",
+                     "description": "Operacion a realizar",
+                     "enum": ["estado", "vitales", "actividad", "historial", "alertas", "sensores", "config"]
+                 },
+                 "area": {"type": "string", "description": "Filtrar por area de la casa (para actividad, historial)"},
+                 "horas": {"type": "number", "description": "Horas de historial a consultar (default 4)"},
+                 "ruview_url": {"type": "string", "description": "URL del servidor RuView (para config)"},
+                 "mapear_zona": {"type": "string", "description": "Nombre de zona en RuView (para config)"},
+                 "a_area": {"type": "string", "description": "Nombre de area en distribucion_casa (para config)"},
+                 "umbral_inactividad_min": {"type": "number", "description": "Minutos sin movimiento para alerta (para config)"},
+             }, "required": ["operacion"]}},
             # ── Distribucion de la Casa ───────────────────────────────────────
             {"type": "function", "name": "distribucion_casa",
              "description": (
@@ -748,20 +865,23 @@ class Agent:
             # ── Agenda de Acciones ────────────────────────────────────────────
             {"type": "function", "name": "agenda",
              "description": (
-                 "Agenda de acciones automáticas programadas.\n"
-                 "Operaciones:\n"
-                 "  agregar    — Crea una nueva acción programada con un prompt para el agente\n"
-                 "  listar     — Muestra todas las acciones (filtro: todos|activas|inactivas)\n"
-                 "  ver        — Detalle completo de una acción por ID\n"
-                 "  activar    — Activa una acción pausada\n"
-                 "  desactivar — Pausa una acción temporalmente\n"
-                 "  eliminar   — Elimina una acción por ID\n"
-                 "  historial  — Últimas ejecuciones de una acción\n\n"
-                 "Tipos de acción:\n"
-                 "  diaria             — Todos los días (o días específicos) a una hora fija\n"
-                 "  recurrente_ventana — Cada N minutos dentro de un rango horario\n"
-                 "  recurrente         — Cada N minutos sin restricción de horario\n\n"
-                 "Días de semana: 1=lunes, 2=martes, ..., 7=domingo"
+                 "Agenda de acciones automáticas programadas.\n\n"
+                 "**OBLIGATORIO:** SIEMPRE incluir el campo 'operacion' (string) en los args.\n"
+                 "NO pases args como {'listar': true} — usa {'operacion': 'listar'}.\n\n"
+                 "Operaciones válidas (valor exacto del campo 'operacion'):\n"
+                 "  'agregar'    — Crea una nueva acción programada (requiere: nombre, tipo, prompt)\n"
+                 "  'listar'     — Muestra todas las acciones (opcional: filtro)\n"
+                 "  'ver'        — Detalle completo de una acción (requiere: id)\n"
+                 "  'activar'    — Activa una acción pausada (requiere: id)\n"
+                 "  'desactivar' — Pausa una acción temporalmente (requiere: id)\n"
+                 "  'eliminar'   — Elimina una acción (requiere: id)\n"
+                 "  'historial'  — Últimas ejecuciones de una acción (requiere: id)\n\n"
+                 "Tipos de acción (campo 'tipo' al agregar):\n"
+                 "  'diaria'             — Todos los días (o días específicos) a una hora fija\n"
+                 "  'recurrente_ventana' — Cada N minutos dentro de un rango horario\n"
+                 "  'recurrente'         — Cada N minutos sin restricción de horario\n\n"
+                 "Días de semana: 1=lunes, 2=martes, ..., 7=domingo\n\n"
+                 "Ejemplo correcto: {\"operacion\": \"listar\", \"filtro\": \"activas\"}"
              ),
              "parameters": {"type": "object", "properties": {
                  "operacion": {
@@ -833,7 +953,42 @@ class Agent:
         elif fn_name == "execute_command":
             result = iatools.execute_command(**args)
         elif fn_name == "execute_bash":
-            result = iatools.execute_bash(**args)
+            # Guardrail: si el comando matchea patrones de comandos largos,
+            # rechazar y empujar al LLM a usar execute_long.
+            import re as _re_eb
+            _cmd_eb = args.get("command", "")
+            _patrones_largos = r"\b(yt-dlp|youtube-dl|whisper(\b|\.py)|ffmpeg|moviepy|doblador|tsr-stress|transcribir|doblar|train\.py|fine.?tune)\b"
+            if _re_eb.search(_patrones_largos, _cmd_eb, _re_eb.IGNORECASE):
+                result = ("⚠️ Este comando parece ser largo (descarga/transcripción/conversión de video). "
+                          "Usa la herramienta `execute_long` en su lugar — encola el proceso en el job_manager "
+                          "y puedes consultar progreso con `job_status`. No bloquea el agente.")
+            else:
+                result = iatools.execute_bash(**args)
+        elif fn_name == "execute_long":
+            from job_client import submit_job, submit_pipeline
+            _name = args.get("name", "tarea-sin-nombre")
+            _cwd = args.get("cwd")
+            if args.get("steps"):
+                resp = submit_pipeline(_name, args["steps"], cwd=_cwd)
+            elif args.get("command"):
+                resp = submit_job(_name, args["command"], cwd=_cwd)
+            else:
+                resp = {"ok": False, "error": "execute_long requiere 'command' o 'steps'"}
+            result = json.dumps(resp, ensure_ascii=False)
+        elif fn_name == "job_status":
+            from job_client import status as _job_status
+            resp = _job_status(args["job_id"],
+                               incluir_output=args.get("incluir_output", False),
+                               lineas=int(args.get("lineas", 30)))
+            result = json.dumps(resp, ensure_ascii=False)
+        elif fn_name == "job_list":
+            from job_client import list_jobs as _job_list
+            resp = _job_list(estado=args.get("estado"), limite=int(args.get("limite", 20)))
+            result = json.dumps(resp, ensure_ascii=False)
+        elif fn_name == "job_cancel":
+            from job_client import cancel as _job_cancel
+            resp = _job_cancel(args["job_id"])
+            result = json.dumps(resp, ensure_ascii=False)
         elif fn_name == "guardar_memoria":
             result = self.memoria.agregar_hecho(**args)
         elif fn_name == "consultar_memoria":
@@ -873,14 +1028,17 @@ class Agent:
                 result = f"Skill '{nombre}' no encontrada. Disponibles: {', '.join(disponibles)}"
         elif fn_name == "ejecutar_script_skill":
             # Aceptar alias que LLMs locales tienden a usar
-            # (incluyendo nombres de crear_skill que el LLM confunde: script_nombre, script_code)
             skill_name = (args.get("skill") or args.get("skill_name")
-                          or args.get("nombre") or "")
+                          or args.get("name") or args.get("nombre") or "")
             script_file = (args.get("script") or args.get("script_file")
-                           or args.get("archivo") or args.get("script_nombre") or "")
-            script_args = (args.get("args") or args.get("arguments")
-                           or args.get("argumentos") or args.get("script_code") or "")
-            result = self.skill_loader.ejecutar_script(skill_name, script_file, script_args)
+                           or args.get("archivo") or args.get("script_nombre") or "run.py")
+            _raw_args = (args.get("args") or args.get("arguments")
+                         or args.get("argumentos") or args.get("script_code") or "")
+            # Si el LLM mandó una lista en vez de string, convertirla
+            if isinstance(_raw_args, list):
+                import shlex as _sx
+                _raw_args = " ".join(_sx.quote(str(a)) for a in _raw_args)
+            result = self.skill_loader.ejecutar_script(skill_name, script_file, _raw_args)
         elif fn_name == "crear_skill":
             result = self.skill_loader.crear_skill(
                 nombre=args.get("nombre", ""),
@@ -905,6 +1063,14 @@ class Agent:
             from excel_tool import ejecutar as excel_ejecutar
             operacion = args.pop("operacion")
             result = excel_ejecutar(operacion, **args)
+        elif fn_name == "google_tv":
+            from google_tv_tool import ejecutar as tv_ejecutar
+            operacion = args.pop("operacion")
+            result = tv_ejecutar(operacion, **args)
+        elif fn_name == "presencia":
+            from presencia_tool import ejecutar as presencia_ejecutar
+            operacion = args.pop("operacion")
+            result = presencia_ejecutar(operacion, **args)
         elif fn_name == "distribucion_casa":
             from distribucion_casa_tool import ejecutar as casa_ejecutar
             operacion = args.pop("operacion")
@@ -1022,28 +1188,87 @@ class Agent:
                     cb(ruta_img, "")
                 result = f"Foto de '{args.get('nombre', '')}' enviada."
         elif fn_name == "enviar_archivo_telegram":
-            ruta = args.get("ruta", "")
+            ruta = args.get("ruta", "") or args.get("path", "") or args.get("archivo", "")
             caption = args.get("caption", "")
-            cb = getattr(self, "_send_file_callback", None)
-            if cb:
-                ok = cb(ruta, caption)
-                result = f"✅ Archivo enviado: {ruta}" if ok else f"❌ No se pudo enviar: {ruta}"
+            if not ruta:
+                result = ("❌ enviar_archivo_telegram requiere 'ruta' a un archivo real existente. "
+                          "No la uses para enviar texto: el texto va en tu respuesta final.")
+            elif not os.path.exists(ruta):
+                result = (f"❌ El archivo no existe: {ruta}. "
+                          "No envíes archivos al azar — si solo quieres mandar texto, "
+                          "ponlo en tu respuesta final, no en esta herramienta.")
             else:
-                result = "⚠️ enviar_archivo_telegram no disponible fuera de Telegram."
+                cb = getattr(self, "_send_file_callback", None)
+                if cb:
+                    ok = cb(ruta, caption)
+                    result = f"✅ Archivo enviado: {ruta}" if ok else f"❌ No se pudo enviar: {ruta}"
+                else:
+                    result = "⚠️ enviar_archivo_telegram no disponible fuera de Telegram."
         elif fn_name == "gmail":
-            import importlib.util as _ilu
-            _spec = _ilu.spec_from_file_location(
-                "gmail_reader",
-                os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                             "skills", "gmail-reader", "run.py")
+            import subprocess, sys as _sys, shlex as _shlex
+            _gmail_script = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                "skills", "gmail-reader", "run.py"
             )
-            _mod = _ilu.module_from_spec(_spec)
-            _spec.loader.exec_module(_mod)
-            operacion = args.pop("operacion")
-            result = _mod.ejecutar(operacion, **args)
+            operacion = args.pop("operacion", "leer")
+            # Build CLI args from kwargs
+            _cli_parts = [operacion]
+            for _k, _v in args.items():
+                if _v is None:
+                    continue
+                _flag = f"--{_k.replace('_', '-')}"
+                if isinstance(_v, bool):
+                    if _v:
+                        _cli_parts.append(_flag)
+                else:
+                    _cli_parts.extend([_flag, str(_v)])
+            _cmd = [_sys.executable, _gmail_script] + _cli_parts
+            try:
+                _proc = subprocess.run(
+                    _cmd, capture_output=True, text=True,
+                    encoding="utf-8", errors="replace", timeout=60
+                )
+                result = (_proc.stdout + _proc.stderr).strip() or "(sin salida)"
+            except subprocess.TimeoutExpired:
+                result = "Error: gmail timeout (60s)"
+            except Exception as _e:
+                result = f"Error gmail: {_e}"
         elif fn_name == "agenda":
             from agenda_tool import ejecutar as agenda_ejecutar
-            operacion = args.pop("operacion")
+            operacion = args.pop("operacion", None)
+            # Fallback: si el LLM no paso "operacion", inferir de los args
+            if not operacion:
+                if args.get("nombre") and args.get("tipo") and args.get("prompt"):
+                    operacion = "agregar"
+                elif args.get("ultimas") is not None:
+                    operacion = "historial"
+                elif args.get("listar") or args.get("filtro") is not None:
+                    operacion = "listar"
+                elif args.get("id") is not None and not args.get("nombre"):
+                    # id solo es ambiguo (ver/activar/desactivar/eliminar);
+                    # default a "ver" por ser no destructivo
+                    operacion = "ver"
+                else:
+                    operacion = "listar"
+                try:
+                    print(f"[agenda] operacion ausente, inferida='{operacion}' desde args={list(args.keys())}", flush=True)
+                except Exception:
+                    pass
+            # Limpiar args invalidos del tool schema
+            args.pop("listar", None)
+            # Filtrar args al subconjunto valido por operacion
+            args_validos_por_op = {
+                "agregar": {"nombre", "tipo", "prompt", "chat_id", "descripcion", "hora",
+                            "dias_semana", "intervalo_minutos", "hora_inicio", "hora_fin"},
+                "listar": {"filtro"},
+                "ver": {"id"},
+                "activar": {"id"},
+                "desactivar": {"id"},
+                "eliminar": {"id"},
+                "historial": {"id", "ultimas"},
+            }
+            permitidos = args_validos_por_op.get(operacion, set())
+            args = {k: v for k, v in args.items() if k in permitidos}
             if operacion == "agregar" and not args.get("chat_id"):
                 args["chat_id"] = getattr(self, "_current_chat_id", 0)
             result = agenda_ejecutar(operacion, **args)
@@ -1202,7 +1427,14 @@ class Agent:
                 "max_output_tokens": max_tokens,
             }
             if self.tools:
-                kwargs["tools"] = self.tools
+                # Tool Router: filtrar herramientas relevantes para reducir tokens
+                if self._tool_router and _iteraciones == 1:
+                    routed = self._tool_router.route(mensaje, self.tools)
+                    if routed:
+                        kwargs["tools"] = routed
+                    # Si routed es vacio, no enviar tools (conversacion general)
+                else:
+                    kwargs["tools"] = self.tools
 
             if stream_callback:
                 response, texto_impreso = self._llamar_llm_stream(kwargs, stream_callback)
