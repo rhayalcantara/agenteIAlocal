@@ -75,7 +75,7 @@ class Agent:
 
     def __init__(self, model: str, api_key: str,
                  base_url: str = None, provider: str = "openai",
-                 tool_profile: str = None):
+                 tool_profile: str = None, memoria_path: str = None):
         self._model = model
         self._provider = provider
 
@@ -126,7 +126,7 @@ class Agent:
             api_key=_router_key,
         ) if _use_router else None
 
-        self.memoria = Memoria()
+        self.memoria = Memoria(ruta=memoria_path) if memoria_path else Memoria()
 
         try:
             self.wiki = WikiManager()
@@ -278,11 +278,45 @@ class Agent:
                         break
             except Exception as e:
                 logger.warning(f"Error generando resumen: {e}")
+        recientes = self._descartar_outputs_huerfanos(recientes)
         self.messages = [system_msg] + recientes
         self._actualizar_system_prompt()
         self._save_messages_debug()
         print(f"✅ Historial compactado: {len(self.messages)} mensajes")
         return True
+
+    def _descartar_outputs_huerfanos(self, mensajes: list) -> list:
+        """Elimina function_call_output cuyo call_id no tenga una function_call
+        previa en la misma ventana. Tras compactar, un slice puede empezar con
+        el output de una llamada cuyo function_call quedó fuera; el LLM lo
+        interpreta como contexto huérfano y suele responder con plantillas de la
+        última ejecución (visible cuando el agente respondía con [SILENCIOSO]
+        a un saludo).
+        """
+        call_ids_validos: set = set()
+        filtrados: list = []
+        for msg in mensajes:
+            if not isinstance(msg, dict):
+                filtrados.append(msg)
+                continue
+            tipo = msg.get("type")
+            if tipo == "function_call":
+                cid = msg.get("call_id")
+                if cid:
+                    call_ids_validos.add(cid)
+                filtrados.append(msg)
+            elif tipo == "function_call_output":
+                cid = msg.get("call_id")
+                if cid and cid in call_ids_validos:
+                    filtrados.append(msg)
+                else:
+                    logger.info(
+                        f"compactar: descartado function_call_output huérfano "
+                        f"(call_id={cid})"
+                    )
+            else:
+                filtrados.append(msg)
+        return filtrados
 
     # ── Setup de herramientas ─────────────────────────────────────────────────
 
@@ -312,13 +346,20 @@ class Agent:
              }, "required": ["path", "new_text"]}},
             {"type": "function", "name": "execute_bash",
              "description": (
-                 "Ejecuta un comando bash persistente. Solo para comandos rápidos (< 30s): "
-                 "ls, git status, cat, cd, grep, etc. Tiene filtro de comandos peligrosos. "
+                 "Ejecuta un comando en la terminal persistente. Para tareas rápidas (<60s): "
+                 "ls, git status, cat, cd, grep, ejecutar scripts cortos, etc. "
+                 "Default timeout 180s (configurable). Tiene filtro de comandos peligrosos.\n"
+                 "Tips:\n"
+                 "• Argumentos con espacios → comillas dobles: node script.js \"NOMBRE\" 5.\n"
+                 "• Para correr en otro dir sin cambiar el cwd persistente, usa el parámetro `cwd`.\n"
+                 "• El terminal mantiene cwd y env vars entre llamadas (es persistente).\n"
                  "NO usar para: descargas (yt-dlp, wget largo), conversiones (ffmpeg), "
                  "transcripciones (whisper), doblaje, scripts python pesados — esos van con execute_long."
              ),
              "parameters": {"type": "object", "properties": {
-                 "command": {"type": "string"}, "timeout": {"type": "number"},
+                 "command": {"type": "string", "description": "Comando shell a ejecutar."},
+                 "timeout": {"type": "number", "description": "Segundos antes de Error: Timeout. Default 180."},
+                 "cwd": {"type": "string", "description": "Directorio donde correr el comando (no afecta el cwd persistente). Opcional."},
              }, "required": ["command"]}},
             {"type": "function", "name": "execute_long",
              "description": (

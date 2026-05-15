@@ -13,11 +13,15 @@ class Tool:
 
     # ── Bash persistente ──────────────────────────────────────────────────────
 
-    def execute_bash(self, command: str, timeout: float = 600) -> str:
-        """Ejecuta un comando en la terminal bash persistente con filtro de seguridad."""
-        logger.info(f"execute_bash: {command[:100]}")
-        print(f"=== Terminal Bash ===\n$ {command}")
-        resultado = self.terminal.ejecutar(command, timeout=timeout)
+    def execute_bash(self, command: str, timeout: float = 180, cwd: str | None = None) -> str:
+        """Ejecuta un comando en la terminal persistente con filtro de seguridad.
+
+        cwd: opcional, corre el comando en ese directorio sin alterar el cwd
+             persistente del shell.
+        """
+        logger.info(f"execute_bash: {command[:100]}" + (f" [cwd={cwd}]" if cwd else ""))
+        print(f"=== Terminal Bash ===\n$ {command}" + (f"  (cwd={cwd})" if cwd else ""))
+        resultado = self.terminal.ejecutar(command, timeout=timeout, cwd=cwd)
         return resultado
 
     def cerrar_terminal(self):
@@ -51,7 +55,11 @@ class Tool:
 
     # ── Archivos ──────────────────────────────────────────────────────────────
 
-    def read_file(self, path: str, encodings: str = "utf-8") -> str:
+    def read_file(self, path: str = None, encodings: str = "utf-8", **kwargs) -> str:
+        # Aceptar 'ruta' como alias del LLM en español
+        path = path or kwargs.get("ruta") or kwargs.get("file") or kwargs.get("archivo")
+        if not path:
+            return "Error: falta el argumento 'path' (o 'ruta')."
         logger.info(f"read_file: {path}")
         print(f"   ReadFile: {path}")
         try:
@@ -63,7 +71,15 @@ class Tool:
             logger.error(f"Error leyendo {path}: {e}")
             return str(e)
 
-    def edit_file(self, path: str, new_text: str, prev_text: str = "") -> str:
+    def edit_file(self, path: str = None, new_text: str = None, prev_text: str = "", **kwargs) -> str:
+        # Aceptar 'ruta' como alias del LLM en español
+        path = path or kwargs.get("ruta") or kwargs.get("file") or kwargs.get("archivo")
+        if new_text is None:
+            new_text = kwargs.get("nuevo_texto") or kwargs.get("contenido") or ""
+        if not prev_text:
+            prev_text = kwargs.get("texto_previo") or kwargs.get("anterior") or ""
+        if not path:
+            return "Error: falta el argumento 'path' (o 'ruta')."
         logger.info(f"edit_file: {path}")
         try:
             if not os.path.exists(path):
@@ -89,7 +105,10 @@ class Tool:
             logger.error(f"Error editando {path}: {e}")
             return str(e)
 
-    def list_files_in_dir(self, directory: str = ".") -> list:
+    def list_files_in_dir(self, directory: str = None, **kwargs) -> list:
+        # Aliases comunes que el LLM usa en español/inglés
+        directory = (directory or kwargs.get("path") or kwargs.get("ruta")
+                     or kwargs.get("dir") or kwargs.get("directorio") or ".")
         try:
             return sorted(os.listdir(directory))
         except Exception as e:
