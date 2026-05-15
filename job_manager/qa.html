@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Q&A — preguntas de Claude</title>
+<style>
+  :root { color-scheme: dark; }
+  body { font-family: ui-sans-serif, system-ui, sans-serif; background: #0d1117; color: #c9d1d9; max-width: 760px; margin: 24px auto; padding: 0 16px; line-height: 1.5; }
+  h1 { color: #58a6ff; font-size: 22px; margin-bottom: 4px; }
+  .sub { color: #8b949e; font-size: 13px; margin-bottom: 24px; }
+  .empty { background: #161b22; border: 1px dashed #30363d; border-radius: 6px; padding: 24px; text-align: center; color: #8b949e; }
+  .qset { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 18px; margin-bottom: 18px; }
+  .qset .ctx { color: #d2a8ff; font-size: 13px; border-left: 3px solid #d2a8ff; padding: 4px 10px; margin-bottom: 12px; background: #1c2128; }
+  .qset h3 { color: #58a6ff; font-size: 14px; margin: 0 0 4px; font-weight: 600; }
+  .qset .meta { color: #6e7681; font-size: 11px; font-family: ui-monospace, monospace; margin-bottom: 14px; }
+  .question { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 12px 14px; margin-bottom: 10px; }
+  .q-text { font-weight: 600; margin-bottom: 8px; color: #e6edf3; }
+  textarea, input[type=text] { width: 100%; box-sizing: border-box; background: #010409; color: #c9d1d9; border: 1px solid #30363d; border-radius: 4px; padding: 8px; font-family: ui-monospace, monospace; font-size: 13px; }
+  textarea { min-height: 70px; resize: vertical; }
+  label.opt { display: block; padding: 5px 0; cursor: pointer; color: #c9d1d9; }
+  label.opt input { margin-right: 8px; }
+  button.send { background: #238636; color: #fff; border: 0; border-radius: 4px; padding: 10px 22px; font-size: 14px; cursor: pointer; font-weight: 600; margin-top: 10px; }
+  button.send:hover { background: #2ea043; }
+  button.send:disabled { background: #30363d; cursor: not-allowed; }
+  .ok { background: #2ea04322; border: 1px solid #3fb950; color: #3fb950; padding: 10px; border-radius: 4px; margin-top: 8px; font-size: 13px; }
+  .err { background: #f8514922; border: 1px solid #f85149; color: #f85149; padding: 10px; border-radius: 4px; margin-top: 8px; font-size: 13px; }
+  .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; font-size: 12px; color: #6e7681; }
+  .toolbar .badge { background: #1f6feb; color: #fff; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<h1>Q&A — preguntas pendientes</h1>
+<p class="sub">Las preguntas que Claude pone aquí esperan tu respuesta. Cuando envías, Claude las lee en su próximo ciclo.</p>
+
+<div class="toolbar">
+  <span>Pendientes: <span class="badge" id="count">0</span></span>
+  <button onclick="cargar()" style="background:#21262d;color:#c9d1d9;border:1px solid #30363d;border-radius:4px;padding:4px 10px;font-size:12px;cursor:pointer;">Refrescar</button>
+  <span id="last-refresh" style="margin-left:auto;font-size:11px;font-family:ui-monospace,monospace;"></span>
+</div>
+
+<div id="list"></div>
+
+<script>
+async function cargar() {
+  document.getElementById('last-refresh').textContent = 'cargando...';
+  let r;
+  try {
+    r = await fetch('/qa/pending', { cache: 'no-store' });
+  } catch (e) {
+    document.getElementById('list').innerHTML = '<div class="empty">Error: ' + e + '</div>';
+    return;
+  }
+  const data = await r.json();
+  document.getElementById('count').textContent = data.count;
+  document.getElementById('last-refresh').textContent = 'actualizado ' + new Date().toLocaleTimeString();
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+
+  if (data.count === 0) {
+    list.innerHTML = '<div class="empty">No hay preguntas pendientes ahora mismo.</div>';
+    return;
+  }
+
+  for (const set of data.items) {
+    const div = document.createElement('div');
+    div.className = 'qset';
+    div.dataset.qid = set.id;
+
+    let html = '';
+    if (set.context) html += '<div class="ctx">' + escapeHtml(set.context) + '</div>';
+    html += '<h3>De ' + escapeHtml(set.from || 'claude') + '</h3>';
+    html += '<div class="meta">id=' + set.id + ' &middot; ' + (set.created_at || '') + '</div>';
+
+    set.questions.forEach((q, i) => {
+      const key = q.id || ('q' + (i + 1));
+      html += '<div class="question">';
+      html += '<div class="q-text">' + (i + 1) + '. ' + escapeHtml(q.text) + '</div>';
+      if (q.type === 'options' && Array.isArray(q.options)) {
+        q.options.forEach(opt => {
+          html += '<label class="opt"><input type="radio" name="' + key + '" value="' + escapeHtml(opt) + '"> ' + escapeHtml(opt) + '</label>';
+        });
+      } else if (q.type === 'yesno') {
+        html += '<label class="opt"><input type="radio" name="' + key + '" value="si"> Sí</label>';
+        html += '<label class="opt"><input type="radio" name="' + key + '" value="no"> No</label>';
+      } else {
+        html += '<textarea name="' + key + '" placeholder="Tu respuesta..."></textarea>';
+      }
+      html += '</div>';
+    });
+
+    html += '<button class="send" onclick="enviar(this)">Enviar respuestas</button>';
+    html += '<div class="status"></div>';
+    div.innerHTML = html;
+    list.appendChild(div);
+  }
+}
+
+async function enviar(btn) {
+  const set = btn.closest('.qset');
+  const qid = set.dataset.qid;
+  const data = { id: qid };
+  set.querySelectorAll('input, textarea, select').forEach(el => {
+    if (el.type === 'radio' || el.type === 'checkbox') {
+      if (el.checked) data[el.name] = el.value;
+    } else if (el.value) {
+      data[el.name] = el.value;
+    }
+  });
+
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+  const status = set.querySelector('.status');
+  try {
+    const r = await fetch('/qa', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (r.ok) {
+      status.innerHTML = '<div class="ok">Respuestas guardadas. Claude las leerá en su próximo ciclo.</div>';
+      setTimeout(cargar, 800);
+    } else {
+      status.innerHTML = '<div class="err">Error ' + r.status + ': ' + (await r.text()) + '</div>';
+      btn.disabled = false;
+      btn.textContent = 'Enviar respuestas';
+    }
+  } catch (e) {
+    status.innerHTML = '<div class="err">Error: ' + e + '</div>';
+    btn.disabled = false;
+    btn.textContent = 'Enviar respuestas';
+  }
+}
+
+function escapeHtml(s) {
+  if (typeof s !== 'string') return s == null ? '' : String(s);
+  return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+cargar();
+setInterval(cargar, 15000);
+</script>
+
+</body>
+</html>

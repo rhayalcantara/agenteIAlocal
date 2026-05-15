@@ -54,6 +54,7 @@ class Agent:
         "local": [
             "list_files_in_dir", "read_file", "edit_file",
             "execute_bash", "execute_long", "job_status", "job_list", "job_cancel",
+            "qa_ask", "qa_check",
             "guardar_memoria",
             "buscar_en_internet", "listar_skills", "activar_skill", "crear_skill",
             "leer_wiki", "buscar_wiki",
@@ -351,6 +352,40 @@ class Agent:
              "parameters": {"type": "object", "properties": {
                  "job_id": {"type": "string"},
              }, "required": ["job_id"]}},
+            {"type": "function", "name": "qa_ask",
+             "description": (
+                 "Pide al usuario una o varias preguntas mediante el form web en http://localhost:8090/qa. "
+                 "Úsalo cuando necesites una respuesta concreta del usuario (preferencias, datos, decisión) "
+                 "y la conversación en chat no es el canal natural. Las preguntas quedan persistentes hasta "
+                 "que el usuario las responda; tú las recoges luego con qa_check. "
+                 "Retorna {ok, id} con el id del set para correlacionar."
+             ),
+             "parameters": {"type": "object", "properties": {
+                 "questions": {
+                     "type": "array",
+                     "items": {
+                         "type": "object",
+                         "properties": {
+                             "text": {"type": "string", "description": "El texto de la pregunta"},
+                             "type": {"type": "string", "enum": ["text", "options", "yesno"], "description": "Tipo de input (default: text)"},
+                             "options": {"type": "array", "items": {"type": "string"}, "description": "Solo si type=options"},
+                             "id": {"type": "string", "description": "Identificador local opcional dentro del set"},
+                         },
+                         "required": ["text"],
+                     },
+                     "description": "Lista de preguntas a presentar al usuario",
+                 },
+                 "context": {"type": "string", "description": "Contexto/explicación opcional que ayude al usuario a responder"},
+             }, "required": ["questions"]}},
+            {"type": "function", "name": "qa_check",
+             "description": (
+                 "Revisa si el usuario respondió alguna pregunta pendiente del form /qa. "
+                 "Por defecto consume las respuestas (las archiva tras leerlas). "
+                 "Retorna {ok, data: {count, items}} con las respuestas pendientes."
+             ),
+             "parameters": {"type": "object", "properties": {
+                 "consume": {"type": "boolean", "description": "Si true (default) archiva las respuestas leídas"},
+             }, "required": []}},
             {"type": "function", "name": "execute_command",
              "description": "Ejecuta un comando simple (no persistente). Tiene filtro de seguridad.",
              "parameters": {"type": "object", "properties": {
@@ -988,6 +1023,14 @@ class Agent:
         elif fn_name == "job_cancel":
             from job_client import cancel as _job_cancel
             resp = _job_cancel(args["job_id"])
+            result = json.dumps(resp, ensure_ascii=False)
+        elif fn_name == "qa_ask":
+            from job_client import qa_ask as _qa_ask
+            resp = _qa_ask(args.get("questions", []), context=args.get("context"))
+            result = json.dumps(resp, ensure_ascii=False)
+        elif fn_name == "qa_check":
+            from job_client import qa_answers as _qa_answers
+            resp = _qa_answers(consume=args.get("consume", True))
             result = json.dumps(resp, ensure_ascii=False)
         elif fn_name == "guardar_memoria":
             result = self.memoria.agregar_hecho(**args)
