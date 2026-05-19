@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor Hub</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+            background: #0d1117; color: #c9d1d9;
+            min-height: 100vh;
+        }
+        .header {
+            background: #161b22; border-bottom: 1px solid #30363d;
+            padding: 16px 24px; display: flex; align-items: center; gap: 16px;
+        }
+        .header h1 { font-size: 20px; color: #58a6ff; }
+        .header .status {
+            padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;
+        }
+        .status.running { background: #1b4332; color: #2dd4bf; }
+        .status.stopped { background: #3b1219; color: #f87171; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .card {
+            background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+            padding: 16px; transition: border-color 0.2s;
+        }
+        .card:hover { border-color: #58a6ff; }
+        .card h3 { font-size: 14px; color: #8b949e; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .card .value { font-size: 28px; font-weight: 700; color: #f0f6fc; }
+        .card .sub { font-size: 12px; color: #8b949e; margin-top: 4px; }
+        .channel-card {
+            background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+            padding: 16px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .channel-info { display: flex; align-items: center; gap: 12px; }
+        .channel-icon { font-size: 24px; }
+        .channel-name { font-weight: 600; font-size: 16px; }
+        .channel-stats { font-size: 12px; color: #8b949e; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        .dot.on { background: #2dd4bf; }
+        .dot.off { background: #f87171; }
+        .toggle-btn {
+            background: #21262d; border: 1px solid #30363d; color: #c9d1d9;
+            padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 13px;
+        }
+        .toggle-btn:hover { background: #30363d; }
+        .messages {
+            background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+            overflow: hidden;
+        }
+        .messages h2 {
+            padding: 12px 16px; border-bottom: 1px solid #30363d;
+            font-size: 14px; color: #8b949e; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .msg-list { max-height: 500px; overflow-y: auto; }
+        .msg {
+            padding: 10px 16px; border-bottom: 1px solid #21262d;
+            display: flex; gap: 12px; align-items: flex-start;
+        }
+        .msg:hover { background: #1c2128; }
+        .msg.urgent { border-left: 3px solid #f87171; }
+        .msg-channel {
+            font-size: 11px; padding: 2px 8px; border-radius: 4px;
+            font-weight: 600; white-space: nowrap;
+        }
+        .msg-channel.telegram { background: #1e3a5f; color: #58a6ff; }
+        .msg-channel.whatsapp { background: #1b4332; color: #2dd4bf; }
+        .msg-channel.gmail { background: #3b1219; color: #f87171; }
+        .msg-body { flex: 1; }
+        .msg-user { font-weight: 600; color: #f0f6fc; font-size: 13px; }
+        .msg-chat { color: #8b949e; font-size: 11px; margin-left: 8px; }
+        .msg-text { font-size: 13px; color: #c9d1d9; margin-top: 2px; word-break: break-word; }
+        .msg-time { font-size: 11px; color: #484f58; white-space: nowrap; }
+        .empty { padding: 40px; text-align: center; color: #484f58; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Monitor Hub</h1>
+        <span class="status" id="hub-status">...</span>
+        <span style="flex:1"></span>
+        <span style="font-size:12px;color:#484f58" id="last-update"></span>
+    </div>
+    <div class="container">
+        <div class="grid" id="stats-grid">
+            <div class="card"><h3>Mensajes totales</h3><div class="value" id="total-msgs">0</div></div>
+            <div class="card"><h3>Canales activos</h3><div class="value" id="active-channels">0</div></div>
+            <div class="card"><h3>Errores</h3><div class="value" id="total-errors">0</div></div>
+        </div>
+        <h2 style="font-size:14px;color:#8b949e;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">Canales</h2>
+        <div id="channels-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px"></div>
+        <div class="messages">
+            <h2>Mensajes recientes <span id="msg-count" style="color:#484f58"></span></h2>
+            <div class="msg-list" id="msg-list">
+                <div class="empty">Esperando mensajes...</div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const ICONS = { telegram: '📱', whatsapp: '💬', gmail: '📧' };
+
+        async function fetchStatus() {
+            try {
+                const resp = await fetch('/api/status');
+                const data = await resp.json();
+                document.getElementById('hub-status').textContent = data.running ? 'Activo' : 'Detenido';
+                document.getElementById('hub-status').className = 'status ' + (data.running ? 'running' : 'stopped');
+                document.getElementById('total-msgs').textContent = data.total_messages;
+                const channels = data.channels || {};
+                const names = Object.keys(channels);
+                document.getElementById('active-channels').textContent = names.filter(n => channels[n].connected).length + '/' + names.length;
+                document.getElementById('total-errors').textContent = names.reduce((s, n) => s + (channels[n].errors || 0), 0);
+                // Canales
+                const list = document.getElementById('channels-list');
+                list.innerHTML = '';
+                for (const [name, ch] of Object.entries(channels)) {
+                    const div = document.createElement('div');
+                    div.className = 'channel-card';
+                    div.innerHTML = `
+                        <div class="channel-info">
+                            <span class="channel-icon">${ICONS[name] || '🔌'}</span>
+                            <div>
+                                <div class="channel-name"><span class="dot ${ch.connected ? 'on' : 'off'}"></span>${name}</div>
+                                <div class="channel-stats">${ch.messages} msgs | ${ch.poll_interval}s poll | ${ch.errors} errores</div>
+                            </div>
+                        </div>
+                        <button class="toggle-btn" onclick="toggleChannel('${name}')">${ch.enabled ? 'Desactivar' : 'Activar'}</button>
+                    `;
+                    list.appendChild(div);
+                }
+                document.getElementById('last-update').textContent = 'Actualizado: ' + new Date().toLocaleTimeString();
+            } catch (e) {}
+        }
+
+        async function toggleChannel(name) {
+            await fetch(`/api/channels/${name}/toggle`, { method: 'POST' });
+            fetchStatus();
+        }
+
+        async function fetchMessages() {
+            try {
+                const resp = await fetch('/api/messages?limit=30');
+                const msgs = await resp.json();
+                const list = document.getElementById('msg-list');
+                document.getElementById('msg-count').textContent = `(${msgs.length})`;
+                if (!msgs.length) { list.innerHTML = '<div class="empty">No hay mensajes aun</div>'; return; }
+                list.innerHTML = '';
+                for (const m of msgs.reverse()) {
+                    const div = document.createElement('div');
+                    div.className = 'msg' + (m.priority === 'urgent' ? ' urgent' : '');
+                    const time = new Date(m.timestamp).toLocaleTimeString();
+                    div.innerHTML = `
+                        <span class="msg-channel ${m.channel}">${m.channel}</span>
+                        <div class="msg-body">
+                            <span class="msg-user">${m.user}</span><span class="msg-chat">${m.chat_name}</span>
+                            <div class="msg-text">${m.text}</div>
+                        </div>
+                        <span class="msg-time">${time}</span>
+                    `;
+                    list.appendChild(div);
+                }
+            } catch (e) {}
+        }
+
+        // SSE para tiempo real
+        const evtSource = new EventSource('/api/events');
+        evtSource.onmessage = (event) => {
+            fetchMessages();
+            fetchStatus();
+        };
+
+        // Polling fallback
+        fetchStatus();
+        fetchMessages();
+        setInterval(fetchStatus, 10000);
+        setInterval(fetchMessages, 10000);
+    </script>
+</body>
+</html>

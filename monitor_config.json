@@ -1,0 +1,44 @@
+{
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "poll_interval": 5,
+      "name": "telegram",
+      "allowed_chats": [5483766132]
+    },
+    "telegram-ranger": {
+      "enabled": false,
+      "type": "telegram",
+      "name": "ranger",
+      "poll_interval": 10,
+      "token": "8728278032:AAF9C-pPkQJ2ZCqXcF2JUO3lFQn0fxFvZSU"
+    },
+    "whatsapp": {
+      "enabled": true,
+      "poll_interval": 30,
+      "watch_groups": ["SISTEMA RAY"]
+    },
+    "jobs": {
+      "enabled": true,
+      "poll_interval": 3,
+      "events_filter": ["started", "done", "failed", "cancelled", "step_failed"]
+    },
+    "gmail": {
+      "enabled": false,
+      "poll_interval": 60,
+      "query": "is:unread",
+      "max_per_poll": 20,
+      "important_senders": [],
+      "important_keywords": ["urgente", "down", "factura vencida"]
+    }
+  },
+  "dispatcher": {
+    "urgent_keywords": ["urgente", "error", "caido", "no funciona", "ayuda", "fallo"],
+    "dedup_window": 60,
+    "relay_urgent_to_telegram_chat_id": "5483766132"
+  },
+  "dashboard": {
+    "enabled": false,
+    "port": 8080
+  }
+}
