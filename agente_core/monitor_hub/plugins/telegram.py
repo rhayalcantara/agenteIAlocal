@@ -17,6 +17,10 @@ class TelegramPlugin(ChannelPlugin):
         self.api = f"https://api.telegram.org/bot{self.token}"
         self._offset = 0
         self.allowed_chats = set(self.config.get("allowed_chats", []))
+        # poll_enabled=False → plugin solo se usa como sink de .send() para
+        # relays cruzados. Evita conflicto de getUpdates cuando otro proceso
+        # (ej. mcp_telegram.py) ya está poll-eando el mismo bot.
+        self.poll_enabled = bool(self.config.get("poll_enabled", True))
         # Carpeta de descarga de medios (fotos, documentos)
         _root = os.path.dirname(os.path.dirname(os.path.dirname(
             os.path.dirname(os.path.abspath(__file__)))))
@@ -62,6 +66,8 @@ class TelegramPlugin(ChannelPlugin):
         return False
 
     def poll(self) -> list:
+        if not self.poll_enabled:
+            return []  # send-only mode: no consumir updates del bot
         messages = []
         try:
             resp = requests.get(f"{self.api}/getUpdates", params={

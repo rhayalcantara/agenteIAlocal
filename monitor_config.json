@@ -4,7 +4,9 @@
       "enabled": true,
       "poll_interval": 5,
       "name": "telegram",
-      "allowed_chats": [5483766132]
+      "allowed_chats": [5483766132],
+      "poll_enabled": false,
+      "_comment": "poll_enabled=false porque mcp_telegram.py ya consume getUpdates de este mismo bot. Aquí solo lo usamos como send-only para el relay cruzado del hub."
     },
     "telegram-ranger": {
       "enabled": false,
@@ -15,8 +17,11 @@
     },
     "whatsapp": {
       "enabled": true,
-      "poll_interval": 30,
-      "watch_groups": ["SISTEMA RAY"]
+      "poll_interval": 10,
+      "watch_groups": ["SISTEMA RAY"],
+      "mode": "auto",
+      "freshness_threshold_sec": 90,
+      "_comment": "mode=auto: si whatsapp_nuevos.json es fresh (<90s) → consumer-only (no spawn). Si stale → spawn propio. Coexiste con el monitor del SessionStart."
     },
     "jobs": {
       "enabled": true,
@@ -24,7 +29,7 @@
       "events_filter": ["started", "done", "failed", "cancelled", "step_failed"]
     },
     "gmail": {
-      "enabled": false,
+      "enabled": true,
       "poll_interval": 60,
       "query": "is:unread",
       "max_per_poll": 20,
