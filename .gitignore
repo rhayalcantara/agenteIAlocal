@@ -110,3 +110,11 @@ agente_core/data/imagenes_ubicaciones/
 
 # Directorio duplicado accidental (contiene certs/keys)
 agente_core/agente_core/
+
+# Repo git embebido (no es submodulo)
+revision_llmcentral/repo/
+
+# Modelos de voz / IA (descargables, no van en git)
+*.onnx
+*.gguf
+*.safetensors
