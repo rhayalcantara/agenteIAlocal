@@ -1,20 +1,21 @@
-# Skill: Buscar Noticias (Diario Libre)
-
-Esta skill permite extraer automáticamente los titulares más recientes y sus imágenes del sitio web Diario Libre, generando un reporte en formato Markdown.
+Extrae los titulares mas recientes de Diario Libre y genera un reporte en Markdown.
 
 ## Uso
-Para usar la skill, simplemente pide algo como:
-- "Busca noticias de Diario Libre"
-- "Ejecuta el scraper de noticias"
+- "Busca noticias"
+- "Que hay de nuevo en las noticias"
+- "Noticias de hoy"
 
-## Lo que hace
-1. Ejecuta el script `diariolibre_scraper.py`.
-2. Realiza un scraping profesional usando BeautifulSoup4 y Requests.
-3. Identifica los contenedores de noticias, extrayendo títulos (`h2`, `h3`), enlaces y la imagen asociada.
-4. Genera un archivo llamado `reporte_diariolibre.md` con formato Markdown compatible.
-5. El resultado final es un reporte visual listo para ser compartido o leído.
+## Ejecucion
+Ejecuta el script con `ejecutar_script_skill`:
+- skill: "buscar-noticias"
+- script: "run.py"
+- args: "" (sin argumentos)
 
-## Formato de salida
-El archivo generado contiene:
-![Imagen](url)
-[Título](url_noticia)
+## Resultado
+- Genera `reporte_diariolibre.md` en la raiz del proyecto
+- Imprime la lista de titulares en la salida
+- Muestra las 10 noticias mas recientes de https://www.diariolibre.com/ultima-hora
+
+## Importante
+- NO uses Gmail, SMTP ni correo. Esta skill hace scraping web directo.
+- NO inventes comandos. Solo ejecuta run.py sin argumentos.

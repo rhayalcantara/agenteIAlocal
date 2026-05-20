@@ -1,46 +1,5 @@
 {
   "hechos": [],
-  "resumenes": [
-    {
-      "texto": "Tras corregir un error de sintaxis, el usuario solicitó investigar sobre DDD para actualizar su archivo tutorial.",
-      "fecha": "2026-04-16 22:41"
-    },
-    {
-      "texto": "Tras aclarar un término ambiguo, el usuario solicita información sobre arquitectura de diseño en programación y el asistente comienza a explicarla.",
-      "fecha": "2026-04-16 22:50"
-    },
-    {
-      "texto": "El usuario envía secuencias crípticas e inconexas que finalizan con una despedida. El asistente intenta interpretar los patrones antes del cierre de la conversación.",
-      "fecha": "2026-04-16 22:58"
-    },
-    {
-      "texto": "El texto transita desde el análisis de un patrón repetitivo hacia consultas sobre los deseos y archivos del sistema de la IA.",
-      "fecha": "2026-04-16 23:04"
-    },
-    {
-      "texto": "El diálogo trata sobre los permisos del sistema y el funcionamiento de la memoria a largo plazo del asistente.",
-      "fecha": "2026-04-16 23:08"
-    },
-    {
-      "texto": "El usuario solicita un resumen de noticias actuales y pide activar la función de búsqueda al notar la limitación del asistente.",
-      "fecha": "2026-04-16 23:10"
-    },
-    {
-      "texto": "El usuario solicita el código para un tablero de ajedrez interactivo con registro de jugadas. El asistente inicia la planificación para crear los archivos necesarios.",
-      "fecha": "2026-04-22 13:46"
-    },
-    {
-      "texto": "Se solicita modificar el formato de la anotación en el historial a: \"jugada del blanco\" - \"jugada del negro\".",
-      "fecha": "2026-04-22 13:50"
-    },
-    {
-      "texto": "Tras un intento fallido de corregir el error en los movimientos, el asistente busca el archivo con la lógica del juego para investigar la falla persistente.",
-      "fecha": "2026-04-22 13:54"
-    },
-    {
-      "texto": "El usuario solicita noticias y una historia de tecnología futurista, a lo que la asistente accede tras aclarar sus limitaciones técnicas.",
-      "fecha": "2026-04-22 15:55"
-    }
-  ],
+  "resumenes": [],
   "siguiente_id": 1
 }

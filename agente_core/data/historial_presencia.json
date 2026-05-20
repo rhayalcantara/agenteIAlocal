@@ -1,0 +1,26 @@
+[
+  {
+    "tipo": "estado",
+    "personas": 1,
+    "areas": [
+      "zone_1"
+    ],
+    "timestamp": "2026-04-27T19:08:04.774730"
+  },
+  {
+    "tipo": "estado",
+    "personas": 1,
+    "areas": [
+      "zone_1"
+    ],
+    "timestamp": "2026-04-27T19:08:45.215713"
+  },
+  {
+    "tipo": "estado",
+    "personas": 1,
+    "areas": [
+      "Sala"
+    ],
+    "timestamp": "2026-04-27T19:08:55.468544"
+  }
+]

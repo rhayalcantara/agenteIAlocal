@@ -1,12 +1,10 @@
 {
   "acciones_autorizadas": [
     "ejecutar scripts python del proyecto",
-    "leer archivos del proyecto",
-    "editar archivos existentes del proyecto",
+    "leer archivos del proyecto",    
     "crear archivos nuevos en el proyecto",
     "instalar paquetes con pip",
     "ejecutar comandos bash de lectura (ls, cat, find, grep, ps, tail)",
-    "buscar en internet con DuckDuckGo",
     "leer páginas web con scrape_url",
     "navegar con el browser (browser_navegar)",
     "tomar screenshots con el browser",
@@ -18,11 +16,15 @@
     "listar directorios y archivos"
   ],
   "requieren_confirmacion": [
+    "buscar en internet con DuckDuckGo",
     "borrar archivos o directorios",
+    "editar archivos existentes del proyecto",
     "modificar .env",
     "instalar software del sistema (brew, apt, etc.)",
     "ejecutar git push o git reset --hard",
     "eliminar entradas de memoria o wiki",
     "acceder a APIs externas con credenciales nuevas no mencionadas"
-  ]
+  ],
+  "NUNCA REALIZES":["editar,modificar,eliminar archivo de la carpeta agente_core"]
+
 }

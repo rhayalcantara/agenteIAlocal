@@ -1,0 +1,111 @@
+Okay so today I wanted to share my super simple framework of how you can kind of use
+yeah you can just cloud code you can use codex to kind of automate in a simple way whatever you want
+and for this I just have kind of three things I want to use here I want to use a cron job for
+timing this is of course important if you want to have this triggered on a schedule like yesterday's
+video I want to use the cloud dashp and with a skill for headless and sometimes we really want
+to use the browser also for automation and if you watch my previous videos I created this framework
+already set up called surf agent so we're gonna use that too so these three things are basically
+all we need for like a super simple but very effective automation flow so I'm gonna show you
+how this works today and how I set this up so now before we get into it I just want to show you
+how I plan to do this today and what kind of automation we want to do okay so for this example
+what we're gonna do is pretty straightforward we want to set up this Hermes AI agent use cases
+research this is just an example right so we have this yeah you can call it these five steps
+here we want to do a search using the SERP API that is today's sponsor I'm gonna tell you more
+about them later we do Google YouTube new search we search for Hermes AI agent past seven days
+we verify this using our SERP agent by going to the browser fact checking looking at all the
+sources we're gonna write a report we're gonna submit the report on a Google form I have created
+for this so again the SERP agent comes in it can do form filling on the browser in Chrome so you
+will see that too and then it's just gonna clean up so this is gonna be the example we're gonna run
+through today so I typically just gonna head over to the Mac mini and let's run this example so you
+can actually see it work in practice so like I said everything here is gonna be skilled driven and
+this recon skill is what is gonna drive our automation here you can see basically it's a pretty
+standard setup because I'm gonna show you how we are gonna brand this now so this is the command
+that's gonna be triggered if we put this into a Chrome job I'm not gonna do that today but if
+you have a Chrome job you can just trigger this command in batch when that yeah Chrome job fires
+so we do cloud dash p and we do the slash recon inquiry so if you know in cloud code this will
+actually trigger the skill if I do like skill slash recon something like that this will of course
+trigger the skill we have created so basically when we are running this this will actually trigger our
+skill I passed in the model here I want to do cloud sonnet for six on this and I want to do
+dangerous discrete permissions because I want to allow all two use on this example automated
+Chrome job setup so basically that is gonna run this skill right that is a Chrome driven recon skill
+so it's gonna pull fresh SERP API results from google youtube i news you serve agents to fetch
+everything we talked about and basically that is the whole setup so before I show you how this runs
+now I talked about SERP API in this video this is very crucial to exactly this setup so yeah let me
+tell you about today's sponsor SERP API so we all know that context is crucial when it comes to
+building out your agents and skills and we want this to be as reliable as possible and today
+sponsor SERP API does exactly that so I want to show you how I use SERP API to set up my skills
+in for example cloud code today so I just want to head over to their documentation here so let's
+head to my dashboard and here we can see I find a documentation for the google search engine
+results so I'm gonna grab this and youtube we have that too I think youtube search API this is
+also something I like to use and I put all the documentation here in cursor so we have the
+documentation then I can just head over to my cloud code and let me do this prompt here I'm just
+gonna say read the docs SERP API build a skill that uses the API key in ENV use the SERP API to get
+context from google search google news and youtube based on the user's input and now we're gonna build
+out these skills and let's test it and see how reliable this works now okay so you can see
+cloud code built SERP context skill here so now let's test it out and see if we can do some quick
+research let's just do use the SERP context skill search youtube and google for any news around
+GPT 5.5 or Spud so this was released yesterday and this should bring up on now all the latest
+freshest news from a simple google search where we get this nice JSON output I can show you
+see all the outputs comes in this JSON format here and this is very useful for LLAMS
+right so let's go back to cloud code now see what we have here yes you can see the launch we have
+all the info we gather from the launch here officially launched yesterday april 23rd perfect what
+is the most viewed youtube video on GPT 5.5 and you can see it super fast it's reliable right and
+I can just say open it so this is why I love using SERP API when it comes to building out my
+agents and skills the reliability the avoiding of captures proxies and everything so if you want
+to try SERP API now follow the link in the description or just scan the QR code on the screen you
+will get 250 credits that you can play around with and set up your skills on agent so big thanks to
+SERP API for sponsoring this part of the video now let's go back to the project okay so now we
+want to run this so basically the way I have set this up you can do this a bunch of different
+ways I just hard code my topic into the skill here but you could pass this in like a
+bash or something if you wanted to change it up but today we're gonna do research on the Hermes
+AI agent use case and hopefully we're gonna end up with the google form that is filled out
+fully autonomously by sonnet46 so we can look at what it did find here so what we want to do now
+is pretty straightforward yeah we have no tabs open so I'm gonna head here and I'm just gonna run
+this command now and that is all we need to do right so I'm gonna start this now so of course this
+first part now using SERP API is headless so we won't see anything but since I'm running this
+on like a dedicated Mac mini I can do the the browser with my SERP agent setup I can do that without
+headless so this could be we can watch what happens so first now of course it's gonna do some
+SERP API look up finding some YouTube videos and then we're gonna go into the SERP agent and you
+will probably see the browser is being triggered here on the screen and pull this looking at all
+the sources it found on the Hermes agent so let's just wait for that and then we can follow along
+what happens okay so now we can see the SERP agent since launching the browser right is looking
+up Hermes it found a video here on a youtuber talking about the Hermes agent and remember it's
+gonna look for three videos and you can see on the right here it's looking at the transcript it's
+gathering all the information in transcripts gonna scroll down hopefully and look at some of the
+comments to get some information from there let's see if it's gonna do that yeah you can see it's
+scrolling down looking at the comments now it's probably gonna do the next video and see what happens
+here yeah here's the final one this is a different video and again probably gonna check the transcript
+look at the comments and now you can see it's heading over to Reddit too and you can also see it's
+checking its sources on the web here so here it's this on decrypt and it's on another website
+scrolling through the sources so it's basically doing some fact checking on what it looked at
+and now we go to search hacker news to see if there are any interesting stuff there so it's
+basically doing like a mini recon mini research setup looking at the topic we had and finally
+it's gonna end up on that google form and fill it out and we can access this from our mobile right
+okay so we close the tabs here hopefully now it's gonna head to the the google form and fill out that
+yeah perfect here is my AI agent automation recon form so we have three questions well
+was your most interesting idea you found from the research today we're gonna leave the urls
+of the sources and it's gonna rate the idea from one to five stars right so that is all the forms
+we have and it's gonna click submit and I can access this like I said from my yeah you can see here
+it puts in like an omnivariable device plus obsidian vault plus Hermes agent creates an
+always on ambient memory loop okay it leaves the url for a source of that idea the youtube and
+it rated it five out of five stars and that was sent and that is the whole loop now if we head back
+here now I think when this ends we get like a summary in the in the terminal two of what happened
+and that kind of completes the loop and the chronoops stops and the next day you can run this
+again and you can also have bunch of different chronoops you wanted to set up with different topics
+right so it's very flexible so let's see here now yeah we got this five novel idea Hermes
+here we have some more ideas but remember it picked the one that it taught was the best but we
+ended up with total five ideas here we can continue working on if we wanted to okay so we give
+a four out of five rating not five okay that was my bad so yeah that is the full loop fully
+automated research plus fact checking using surf agent and stuff like that so let me show you the
+form now and let's see if our response got recorded and you can see now we have one response so
+I'm gonna click on this and yeah you can see we have it yeah we got a four out of five and everything
+works here so this is a super simple way to kick off this automated setups and basically
+you can't turn it into whatever you want it it doesn't really have to be this kind of research
+but with the simple framework of using like the cloud dash p with the skill setup and you can
+add in like today's sponsor serve API that is also really good but then because you can search google
+and you can search youtube and a bunch of other things too like I said in the integration
+and of course my surf agent can do everything browser fill out forms and everything so you find a
+link in the description also to my surf agent so yeah that is what I wanted to share today I hope
+you enjoyed it and don't forget to check out surf API you can find the link in the description and
+you will get 250 credits like I said so yeah thank you for tuning in hope this gave you some
+inspiration of building out your AI agent automation setups and I will see you again soon

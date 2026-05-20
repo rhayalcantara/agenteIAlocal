@@ -1,0 +1,1 @@
+Usa selenium o playwright para acceder a páginas web que requieren JavaScript y extraer precios.

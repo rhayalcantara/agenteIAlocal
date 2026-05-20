@@ -1,0 +1,1 @@
+Use this skill to fetch web content and extract prices or data.

@@ -1,0 +1,23 @@
+{
+  "TV Cuarto Bernar": {
+    "ip": "192.168.1.45",
+    "modelo": "AI PONT SA",
+    "marca": "CHiQ",
+    "android": "11",
+    "area": "Cuarto de Bernar"
+  },
+  "TV Habitacion Principal": {
+    "ip": "192.168.1.182",
+    "modelo": "",
+    "marca": "",
+    "android": "",
+    "area": null
+  },
+  "TV Sala": {
+    "ip": "192.168.1.193",
+    "modelo": "",
+    "marca": "",
+    "android": "",
+    "area": null
+  }
+}

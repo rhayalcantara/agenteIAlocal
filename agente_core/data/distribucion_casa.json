@@ -1,0 +1,66 @@
+[
+  {
+    "id": 1,
+    "nombre": "Comedor",
+    "descripcion": "Área de comedor con mesa de madera para 6 personas y sillas.",
+    "imagen": "C:\\proyectos\\agenteIAlocal\\agente_core\\data\\imagenes_casa\\comedor.jpg",
+    "fecha_creado": "2026-04-23T16:09:28.757803",
+    "fecha_modificado": "2026-04-23T16:09:28.757803"
+  },
+  {
+    "id": 2,
+    "nombre": "SALA",
+    "descripcion": "Sala de estar con sofá gris, televisor y baloncesto.",
+    "imagen": "C:\\proyectos\\agenteIAlocal\\agente_core\\data\\imagenes_casa\\sala.jpg",
+    "fecha_creado": "2026-04-23T16:09:49.426556",
+    "fecha_modificado": "2026-04-23T16:10:19.905925"
+  },
+  {
+    "id": 3,
+    "nombre": "Lavado",
+    "descripcion": "Lavandería con lavadora y secadora apiladas, tendedero y tanca de gas.",
+    "imagen": null,
+    "fecha_creado": "2026-04-23T16:11:02.904896",
+    "fecha_modificado": "2026-04-23T16:11:02.904896"
+  },
+  {
+    "id": 4,
+    "nombre": "Cocina",
+    "descripcion": "Cocina con barra y nevera",
+    "imagen": null,
+    "fecha_creado": "2026-04-23T16:19:01.849874",
+    "fecha_modificado": "2026-04-23T16:19:01.849874"
+  },
+  {
+    "id": 5,
+    "nombre": "Estudio",
+    "descripcion": "Oficina con escritorio y PC",
+    "imagen": null,
+    "fecha_creado": "2026-04-23T16:19:01.873586",
+    "fecha_modificado": "2026-04-23T16:19:01.873586"
+  },
+  {
+    "id": 6,
+    "nombre": "Cuarto de Bernar",
+    "descripcion": "Dormitorio con somier, ropero de madera, escritorio con computadora y ropa tendida.",
+    "imagen": null,
+    "fecha_creado": "2026-04-23T16:22:00.037184",
+    "fecha_modificado": "2026-04-23T16:22:00.037184"
+  },
+  {
+    "id": 7,
+    "nombre": "Habitación principal",
+    "descripcion": "Habitación principal con cama matricial, almohadas, ropa sobre la cama, velador y escritorio. Paredes con pintura desgastada y persianas en ventanas.",
+    "imagen": null,
+    "fecha_creado": "2026-04-23T16:22:46.247656",
+    "fecha_modificado": "2026-04-23T16:22:46.247656"
+  },
+  {
+    "id": 8,
+    "nombre": "guagua",
+    "descripcion": "Área de almacenamiento para guaguas de bebé, con cama de cambio y equipos de cuidado.",
+    "imagen": "C:\\proyectos\\agenteIAlocal\\agente_core\\data\\imagenes_casa\\guagua.jpg",
+    "fecha_creado": "2026-04-24T18:36:08.959006",
+    "fecha_modificado": "2026-04-24T18:36:08.959006"
+  }
+]

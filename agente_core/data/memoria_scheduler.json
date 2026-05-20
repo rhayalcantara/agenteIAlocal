@@ -1,0 +1,18 @@
+{
+  "hechos": [],
+  "resumenes": [
+    {
+      "texto": "El asistente ajusta el directorio de trabajo y reactiva la habilidad de seguimiento para verificar correctamente el estado del envío de Amazon.",
+      "fecha": "2026-05-16 21:42"
+    },
+    {
+      "texto": "El sistema revisa automáticamente cada dos horas los últimos 10 correos no leídos y genera un resumen si aparecen nuevos.",
+      "fecha": "2026-05-17 03:55"
+    },
+    {
+      "texto": "Cada dos horas, este proceso automático revisa los últimos diez correos no leídos y genera un resumen si hay nuevos.",
+      "fecha": "2026-05-17 05:57"
+    }
+  ],
+  "siguiente_id": 1
+}

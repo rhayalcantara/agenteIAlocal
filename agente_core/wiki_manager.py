@@ -119,22 +119,27 @@ class WikiManager:
     def _paginas_cercanas(self, pagina: str) -> list:
         nombre = os.path.basename(pagina).lower()
         similares = []
-        for seccion in SECCIONES:
-            seccion_dir = os.path.join(self.wiki_dir, seccion)
+        for entry in os.listdir(self.wiki_dir):
+            seccion_dir = os.path.join(self.wiki_dir, entry)
             if os.path.isdir(seccion_dir):
                 for archivo in os.listdir(seccion_dir):
                     if archivo.endswith(".md") and nombre in archivo.lower():
-                        similares.append(f"{seccion}/{archivo[:-3]}")
+                        similares.append(f"{entry}/{archivo[:-3]}")
         return similares[:5]
 
     def estadisticas(self) -> dict:
         paginas = []
-        for seccion in SECCIONES:
-            d = os.path.join(self.wiki_dir, seccion)
+        # Contar archivos .md en la raiz de la wiki
+        for f in os.listdir(self.wiki_dir):
+            if f.endswith(".md"):
+                paginas.append(f[:-3])
+        # Contar archivos .md en TODAS las subcarpetas (no solo SECCIONES)
+        for entry in os.listdir(self.wiki_dir):
+            d = os.path.join(self.wiki_dir, entry)
             if os.path.isdir(d):
                 for f in os.listdir(d):
                     if f.endswith(".md"):
-                        paginas.append(f"{seccion}/{f[:-3]}")
+                        paginas.append(f"{entry}/{f[:-3]}")
         return {"total_paginas": len(paginas), "wiki_dir": self.wiki_dir}
 
 

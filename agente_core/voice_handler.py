@@ -149,7 +149,7 @@ def sintetizar(texto: str, lang: str = "es", speed: float = 1.0) -> str | None:
             return None
 
         # Generar MP3 con gTTS (máx 4096 chars por chunk)
-        mp3_path = tempfile.mktemp(suffix="_tts.mp3", dir="/tmp")
+        mp3_path = tempfile.mktemp(suffix="_tts.mp3", dir=tempfile.gettempdir())
         slow = speed < 0.8
         chunks = [texto[i:i+4096] for i in range(0, len(texto), 4096)]
         tts = gTTS(text=chunks[0], lang=lang, slow=slow)
@@ -157,7 +157,7 @@ def sintetizar(texto: str, lang: str = "es", speed: float = 1.0) -> str | None:
         # Si hay más chunks, concatenar al mismo MP3
         if len(chunks) > 1:
             for chunk in chunks[1:]:
-                chunk_path = tempfile.mktemp(suffix="_tts_chunk.mp3", dir="/tmp")
+                chunk_path = tempfile.mktemp(suffix="_tts_chunk.mp3", dir=tempfile.gettempdir())
                 gTTS(text=chunk, lang=lang, slow=slow).save(chunk_path)
                 subprocess.run(
                     ["ffmpeg", "-y",

@@ -14,11 +14,35 @@ _file_handler = None
 _console_handler = None
 
 
+class _SafeRotatingFileHandler(RotatingFileHandler):
+    """RotatingFileHandler tolerante a locks de Windows.
+
+    Si otro proceso mantiene abierto el archivo durante la rotación
+    (WinError 32), se omite la rotación en lugar de levantar una
+    Logging error en cada emit. El archivo crece un poco más hasta
+    que el próximo intento pueda renombrar.
+    """
+
+    def doRollover(self):
+        try:
+            super().doRollover()
+        except (PermissionError, OSError):
+            if self.stream:
+                try:
+                    self.stream.close()
+                except Exception:
+                    pass
+                self.stream = None
+            if not self.delay:
+                self.stream = self._open()
+
+
 def _get_file_handler():
     global _file_handler
     if _file_handler is None:
-        _file_handler = RotatingFileHandler(
-            LOG_FILE, maxBytes=5 * 1024 * 1024, backupCount=3, encoding="utf-8"
+        _file_handler = _SafeRotatingFileHandler(
+            LOG_FILE, maxBytes=5 * 1024 * 1024, backupCount=3,
+            encoding="utf-8", delay=True,
         )
         _file_handler.setLevel(logging.DEBUG)
         _file_handler.setFormatter(logging.Formatter(LOG_FORMAT, datefmt=LOG_DATE_FORMAT))

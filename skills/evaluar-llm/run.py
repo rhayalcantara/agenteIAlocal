@@ -184,6 +184,98 @@ PRUEBAS = [
             "El cierre es definitivo (no deja temas abiertos)",
         ],
     },
+
+    # ── DIMENSIÓN 5: Compatibilidad con agente (casos reales) ────────────
+    {
+        "dimension": "Compatibilidad con agente",
+        "id": "CA-1",
+        "nombre": "Usar tool names correctos",
+        "descripcion": "Eres un agente con las siguientes herramientas disponibles:\n"
+                       "- buscar_en_internet(query)\n"
+                       "- read_file(path)\n"
+                       "- edit_file(path, prev_text, new_text)\n"
+                       "- execute_bash(command)\n"
+                       "- activar_skill(nombre)\n"
+                       "- enviar_archivo_telegram(ruta, caption)\n"
+                       "- gmail(operacion, ...)\n"
+                       "- lista_compras(operacion, ...)\n\n"
+                       "El usuario dice: 'Busca las noticias de hoy'\n\n"
+                       "¿Qué herramienta usarías? Responde SOLO con el nombre exacto de la herramienta "
+                       "de la lista anterior. Una sola palabra.",
+        "criterios": [
+            "Usa un nombre de herramienta que existe en la lista (buscar_en_internet o activar_skill)",
+            "No inventa nombres como 'buscar-noticias' o 'buscar_noticias'",
+        ],
+    },
+    {
+        "dimension": "Compatibilidad con agente",
+        "id": "CA-2",
+        "nombre": "Argumentos correctos para edit_file",
+        "descripcion": "Tienes la herramienta edit_file con estos parámetros obligatorios:\n"
+                       "- path (str): ruta del archivo\n"
+                       "- prev_text (str): texto a reemplazar\n"
+                       "- new_text (str): texto nuevo\n\n"
+                       "Necesitas crear un archivo HTML en 'reporte.html' con el contenido '<h1>Hola</h1>'.\n\n"
+                       "Escribe la llamada a edit_file como JSON con los 3 parámetros. "
+                       "Recuerda: si el archivo no existe, prev_text debe estar vacío.",
+        "criterios": [
+            "Incluye el parámetro 'path' con valor 'reporte.html' o similar",
+            "Incluye 'prev_text' (vacío para archivo nuevo)",
+            "Incluye 'new_text' con contenido HTML",
+            "No omite ningún parámetro obligatorio",
+        ],
+    },
+    {
+        "dimension": "Compatibilidad con agente",
+        "id": "CA-3",
+        "nombre": "Secuencia multi-step: noticias + envio",
+        "descripcion": "Eres un agente con estas herramientas:\n"
+                       "- buscar_en_internet(query): busca en internet\n"
+                       "- edit_file(path, prev_text, new_text): crea/edita archivos\n"
+                       "- enviar_archivo_telegram(ruta, caption): envía archivo al usuario\n\n"
+                       "El usuario dice: 'Busca noticias de tecnología y envíamelas como HTML'\n\n"
+                       "Describe los pasos en orden numerado. Para cada paso indica "
+                       "qué herramienta usarías y con qué argumentos clave.",
+        "criterios": [
+            "Paso 1 usa buscar_en_internet para obtener noticias",
+            "Un paso intermedio usa edit_file para crear el HTML",
+            "El último paso usa enviar_archivo_telegram para enviar el archivo",
+            "El orden es lógico: buscar -> crear archivo -> enviar",
+        ],
+    },
+    {
+        "dimension": "Compatibilidad con agente",
+        "id": "CA-4",
+        "nombre": "Gmail: query correcta",
+        "descripcion": "Tienes la herramienta gmail con estas operaciones:\n"
+                       "- gmail(operacion='leer', cantidad=10, query='is:unread')\n"
+                       "- gmail(operacion='buscar', query='from:banco after:2026/04/01')\n"
+                       "- gmail(operacion='resumen')\n\n"
+                       "El usuario dice: 'busca correos del banco de este mes'\n\n"
+                       "Escribe la llamada exacta como JSON. Hoy es abril 2026.",
+        "criterios": [
+            "Usa operacion='buscar' (no 'leer')",
+            "El query incluye filtro de fecha (after:2026/04 o similar)",
+            "El query incluye referencia a banco (from:banco o subject:banco o banco)",
+        ],
+    },
+    {
+        "dimension": "Compatibilidad con agente",
+        "id": "CA-5",
+        "nombre": "No inventar herramientas",
+        "descripcion": "Eres un agente. Tus ÚNICAS herramientas disponibles son:\n"
+                       "list_files_in_dir, read_file, edit_file, execute_bash, "
+                       "guardar_memoria, buscar_en_internet, gmail, lista_compras, "
+                       "activar_skill, enviar_archivo_telegram\n\n"
+                       "El usuario dice: 'lee mis correos y descarga los estados de cuenta'\n\n"
+                       "Lista las herramientas que usarías en orden. "
+                       "USA SOLO herramientas de la lista anterior. No inventes ninguna.",
+        "criterios": [
+            "Solo usa herramientas de la lista proporcionada",
+            "No inventa herramientas como 'descargar_adjunto', 'leer_correos', 'download_attachment'",
+            "Incluye gmail como herramienta principal",
+        ],
+    },
 ]
 
 
@@ -228,7 +320,10 @@ def _get_client():
     return OpenAI(**kwargs), cfg["model"], provider
 
 
-def _preguntar(client, model: str, mensajes: list, max_tokens: int = 512) -> str:
+def _preguntar(client, model: str, mensajes: list, max_tokens: int = 2048) -> tuple[str, float]:
+    """Retorna (respuesta, tiempo_en_segundos)."""
+    import time
+    t0 = time.time()
     try:
         resp = client.chat.completions.create(
             model=model,
@@ -236,9 +331,11 @@ def _preguntar(client, model: str, mensajes: list, max_tokens: int = 512) -> str
             max_tokens=max_tokens,
             temperature=0.3,
         )
-        return resp.choices[0].message.content.strip()
+        elapsed = time.time() - t0
+        return resp.choices[0].message.content.strip(), elapsed
     except Exception as e:
-        return f"[ERROR: {e}]"
+        elapsed = time.time() - t0
+        return f"[ERROR: {e}]", elapsed
 
 
 # ── Evaluación interactiva ─────────────────────────────────────────────────
@@ -268,6 +365,50 @@ def _evaluar_criterios(respuesta: str, criterios: list) -> dict:
             resultados[c] = "?" in respuesta
         elif "advierte" in c.lower() or "riesgo" in c.lower():
             resultados[c] = any(w in respuesta.lower() for w in ["cuidado", "riesgo", "peligro", "irreversible", "perderás", "perder", "advertencia", "warning"])
+        # ── Criterios de compatibilidad con agente (CA-*) ────────────────
+        elif "nombre de herramienta que existe" in c.lower():
+            tools_validas = ["buscar_en_internet", "activar_skill", "read_file", "edit_file",
+                             "execute_bash", "list_files_in_dir", "gmail", "lista_compras",
+                             "enviar_archivo_telegram", "guardar_memoria"]
+            resultados[c] = any(t in respuesta.lower().replace(" ", "_") for t in tools_validas)
+        elif "no inventa nombres como" in c.lower():
+            inventados = ["buscar-noticias", "buscar_noticias", "leer_archivo", "editar_archivo",
+                          "executar_comando", "leer_correos", "descargar_adjunto"]
+            resultados[c] = not any(inv in respuesta.lower() for inv in inventados)
+        elif "parámetro 'path'" in c.lower():
+            resultados[c] = "path" in respuesta.lower() and ("reporte" in respuesta.lower() or ".html" in respuesta.lower())
+        elif "no omite ningún parámetro" in c.lower():
+            resultados[c] = all(p in respuesta.lower() for p in ["path", "prev_text", "new_text"])
+        elif "paso 1 usa buscar_en_internet" in c.lower():
+            resultados[c] = "buscar_en_internet" in respuesta.lower().replace(" ", "_")
+        elif "último paso usa enviar_archivo_telegram" in c.lower():
+            resultados[c] = "enviar_archivo_telegram" in respuesta.lower().replace(" ", "_")
+        elif "orden es lógico" in c.lower():
+            r_lower = respuesta.lower()
+            pos_buscar = r_lower.find("buscar")
+            pos_edit = r_lower.find("edit_file") if "edit_file" in r_lower else r_lower.find("crear")
+            pos_enviar = r_lower.find("enviar")
+            if pos_buscar >= 0 and pos_edit >= 0 and pos_enviar >= 0:
+                resultados[c] = pos_buscar < pos_edit < pos_enviar
+            else:
+                resultados[c] = None
+        elif "operacion='buscar'" in c.lower():
+            resultados[c] = "buscar" in respuesta.lower()
+        elif "filtro de fecha" in c.lower():
+            resultados[c] = any(f in respuesta.lower() for f in ["after:", "2026/04", "2026-04", "abril"])
+        elif "referencia a banco" in c.lower():
+            resultados[c] = "banco" in respuesta.lower()
+        elif "solo usa herramientas de la lista" in c.lower():
+            inventados = ["descargar_adjunto", "download_attachment", "leer_correos",
+                          "read_email", "download_file", "descargar_archivo",
+                          "buscar_correos", "obtener_adjuntos"]
+            resultados[c] = not any(inv in respuesta.lower().replace(" ", "_") for inv in inventados)
+        elif "no inventa herramientas como" in c.lower():
+            inventados = ["descargar_adjunto", "download_attachment", "leer_correos",
+                          "download", "fetch_email"]
+            resultados[c] = not any(inv in respuesta.lower().replace(" ", "_") for inv in inventados)
+        elif "incluye gmail como herramienta" in c.lower():
+            resultados[c] = "gmail" in respuesta.lower()
         else:
             resultados[c] = None  # Requiere revisión manual
     return resultados
@@ -315,7 +456,7 @@ def run_evaluar_llm(provider_override: str = None, output_dir: str = None) -> st
             {"role": "user", "content": prueba["descripcion"]},
         ]
 
-        respuesta1 = _preguntar(client, model, mensajes)
+        respuesta1, tiempo1 = _preguntar(client, model, mensajes)
         evals1 = _evaluar_criterios(respuesta1, prueba["criterios"])
         score1 = _calcular_score(evals1)
 
@@ -324,24 +465,27 @@ def run_evaluar_llm(provider_override: str = None, output_dir: str = None) -> st
             "respuesta": respuesta1,
             "evaluacion": evals1,
             "score": score1,
+            "tiempo": tiempo1,
             "respuesta2": None,
             "evaluacion2": None,
             "score2": None,
+            "tiempo2": None,
         }
 
         # Segundo turno si aplica (CT-1)
         if prueba.get("segundo_turno"):
             mensajes.append({"role": "assistant", "content": respuesta1})
             mensajes.append({"role": "user", "content": prueba["segundo_turno"]})
-            respuesta2 = _preguntar(client, model, mensajes, max_tokens=800)
+            respuesta2, tiempo2 = _preguntar(client, model, mensajes, max_tokens=2048)
             evals2 = _evaluar_criterios(respuesta2, prueba["criterios_segundo"])
             resultado["respuesta2"] = respuesta2
             resultado["evaluacion2"] = evals2
             resultado["score2"] = _calcular_score(evals2)
+            resultado["tiempo2"] = tiempo2
 
         resultados.append(resultado)
         score_str = f"{score1:.1f}/5" if score1 is not None else "manual"
-        print(f"score={score_str}")
+        print(f"score={score_str} ({tiempo1:.1f}s)")
 
     # ── Generar reporte markdown ───────────────────────────────────────────
     reporte = _generar_reporte(resultados, model, provider, fecha)
@@ -373,11 +517,30 @@ def _generar_reporte(resultados: list, model: str, provider: str, fecha: str) ->
     if scores_validos:
         score_global = round(sum(scores_validos) / len(scores_validos), 2)
 
+    # Calcular tiempos
+    tiempos = [r["tiempo"] for r in resultados if r.get("tiempo")]
+    tiempos += [r["tiempo2"] for r in resultados if r.get("tiempo2")]
+    tiempo_promedio = round(sum(tiempos) / len(tiempos), 1) if tiempos else 0
+    tiempo_total = round(sum(tiempos), 1)
+    tiempo_min = round(min(tiempos), 1) if tiempos else 0
+    tiempo_max = round(max(tiempos), 1) if tiempos else 0
+
     md = f"""# Evaluación LLM — {model}
 
 **Proveedor:** {provider.upper()}
 **Fecha:** {fecha}
 **Score global:** {score_global}/5 ({'⭐' * round(score_global) if score_global else 'N/A'})
+
+---
+
+## Rendimiento
+
+| Métrica | Valor |
+|---------|-------|
+| Tiempo promedio por respuesta | {tiempo_promedio}s |
+| Tiempo mínimo | {tiempo_min}s |
+| Tiempo máximo | {tiempo_max}s |
+| Tiempo total evaluación | {tiempo_total}s |
 
 ---
 
@@ -407,7 +570,8 @@ def _generar_reporte(resultados: list, model: str, provider: str, fecha: str) ->
         md += f"### {dim}\n\n"
         for r in items:
             p = r["prueba"]
-            md += f"#### [{p['id']}] {p['nombre']}\n\n"
+            tiempo_str = f" — {r['tiempo']:.1f}s" if r.get("tiempo") else ""
+            md += f"#### [{p['id']}] {p['nombre']}{tiempo_str}\n\n"
             md += f"**Prompt:**\n> {p['descripcion']}\n\n"
             md += f"**Respuesta:**\n```\n{r['respuesta']}\n```\n\n"
             md += "**Criterios:**\n"

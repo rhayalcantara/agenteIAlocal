@@ -39,7 +39,7 @@ def _obtener_pagina():
         raise
 
 
-def browser_navegar(url: str, esperar: str = "domcontentloaded", timeout: int = 15000) -> str:
+def browser_navegar(url: str, esperar: str = "domcontentloaded", timeout: int = 15000, **kwargs) -> str:
     """Navega a una URL y devuelve el texto visible de la página."""
     try:
         page = _obtener_pagina()
@@ -56,7 +56,7 @@ def browser_navegar(url: str, esperar: str = "domcontentloaded", timeout: int = 
         return f"Error navegando a {url}: {e}"
 
 
-def browser_screenshot(nombre: str = None) -> str:
+def browser_screenshot(nombre: str = None, **kwargs) -> str:
     """Toma un screenshot de la página actual. Devuelve la ruta del archivo."""
     try:
         page = _obtener_pagina()
@@ -74,7 +74,7 @@ def browser_screenshot(nombre: str = None) -> str:
         return f"Error tomando screenshot: {e}"
 
 
-def browser_click(selector: str) -> str:
+def browser_click(selector: str, **kwargs) -> str:
     """Hace clic en un elemento. Acepta selector CSS, texto visible o aria-label."""
     try:
         page = _obtener_pagina()
@@ -91,7 +91,7 @@ def browser_click(selector: str) -> str:
         return f"Error haciendo click en '{selector}': {e}"
 
 
-def browser_escribir(selector: str, texto: str) -> str:
+def browser_escribir(selector: str, texto: str, **kwargs) -> str:
     """Escribe texto en un campo de formulario."""
     try:
         page = _obtener_pagina()
@@ -103,7 +103,7 @@ def browser_escribir(selector: str, texto: str) -> str:
         return f"Error escribiendo en '{selector}': {e}"
 
 
-def browser_obtener_texto(selector: str = "body") -> str:
+def browser_obtener_texto(selector: str = "body", **kwargs) -> str:
     """Devuelve el texto visible del elemento indicado (por defecto toda la página)."""
     try:
         page = _obtener_pagina()
@@ -116,7 +116,7 @@ def browser_obtener_texto(selector: str = "body") -> str:
         return f"Error obteniendo texto de '{selector}': {e}"
 
 
-def browser_ejecutar_js(script: str) -> str:
+def browser_ejecutar_js(script: str, **kwargs) -> str:
     """Ejecuta JavaScript en la página actual y devuelve el resultado."""
     try:
         page = _obtener_pagina()

@@ -39,6 +39,13 @@ Para usar la skill, pide algo como:
 - **CT-1** Pausar y retomar — esperar confirmación antes de responder
 - **CT-2** Resumen y cierre — resumen ejecutivo de 3 temas con recomendación final
 
+### Compatibilidad con agente (casos reales del log)
+- **CA-1** Usar tool names correctos — no inventar herramientas que no existen
+- **CA-2** Argumentos correctos para edit_file — incluir path, prev_text y new_text
+- **CA-3** Secuencia multi-step — buscar noticias + crear HTML + enviar por Telegram
+- **CA-4** Gmail query correcta — buscar correos del banco con filtro de fecha
+- **CA-5** No inventar herramientas — usar solo las disponibles para leer correos
+
 ## Interfaz
 
 ### Desde Python

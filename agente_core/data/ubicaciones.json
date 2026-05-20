@@ -1,0 +1,90 @@
+[
+  {
+    "id": 1,
+    "nombre": "Monitor de escritorio",
+    "area": "Cuarto de Bernar",
+    "lugar_exacto": "Escritorio",
+    "descripcion": "Monitor de trabajo (código visible)",
+    "imagen": "C:\\proyectos\\agenteIAlocal\\agente_core\\data\\imagenes_ubicaciones\\monitor_de_escritorio.jpg",
+    "fecha_registrado": "2026-04-23T16:30:14.258806",
+    "fecha_movido": null,
+    "historial_movimientos": []
+  },
+  {
+    "id": 2,
+    "nombre": "Laptop Lenovo ThinkPad",
+    "area": "Cuarto de Bernar",
+    "lugar_exacto": "Escritorio",
+    "descripcion": "Asignada por la empresa para trabajo (Pantalla de Calidad visible)",
+    "imagen": null,
+    "fecha_registrado": "2026-04-23T16:33:21.574525",
+    "fecha_movido": null,
+    "historial_movimientos": []
+  },
+  {
+    "id": 3,
+    "nombre": "Audífonos",
+    "area": "Cuarto de Bernar",
+    "lugar_exacto": "Sobre la Laptop",
+    "descripcion": "Asignados por la empresa, color negro",
+    "imagen": null,
+    "fecha_registrado": "2026-04-23T16:33:21.583315",
+    "fecha_movido": null,
+    "historial_movimientos": []
+  },
+  {
+    "id": 4,
+    "nombre": "Monitor HP",
+    "area": "Cuarto de Bernar",
+    "lugar_exacto": "Escritorio",
+    "descripcion": "Monitor HP asignado por la empresa, mostrando VS Code en uso",
+    "imagen": "C:\\proyectos\\agenteIAlocal\\agente_core\\data\\imagenes_ubicaciones\\monitor_hp.jpg",
+    "fecha_registrado": "2026-04-23T16:35:49.284954",
+    "fecha_movido": null,
+    "historial_movimientos": []
+  },
+  {
+    "id": 5,
+    "nombre": "MacBook Pro M4",
+    "area": "Cuarto de Bernar",
+    "lugar_exacto": "Escritorio",
+    "descripcion": null,
+    "imagen": "C:\\proyectos\\agenteIAlocal\\agente_core\\data\\imagenes_ubicaciones\\macbook_pro_m4.jpg",
+    "fecha_registrado": "2026-04-23T16:37:15.895204",
+    "fecha_movido": null,
+    "historial_movimientos": []
+  },
+  {
+    "id": 6,
+    "nombre": "Lenovo Laptop",
+    "area": "Cuarto de Bernar",
+    "lugar_exacto": "Escritorio",
+    "descripcion": "Donde corre la IA",
+    "imagen": "C:\\proyectos\\agenteIAlocal\\agente_core\\data\\imagenes_ubicaciones\\lenovo_laptop.jpg",
+    "fecha_registrado": "2026-04-23T16:39:15.851587",
+    "fecha_movido": null,
+    "historial_movimientos": []
+  },
+  {
+    "id": 7,
+    "nombre": "cuna de bebé",
+    "area": "guagua",
+    "lugar_exacto": "esquina izquierda, junto a la ventana",
+    "descripcion": "Cuna plegable, con colchón de espuma y cobertor azul",
+    "imagen": null,
+    "fecha_registrado": "2026-04-24T20:24:43.601535",
+    "fecha_movido": null,
+    "historial_movimientos": []
+  },
+  {
+    "id": 8,
+    "nombre": "Ninja Creami",
+    "area": "Cocina",
+    "lugar_exacto": "encimera",
+    "descripcion": "7-in-1 Ice Cream Maker",
+    "imagen": null,
+    "fecha_registrado": "2026-04-26T20:52:41.834298",
+    "fecha_movido": null,
+    "historial_movimientos": []
+  }
+]

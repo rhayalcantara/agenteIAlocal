@@ -1,0 +1,16 @@
+{
+  "ruview_url": "http://localhost:3000",
+  "ws_url": "ws://localhost:3001",
+  "umbral_inactividad_min": 60,
+  "umbral_caida_confianza": 0.7,
+  "max_historial_horas": 24,
+  "zonas_mapeadas": {
+    "zone_1": "Sala",
+    "zone_2": "Cocina",
+    "zone_3": "Habitacion principal",
+    "zone_4": "Cuarto de Bernar",
+    "zone_5": "Comedor",
+    "zone_6": "Lavado",
+    "zone_7": "Bano"
+  }
+}

@@ -234,6 +234,200 @@ def cmd_enviar(args):
         sys.exit(1)
 
 
+def _extraer_adjuntos(service, msg_id: str, payload: dict, carpeta: str) -> list:
+    """Recorre el payload de un correo, descarga todos los adjuntos a `carpeta`.
+    Retorna lista de rutas guardadas."""
+    rutas = []
+
+    def _recorrer(partes):
+        for parte in partes:
+            filename = parte.get("filename", "")
+            body = parte.get("body", {}) or {}
+            if parte.get("parts"):
+                _recorrer(parte["parts"])
+            if filename and body.get("size", 0) > 0:
+                attachment_id = body.get("attachmentId")
+                data = body.get("data")
+                if attachment_id:
+                    att = service.users().messages().attachments().get(
+                        userId="me", messageId=msg_id, id=attachment_id
+                    ).execute()
+                    data = att.get("data", "")
+                if data:
+                    file_data = base64.urlsafe_b64decode(data + "==")
+                    # Sanitizar filename
+                    safe_name = re.sub(r'[<>:"/\\|?*]', "_", filename)
+                    ruta = os.path.join(carpeta, safe_name)
+                    # Si ya existe, prefijar con msg_id corto
+                    if os.path.exists(ruta):
+                        base, ext = os.path.splitext(safe_name)
+                        ruta = os.path.join(carpeta, f"{base}_{msg_id[:8]}{ext}")
+                    with open(ruta, "wb") as f:
+                        f.write(file_data)
+                    rutas.append(ruta)
+
+    _recorrer(payload.get("parts", []))
+    return rutas
+
+
+def cmd_descargar_adjuntos(args):
+    """Descarga adjuntos de los correos que coincidan con --query, a la carpeta dada."""
+    service = _get_service()
+    from googleapiclient.errors import HttpError
+
+    # Resolver carpeta destino
+    carpeta = args.carpeta
+    if not os.path.isabs(carpeta):
+        carpeta = os.path.join(_ROOT, carpeta)
+    os.makedirs(carpeta, exist_ok=True)
+
+    # Tracking de IDs procesados (para no re-descargar)
+    tracking_file = os.path.join(carpeta, ".procesados.json")
+    procesados = set()
+    if os.path.exists(tracking_file):
+        try:
+            with open(tracking_file, "r", encoding="utf-8") as f:
+                procesados = set(json.load(f))
+        except Exception:
+            procesados = set()
+
+    try:
+        # Buscar correos que coincidan
+        ids = []
+        page_token = None
+        while True:
+            resp = service.users().messages().list(
+                userId="me", q=args.query, maxResults=100, pageToken=page_token,
+            ).execute()
+            ids.extend([m["id"] for m in resp.get("messages", [])])
+            page_token = resp.get("nextPageToken")
+            if not page_token or (args.limite and len(ids) >= args.limite):
+                break
+        if args.limite:
+            ids = ids[: args.limite]
+
+        # Filtrar los que ya procesamos (a menos que --reprocesar)
+        if not args.reprocesar:
+            ids = [i for i in ids if i not in procesados]
+
+        if not ids:
+            print(json.dumps({
+                "descargados": 0,
+                "carpeta": carpeta,
+                "mensaje": "Sin correos nuevos para procesar (todos ya procesados o sin coincidencias).",
+            }, ensure_ascii=False, indent=2))
+            return
+
+        def _persistir_tracking():
+            with open(tracking_file, "w", encoding="utf-8") as f:
+                json.dump(sorted(procesados), f, ensure_ascii=False, indent=2)
+
+        resultados = []
+        nuevos = 0
+        errores = []
+        for msg_id in ids:
+            try:
+                msg = service.users().messages().get(
+                    userId="me", id=msg_id, format="full"
+                ).execute()
+                headers = msg["payload"].get("headers", [])
+                de = _get_header(headers, "From")
+                asunto = _get_header(headers, "Subject")
+                fecha = _get_header(headers, "Date")
+                adjuntos = _extraer_adjuntos(service, msg_id, msg["payload"], carpeta)
+                if adjuntos:
+                    resultados.append({
+                        "id": msg_id, "de": de, "asunto": asunto, "fecha": fecha,
+                        "adjuntos": adjuntos,
+                    })
+                # Marcar procesado y persistir tras cada uno (resiliente a crashes)
+                procesados.add(msg_id)
+                _persistir_tracking()
+                nuevos += 1
+            except Exception as e:
+                errores.append({"id": msg_id, "error": str(e)})
+                # No abortar el loop entero por un error puntual de red
+                continue
+
+        total_archivos = sum(len(r["adjuntos"]) for r in resultados)
+        salida = {
+            "correos_procesados": nuevos,
+            "correos_con_adjuntos": len(resultados),
+            "total_archivos": total_archivos,
+            "carpeta": carpeta,
+            "detalle": resultados,
+        }
+        if errores:
+            salida["errores"] = errores
+        print(json.dumps(salida, ensure_ascii=False, indent=2))
+    except HttpError as e:
+        print(f"ERROR Gmail API: {e}")
+        sys.exit(1)
+
+
+def cmd_borrar(args):
+    """Mueve correos a la papelera (recuperables 30 días). Requiere scope gmail.modify."""
+    service = _get_service()
+    from googleapiclient.errors import HttpError
+    try:
+        # Si vino --id directo, lo usamos; sino, buscamos por query
+        if args.id:
+            ids = [args.id]
+        else:
+            if not args.query:
+                print("ERROR: debes pasar --query o --id")
+                sys.exit(1)
+
+            ids = []
+            page_token = None
+            while True:
+                resp = service.users().messages().list(
+                    userId="me",
+                    q=args.query,
+                    maxResults=500,
+                    pageToken=page_token,
+                ).execute()
+                ids.extend([m["id"] for m in resp.get("messages", [])])
+                page_token = resp.get("nextPageToken")
+                if not page_token or (args.limite and len(ids) >= args.limite):
+                    break
+
+            if args.limite:
+                ids = ids[: args.limite]
+
+        if not ids:
+            print(json.dumps({"borrados": 0, "mensaje": "Sin coincidencias para borrar."}, ensure_ascii=False))
+            return
+
+        if args.dry_run:
+            print(json.dumps({
+                "dry_run": True,
+                "encontrados": len(ids),
+                "ids_muestra": ids[:5],
+                "mensaje": f"Se moverían {len(ids)} correo(s) a la papelera. Re-ejecuta sin --dry-run.",
+            }, ensure_ascii=False, indent=2))
+            return
+
+        # batchModify acepta hasta 1000 ids por llamada
+        borrados = 0
+        for i in range(0, len(ids), 500):
+            lote = ids[i:i + 500]
+            service.users().messages().batchModify(
+                userId="me",
+                body={"ids": lote, "addLabelIds": ["TRASH"], "removeLabelIds": ["INBOX", "UNREAD"]},
+            ).execute()
+            borrados += len(lote)
+
+        print(json.dumps({
+            "borrados": borrados,
+            "destino": "TRASH (recuperable 30 días)",
+            "query": args.query or f"id={args.id}",
+        }, ensure_ascii=False, indent=2))
+    except HttpError as e:
+        print(f"ERROR Gmail API: {e}")
+        sys.exit(1)
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
@@ -268,6 +462,26 @@ def main():
     p_env.add_argument("--asunto", required=True, help="Asunto del correo")
     p_env.add_argument("--cuerpo", required=True, help="Cuerpo del correo (texto plano)")
     p_env.set_defaults(func=cmd_enviar)
+
+    # borrar — mueve a TRASH (recuperable 30 días)
+    p_borrar = sub.add_parser("borrar", help="Mueve correos a la papelera (recuperable 30 días)")
+    p_borrar.add_argument("--query", "-q", help="Query Gmail (e.g. 'from:foo@bar.com')")
+    p_borrar.add_argument("--id", help="ID específico de un correo (alternativa a --query)")
+    p_borrar.add_argument("--limite", type=int, help="Tope de correos a procesar")
+    p_borrar.add_argument("--dry-run", action="store_true", help="Solo muestra cuántos se borrarían, no borra")
+    p_borrar.set_defaults(func=cmd_borrar)
+
+    # descargar_adjuntos — guarda adjuntos de correos que coincidan con --query
+    p_adj = sub.add_parser("descargar_adjuntos",
+                           help="Descarga adjuntos de correos que coincidan, evita duplicados")
+    p_adj.add_argument("--query", "-q", required=True,
+                       help="Query Gmail (e.g. 'from:avdmail@avdinternacional.com')")
+    p_adj.add_argument("--carpeta", required=True,
+                       help="Carpeta destino (relativa al root o absoluta)")
+    p_adj.add_argument("--limite", type=int, help="Tope de correos a procesar")
+    p_adj.add_argument("--reprocesar", action="store_true",
+                       help="Re-descargar incluso si el correo ya fue procesado antes")
+    p_adj.set_defaults(func=cmd_descargar_adjuntos)
 
     args = parser.parse_args()
     args.func(args)

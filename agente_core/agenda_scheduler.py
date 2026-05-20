@@ -210,11 +210,17 @@ class AgendaScheduler(threading.Thread):
 
             # Sub-agente temporal: instancia independiente con historial limpio.
             # Usa el modelo configurado para la agenda (puede ser uno más rápido).
+            # Memoria aislada para que sus [instruccion]/[hecho] no contaminen
+            # el system prompt del agente principal.
+            _data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                     "data")
+            _memoria_path = os.path.join(_data_dir, "memoria_scheduler.json")
             agente = Agent(
                 model=self._agenda_model,
                 api_key=self._agenda_api_key,
                 base_url=self._agenda_base_url,
                 provider=self._agenda_provider,
+                memoria_path=_memoria_path,
             )
             # Limpiar historial para garantizar contexto limpio
             agente.limpiar_historial()

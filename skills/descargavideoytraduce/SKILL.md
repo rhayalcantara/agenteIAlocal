@@ -1,19 +1,73 @@
 # Skill: descargavideoytraduce
 
-Esta skill automatiza el proceso de descargar un video de YouTube, extraer su audio, transcribirlo al idioma original, traducirlo al español y generar una nueva pista de audio en español mediante TTS para luego montarlo sobre el video original.
+Descarga o procesa un video, lo transcribe con Whisper, traduce al español y genera audio doblado con edge-tts.
 
-## Flujo de trabajo
-1. **Descarga**: Utiliza `yt-dlp` para obtener la mejor calidad del video de YouTube.
-2. **Extracción de Audio**: Convierte el contenido descargado a un formato compatible (MP3/WAV) usando `ffmpeg`.
-3. **Transcripción (Whisper)**: Emplea el modelo Whisper para convertir el audio en texto (idioma original).
-4. **Traducción**: Procesa el texto transcrito y lo traduce al español.
-5. **Generación de Audio (TTS)**: Utiliza una herramienta de Text-to-Speech para generar la voz en español basada en la traducción.
-6. **Montaje Final**: Combina el video original con la nueva pista de audio en español usando `ffmpeg`, asegurando la sincronización básica.
+## Modos de uso
 
-## Requisitos previos
-- `yt-dlp` instalado.
-- `ffmpeg` instalado.
-- Librerías de Python: `openai-whisper`, `googletrans==4.0.0-rc1` (o similar), y una librería de TTS (ej. `gTTS` o `edge-tts`).
+| Modo | Argumento | Qué hace |
+|------|-----------|----------|
+| URL YouTube | `https://youtube.com/watch?v=...` | Descarga + transcribe + traduce + dobla |
+| Video local | `ruta/al/video.mp4` | Transcribe + traduce + dobla (sin descargar) |
+| Solo audio | `--audio ruta/al/audio.mp3` | Transcribe + traduce + genera TTS |
+| Solo texto | `--texto ruta/al/texto.txt` | Traduce + genera TTS |
 
-## Ejemplo de uso
-Para usar esta skill, proporciona la URL del video de YouTube al agente. El agente ejecutará el script con la lógica de procesamiento definida.
+## ⚠️ ESTA SKILL ES LARGA — USAR `execute_long`, NO `execute_bash` ni `ejecutar_script_skill`
+
+Esta skill descarga + transcribe + traduce + dobla. Tarda **varios minutos** (puede llegar a 30-60min para videos largos). Por eso DEBE encolarse en el job_manager con la herramienta `execute_long`. Si la corres con `execute_bash` el agente queda bloqueado.
+
+### Forma correcta de invocar (con execute_long):
+
+```python
+# Video de YouTube
+execute_long(
+    name="doblaje-<id_video>",
+    command='python skills/descargavideoytraduce/run.py "https://www.youtube.com/watch?v=ID"'
+)
+
+# Video ya descargado en disco
+execute_long(
+    name="doblaje-local",
+    command='python skills/descargavideoytraduce/run.py "C:/ruta/video.mp4"'
+)
+
+# Solo audio
+execute_long(
+    name="doblaje-audio",
+    command='python skills/descargavideoytraduce/run.py --audio "C:/ruta/audio.mp3"'
+)
+```
+
+### NUNCA uses estos formatos (todos fallan):
+
+```
+# ❌ NO existe el módulo "skill"
+python -m skill descargavideoytraduce ...
+
+# ❌ NO uses execute_bash para esto, bloquea al agente
+execute_bash("python skills/descargavideoytraduce/run.py ...")
+
+# ❌ NO actives la skill — esta se invoca SIEMPRE como un comando shell vía execute_long
+ejecutar_script_skill("descargavideoytraduce", ...)   # versión vieja, no apta para procesos largos
+```
+
+### Después de encolar, consulta el progreso:
+
+```python
+job_status(job_id="...", incluir_output=True, lineas=20)
+```
+
+El usuario recibe automáticamente notificaciones `[started]` y `[done]`/`[failed]` por el monitor_hub — no necesitas avisarle tú.
+
+## Pipeline
+
+1. **Descargar** (si es URL) → `downloads/`
+2. **Extraer audio** (si es video) → `output/audio_original.mp3`
+3. **Transcribir** con Whisper medium → `output/transcripcion.txt`
+4. **Traducir** al español via gateway LLM → `output/traduccion_es.txt`
+5. **Generar TTS** con edge-tts (es-MX-AlbertoNeural) → `output/audio_espanol.mp3`
+6. **Unir** video + audio doblado → `output/<nombre>_doblado.mp4`
+
+## Notas
+- Cada etapa guarda su resultado en `output/`, permitiendo retomar si falla
+- Si el audio ya está en español, salta la traducción
+- Requiere: whisper, edge-tts, yt-dlp (solo para URLs), ffmpeg
