@@ -36,3 +36,77 @@ transcripcion*.txt
 
 # Archivos de datos locales sensibles
 agente_core/data/permisos.json
+agente.pid
+
+# Offset persistido de listeners Telegram
+.telegram_offset_mcp.json
+.telegram_offset_agente.json
+
+# Bridge inbox (mensajes en cola)
+bridge/bridge_inbox.json
+
+# Backups de BD Ranger (datos de produccion - NO commitear)
+ranger_backups/
+backups_ranger/
+
+# Dependencias y artefactos pesados
+node_modules/
+output/
+downloads/
+descargas/
+descarga/
+
+# Sesion y cache de WhatsApp Web (credenciales de login - NUNCA commitear)
+.wwebjs_auth/
+.wwebjs_cache/
+whatsapp_media/
+whatsapp_archive/
+
+# Tokens OAuth y backups con secretos
+token.json.bak.*
+*.bak.20*
+*.bak-20*
+
+# Logs y locks de runtime
+*.log
+*.lock
+.claude/scheduled_tasks.lock
+
+# Estado de runtime (se regenera solo)
+whatsapp_nuevos.json
+whatsapp_enviar.json
+heartbeat.json
+gmail_reader_output.json
+resumen_correos.json
+_demo_b64.json
+agente.pid
+
+# Bases de datos locales (runtime)
+*.db
+
+# Binarios multimedia adicionales
+*.webm
+*.jpg
+*.jpeg
+*.gz
+
+# Dumps de login del router (posibles credenciales)
+zyxel_login_dump.html
+zyxel_login_body.html
+zyxel_post_login.html
+
+# Certificados y media personal
+agente_core/data/tv_certs/
+agente_core/data/telegram_media/
+agente_core/data/imagenes_casa/
+agente_core/data/imagenes_ubicaciones/
+
+# Claves privadas y certificados (NUNCA commitear) - cubre rutas anidadas
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Directorio duplicado accidental (contiene certs/keys)
+agente_core/agente_core/
