@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard de Presencia — RuView</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    min-height: 100vh;
+  }
+
+  .header {
+    background: #1e293b;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #334155;
+  }
+  .header h1 { font-size: 1.3rem; font-weight: 600; }
+  .header .status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+  }
+  .status-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #ef4444;
+    transition: background 0.3s;
+  }
+  .status-dot.online { background: #22c55e; }
+  .status-dot.simulated { background: #eab308; }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+
+  .card {
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #334155;
+  }
+  .card h2 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+    margin-bottom: 12px;
+  }
+  .card .value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .card .subtitle {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-top: 6px;
+  }
+
+  .card-wide { grid-column: span 2; }
+  .card-full { grid-column: span 3; }
+
+  /* Personas */
+  .personas-count { color: #3b82f6; }
+  .personas-count.zero { color: #64748b; }
+
+  /* Vitales */
+  .vital {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #334155;
+  }
+  .vital:last-child { border-bottom: none; }
+  .vital-label { font-size: 0.9rem; color: #94a3b8; }
+  .vital-value { font-size: 1.4rem; font-weight: 600; }
+  .vital-unit { font-size: 0.75rem; color: #64748b; margin-left: 4px; }
+  .vital-status {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-weight: 500;
+  }
+  .vital-status.normal { background: #166534; color: #4ade80; }
+  .vital-status.warning { background: #854d0e; color: #facc15; }
+  .vital-status.danger { background: #991b1b; color: #fca5a5; }
+
+  /* Mapa de areas — plano real */
+  .floor-plan {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 4px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .area-cell {
+    background: #0f172a;
+    border: 2px solid #334155;
+    border-radius: 8px;
+    padding: 14px 10px;
+    text-align: center;
+    transition: all 0.5s;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+  .area-cell.occupied {
+    border-color: #3b82f6;
+    background: #1e3a5f;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.25);
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
+    50% { box-shadow: 0 0 25px rgba(59, 130, 246, 0.4); }
+  }
+  .area-cell .area-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .area-cell .area-status {
+    font-size: 0.7rem;
+    color: #64748b;
+  }
+  .area-cell.occupied .area-status {
+    color: #60a5fa;
+  }
+  .area-icon {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+  }
+  .wifi-badge {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    font-size: 0.65rem;
+    color: #22c55e;
+  }
+
+  /* Confianza */
+  .confidence-bar {
+    width: 100%;
+    height: 6px;
+    background: #334155;
+    border-radius: 3px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .confidence-fill {
+    height: 100%;
+    background: #3b82f6;
+    border-radius: 3px;
+    transition: width 0.5s;
+  }
+
+  /* Señal */
+  .signal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .signal-item {
+    background: #0f172a;
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .signal-label { font-size: 0.75rem; color: #64748b; }
+  .signal-value { font-size: 1.1rem; font-weight: 600; margin-top: 4px; }
+
+  /* Pose */
+  .pose-canvas-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+  }
+  canvas#poseCanvas {
+    background: #0f172a;
+    border-radius: 8px;
+    border: 1px solid #334155;
+  }
+
+  /* Log */
+  .log-entries {
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: 'Cascadia Code', monospace;
+    font-size: 0.75rem;
+  }
+  .log-entry {
+    padding: 4px 0;
+    border-bottom: 1px solid #1e293b;
+    color: #94a3b8;
+  }
+  .log-entry .time { color: #64748b; }
+  .log-entry.alert { color: #fca5a5; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .container { grid-template-columns: 1fr 1fr; }
+    .card-full { grid-column: span 2; }
+  }
+  @media (max-width: 600px) {
+    .container { grid-template-columns: 1fr; }
+    .card-wide, .card-full { grid-column: span 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Dashboard de Presencia</h1>
+  <div class="status">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusText">Conectando...</span>
+    <span style="color:#64748b; margin-left:12px" id="tickCount"></span>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Personas detectadas -->
+  <div class="card">
+    <h2>Personas en casa</h2>
+    <div class="value personas-count" id="personCount">-</div>
+    <div class="subtitle" id="personZones">Sin datos</div>
+  </div>
+
+  <!-- Movimiento -->
+  <div class="card">
+    <h2>Movimiento</h2>
+    <div class="value" id="motionLevel">-</div>
+    <div class="confidence-bar">
+      <div class="confidence-fill" id="confidenceBar" style="width:0%"></div>
+    </div>
+    <div class="subtitle" id="confidenceText">Confianza: -</div>
+  </div>
+
+  <!-- Señal -->
+  <div class="card">
+    <h2>Señal WiFi</h2>
+    <div class="signal-grid">
+      <div class="signal-item">
+        <div class="signal-label">RSSI</div>
+        <div class="signal-value" id="rssiValue">-</div>
+      </div>
+      <div class="signal-item">
+        <div class="signal-label">Subcarriers</div>
+        <div class="signal-value" id="subcarrierCount">-</div>
+      </div>
+      <div class="signal-item">
+        <div class="signal-label">Nodos</div>
+        <div class="signal-value" id="nodeCount">-</div>
+      </div>
+      <div class="signal-item">
+        <div class="signal-label">Calidad</div>
+        <div class="signal-value" id="signalQuality">-</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Signos vitales -->
+  <div class="card card-wide">
+    <h2>Signos Vitales</h2>
+    <div class="vital">
+      <span class="vital-label">Respiracion</span>
+      <div>
+        <span class="vital-value" id="breathRate">-</span>
+        <span class="vital-unit">BPM</span>
+        <span class="vital-status" id="breathStatus">-</span>
+      </div>
+    </div>
+    <div class="vital">
+      <span class="vital-label">Frecuencia Cardiaca</span>
+      <div>
+        <span class="vital-value" id="heartRate">-</span>
+        <span class="vital-unit">BPM</span>
+        <span class="vital-status" id="heartStatus">-</span>
+      </div>
+    </div>
+    <div class="vital">
+      <span class="vital-label">Calidad de senal vital</span>
+      <div>
+        <span class="vital-value" id="vitalQuality">-</span>
+        <span class="vital-unit">%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pose -->
+  <div class="card">
+    <h2>Pose Estimada</h2>
+    <div class="pose-canvas-container">
+      <canvas id="poseCanvas" width="200" height="300"></canvas>
+    </div>
+  </div>
+
+  <!-- Mapa de areas — plano real -->
+  <div class="card card-full">
+    <h2>Mapa de la Casa</h2>
+    <div class="floor-plan" id="areasGrid">
+      <!-- Fila 1: hab principal | sala | comedor -->
+      <div class="area-cell" id="area-Habitacion-principal">
+        <div class="area-icon">🛏️</div>
+        <div class="area-name">Hab. Principal</div>
+        <div class="area-status">sin datos</div>
+      </div>
+      <div class="area-cell" id="area-Sala">
+        <div class="area-icon">🛋️</div>
+        <div class="area-name">Sala</div>
+        <div class="area-status">sin datos</div>
+      </div>
+      <div class="area-cell" id="area-Comedor">
+        <div class="area-icon">🍽️</div>
+        <div class="area-name">Comedor</div>
+        <div class="area-status">sin datos</div>
+      </div>
+      <!-- Fila 2: hab bernar | lavado | cocina -->
+      <div class="area-cell" id="area-Cuarto-de-Bernar">
+        <div class="area-icon">🛏️</div>
+        <div class="area-name">Hab. Bernar</div>
+        <div class="area-status">sin datos</div>
+        <div class="wifi-badge" title="Modem WiFi aqui">📡 WiFi</div>
+      </div>
+      <div class="area-cell" id="area-Lavado">
+        <div class="area-icon">🧺</div>
+        <div class="area-name">Lavado</div>
+        <div class="area-status">sin datos</div>
+      </div>
+      <div class="area-cell" id="area-Cocina">
+        <div class="area-icon">🍳</div>
+        <div class="area-name">Cocina</div>
+        <div class="area-status">sin datos</div>
+      </div>
+      <!-- Fila 3: baño | (vacio) | (vacio) -->
+      <div class="area-cell" id="area-Bano">
+        <div class="area-icon">🚿</div>
+        <div class="area-name">Baño</div>
+        <div class="area-status">sin datos</div>
+      </div>
+      <div style="grid-column: span 2;"></div>
+    </div>
+  </div>
+
+  <!-- Log de eventos -->
+  <div class="card card-full">
+    <h2>Eventos Recientes</h2>
+    <div class="log-entries" id="logEntries"></div>
+  </div>
+</div>
+
+<script>
+// ── Configuracion ────────────────────────────────────────────────────────
+// Auto-detectar host: si se accede por red, usar la IP del servidor
+const _host = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'localhost'
+  : window.location.hostname;
+const REST_URL = `http://${_host}:3000`;
+const WS_URL = `ws://${_host}:3001/ws/sensing`;
+const AREAS_CASA = [
+  'Habitacion principal', 'Sala', 'Comedor',
+  'Cuarto de Bernar', 'Lavado', 'Cocina', 'Bano'
+];
+const ZONE_MAP = {
+  'zone_1': 'Sala',
+  'zone_2': 'Cocina',
+  'zone_3': 'Habitacion principal',
+  'zone_4': 'Cuarto de Bernar',
+  'zone_5': 'Comedor',
+  'zone_6': 'Lavado',
+  'zone_7': 'Bano'
+};
+
+// ── Estado ───────────────────────────────────────────────────────────────
+let ws = null;
+let reconnectTimer = null;
+let logBuffer = [];
+
+// ── Mapa de areas (plano fijo en HTML) ───────────────────────────────────
+function initAreas() { /* plano es estatico en el HTML */ }
+
+// ── Actualizar UI ────────────────────────────────────────────────────────
+function updateUI(data) {
+  // Personas
+  const persons = data.persons || [];
+  const count = data.estimated_persons || persons.length;
+  const el = document.getElementById('personCount');
+  el.textContent = count;
+  el.className = `value personas-count ${count === 0 ? 'zero' : ''}`;
+
+  // Zonas
+  const zones = persons.map(p => ZONE_MAP[p.zone] || p.zone);
+  document.getElementById('personZones').textContent =
+    zones.length ? `En: ${[...new Set(zones)].join(', ')}` : 'Sin detecciones';
+
+  // Clasificacion / Movimiento
+  const cls = data.classification || {};
+  const motionMap = {
+    'present_still': 'Quieto',
+    'present_moving': 'Movimiento',
+    'absent': 'Ausente',
+    'fallen': 'CAIDA'
+  };
+  document.getElementById('motionLevel').textContent =
+    motionMap[cls.motion_level] || cls.motion_level || '-';
+  const conf = (cls.confidence || 0) * 100;
+  document.getElementById('confidenceBar').style.width = `${conf}%`;
+  document.getElementById('confidenceText').textContent = `Confianza: ${conf.toFixed(0)}%`;
+
+  // Señal
+  const nodes = data.nodes || [];
+  if (nodes.length > 0) {
+    document.getElementById('rssiValue').textContent = `${nodes[0].rssi_dbm || '?'} dBm`;
+    document.getElementById('subcarrierCount').textContent = nodes[0].subcarrier_count || '-';
+  }
+  document.getElementById('nodeCount').textContent = nodes.length;
+  const vitals = data.vital_signs || {};
+  document.getElementById('signalQuality').textContent =
+    vitals.signal_quality ? `${(vitals.signal_quality * 100).toFixed(0)}%` : '-';
+
+  // Vitales
+  const br = vitals.breathing_rate_bpm;
+  const hr = vitals.heart_rate_bpm;
+  if (br != null) {
+    document.getElementById('breathRate').textContent = br.toFixed(1);
+    const brStatus = document.getElementById('breathStatus');
+    if (br >= 12 && br <= 20) {
+      brStatus.textContent = 'normal'; brStatus.className = 'vital-status normal';
+    } else if (br >= 8 && br <= 25) {
+      brStatus.textContent = 'revisar'; brStatus.className = 'vital-status warning';
+    } else {
+      brStatus.textContent = 'alerta'; brStatus.className = 'vital-status danger';
+    }
+  }
+  if (hr != null) {
+    document.getElementById('heartRate').textContent = hr.toFixed(1);
+    const hrStatus = document.getElementById('heartStatus');
+    if (hr >= 60 && hr <= 100) {
+      hrStatus.textContent = 'normal'; hrStatus.className = 'vital-status normal';
+    } else if (hr >= 50 && hr <= 120) {
+      hrStatus.textContent = 'revisar'; hrStatus.className = 'vital-status warning';
+    } else {
+      hrStatus.textContent = 'alerta'; hrStatus.className = 'vital-status danger';
+    }
+  }
+  if (vitals.signal_quality != null) {
+    document.getElementById('vitalQuality').textContent =
+      (vitals.signal_quality * 100).toFixed(0);
+  }
+
+  // Mapa de areas (plano fijo)
+  const occupiedAreas = new Set(zones);
+  AREAS_CASA.forEach(area => {
+    const cellId = `area-${area.replace(/\s+/g, '-')}`;
+    const cell = document.getElementById(cellId);
+    if (!cell) return;
+    const isOccupied = occupiedAreas.has(area);
+    const wasOccupied = cell.classList.contains('occupied');
+    // Mantener wifi-badge si existe
+    const badge = cell.querySelector('.wifi-badge');
+    if (isOccupied && !wasOccupied) cell.classList.add('occupied');
+    if (!isOccupied && wasOccupied) cell.classList.remove('occupied');
+    const statusEl = cell.querySelector('.area-status');
+    if (statusEl) {
+      const n = persons.filter(p => (ZONE_MAP[p.zone] || p.zone) === area).length;
+      statusEl.textContent = isOccupied ? `${n} persona(s)` : 'vacio';
+    }
+  });
+
+  // Pose
+  if (persons.length > 0 && persons[0].keypoints) {
+    drawPose(persons[0].keypoints, persons[0].bbox);
+  }
+
+  // Tick
+  document.getElementById('tickCount').textContent = `tick: ${data.tick || 0}`;
+}
+
+// ── Dibujar pose ─────────────────────────────────────────────────────────
+const SKELETON = [
+  ['left_ankle','left_knee'], ['left_knee','left_hip'],
+  ['right_ankle','right_knee'], ['right_knee','right_hip'],
+  ['left_hip','right_hip'],
+  ['left_hip','left_shoulder'], ['right_hip','right_shoulder'],
+  ['left_shoulder','right_shoulder'],
+  ['left_shoulder','left_elbow'], ['left_elbow','left_wrist'],
+  ['right_shoulder','right_elbow'], ['right_elbow','right_wrist'],
+  ['left_shoulder','nose'], ['right_shoulder','nose'],
+  ['nose','left_eye'], ['nose','right_eye'],
+  ['left_eye','left_ear'], ['right_eye','right_ear']
+];
+
+function drawPose(keypoints, bbox) {
+  const canvas = document.getElementById('poseCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (!keypoints || keypoints.length === 0) return;
+
+  // Escalar keypoints al canvas
+  const bx = bbox ? bbox.x : 200;
+  const by = bbox ? bbox.y : 100;
+  const bw = bbox ? bbox.width : 200;
+  const bh = bbox ? bbox.height : 300;
+
+  const scale = (kp) => ({
+    x: ((kp.x - bx) / bw) * (canvas.width - 40) + 20,
+    y: ((kp.y - by) / bh) * (canvas.height - 40) + 20,
+    name: kp.name,
+    confidence: kp.confidence
+  });
+
+  const scaled = keypoints.map(scale);
+  const byName = {};
+  scaled.forEach(kp => byName[kp.name] = kp);
+
+  // Dibujar esqueleto
+  ctx.strokeStyle = '#3b82f6';
+  ctx.lineWidth = 2;
+  SKELETON.forEach(([a, b]) => {
+    const ka = byName[a], kb = byName[b];
+    if (ka && kb) {
+      ctx.beginPath();
+      ctx.moveTo(ka.x, ka.y);
+      ctx.lineTo(kb.x, kb.y);
+      ctx.stroke();
+    }
+  });
+
+  // Dibujar puntos
+  scaled.forEach(kp => {
+    ctx.beginPath();
+    ctx.arc(kp.x, kp.y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = kp.confidence > 0.7 ? '#22c55e' : kp.confidence > 0.5 ? '#eab308' : '#ef4444';
+    ctx.fill();
+  });
+}
+
+// ── Log de eventos ───────────────────────────────────────────────────────
+function addLog(msg, isAlert = false) {
+  const now = new Date().toLocaleTimeString('es-DO', { hour12: false });
+  logBuffer.unshift({ time: now, msg, isAlert });
+  if (logBuffer.length > 50) logBuffer.pop();
+  renderLog();
+}
+
+function renderLog() {
+  const el = document.getElementById('logEntries');
+  el.innerHTML = logBuffer.map(e =>
+    `<div class="log-entry ${e.isAlert ? 'alert' : ''}">
+      <span class="time">${e.time}</span> ${e.msg}
+    </div>`
+  ).join('');
+}
+
+// ── WebSocket ────────────────────────────────────────────────────────────
+function connect() {
+  const dot = document.getElementById('statusDot');
+  const text = document.getElementById('statusText');
+
+  ws = new WebSocket(WS_URL);
+
+  ws.onopen = () => {
+    dot.className = 'status-dot online';
+    text.textContent = 'Conectado (WebSocket)';
+    addLog('WebSocket conectado');
+    if (reconnectTimer) { clearInterval(reconnectTimer); reconnectTimer = null; }
+  };
+
+  ws.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.persons || data.classification) {
+        updateUI(data);
+      }
+    } catch (e) {}
+  };
+
+  ws.onclose = () => {
+    dot.className = 'status-dot';
+    text.textContent = 'Desconectado — reintentando...';
+    addLog('WebSocket desconectado', true);
+    if (!reconnectTimer) {
+      reconnectTimer = setInterval(() => connect(), 5000);
+    }
+  };
+
+  ws.onerror = () => ws.close();
+}
+
+// ── Fallback REST polling ────────────────────────────────────────────────
+async function pollREST() {
+  try {
+    const resp = await fetch(`${REST_URL}/api/v1/sensing/latest`);
+    if (resp.ok) {
+      const data = await resp.json();
+      updateUI(data);
+      const dot = document.getElementById('statusDot');
+      dot.className = 'status-dot simulated';
+      document.getElementById('statusText').textContent = 'Conectado (REST polling)';
+    }
+  } catch (e) {}
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────
+initAreas();
+connect();
+// Fallback: si WS no conecta en 3s, usar REST polling
+setTimeout(() => {
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    addLog('WebSocket no disponible, usando REST polling');
+    setInterval(pollREST, 2000);
+    pollREST();
+  }
+}, 3000);
+</script>
+</body>
+</html>

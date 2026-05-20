@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>job_manager — Dashboard</title>
+<style>
+  :root { color-scheme: dark; }
+  body { font-family: ui-monospace, "JetBrains Mono", Consolas, monospace; background: #0d1117; color: #c9d1d9; margin: 0; padding: 16px; }
+  h1 { color: #58a6ff; margin: 0 0 12px; font-size: 20px; }
+  h2 { color: #d2a8ff; margin: 18px 0 8px; font-size: 14px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .card { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { padding: 4px 8px; text-align: left; border-bottom: 1px solid #21262d; }
+  th { color: #8b949e; font-weight: normal; }
+  tr.row { cursor: pointer; }
+  tr.row:hover { background: #1f242c; }
+  .estado { font-size: 11px; padding: 1px 6px; border-radius: 3px; display: inline-block; }
+  .estado-queued    { background: #21262d; color: #8b949e; }
+  .estado-running   { background: #1f6feb22; color: #58a6ff; }
+  .estado-done      { background: #2ea04322; color: #3fb950; }
+  .estado-failed    { background: #f8514922; color: #f85149; }
+  .estado-cancelled { background: #d2a8ff22; color: #d2a8ff; }
+  .estado-blocked   { background: #d2916922; color: #d29169; }
+  pre.log { background: #010409; color: #8b949e; padding: 10px; border-radius: 4px; max-height: 320px; overflow-y: auto; font-size: 11px; margin: 0; }
+  .stats { display: flex; gap: 12px; flex-wrap: wrap; margin: 8px 0 16px; }
+  .stat { background: #161b22; border: 1px solid #30363d; border-radius: 4px; padding: 6px 12px; font-size: 12px; }
+  .stat strong { color: #58a6ff; font-size: 16px; display: block; }
+  .events { background: #010409; padding: 8px; border-radius: 4px; max-height: 200px; overflow-y: auto; font-size: 11px; }
+  .events div { padding: 1px 0; color: #8b949e; }
+  .events .ev-done { color: #3fb950; }
+  .events .ev-failed { color: #f85149; }
+  .events .ev-started, .events .ev-step_started { color: #58a6ff; }
+  .small { color: #8b949e; font-size: 11px; }
+  .id { font-family: monospace; color: #79c0ff; }
+  button { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 11px; }
+  button:hover { background: #30363d; }
+  .header { display: flex; justify-content: space-between; align-items: center; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>job_manager — Dashboard</h1>
+  <span class="small" id="lastRefresh">…</span>
+</div>
+
+<div class="stats" id="stats"></div>
+
+<div class="grid">
+  <div class="card">
+    <h2>Jobs activos (queued + running)</h2>
+    <table id="tablaActivos"><thead><tr><th>ID</th><th>Nombre</th><th>Estado</th><th>Acción</th></tr></thead><tbody></tbody></table>
+  </div>
+  <div class="card">
+    <h2>Eventos recientes</h2>
+    <div class="events" id="events"></div>
+  </div>
+</div>
+
+<div class="card" style="margin-top: 16px;">
+  <h2>Histórico (últimos 30, todos los estados)</h2>
+  <table id="tablaHist"><thead><tr><th>ID</th><th>Nombre</th><th>Estado</th><th>Inicio</th><th>Fin</th><th>Exit</th></tr></thead><tbody></tbody></table>
+</div>
+
+<div class="card" style="margin-top: 16px; display: none;" id="detalleCard">
+  <h2 id="detalleTitulo">Detalle</h2>
+  <div id="detalleMeta"></div>
+  <h2>Output (tail)</h2>
+  <pre class="log" id="detalleLog"></pre>
+</div>
+
+<script>
+const POLL_MS = 2000;
+let eventOffset = 0;
+let detalleId = null;
+let detalleLogOffset = 0;
+
+const fmt = {
+  estado: (e) => `<span class="estado estado-${e}">${e}</span>`,
+  hora: (iso) => iso ? iso.slice(11, 19) : "—",
+};
+
+async function refrescar() {
+  try {
+    const stats = await (await fetch("/stats")).json();
+    const cs = stats.counts_por_estado || {};
+    document.getElementById("stats").innerHTML = ["queued","running","done","failed","cancelled"]
+      .map(e => `<div class="stat"><strong>${cs[e] || 0}</strong>${e}</div>`).join("");
+
+    const activos = await (await fetch("/jobs?solo_roots=true&limite=20")).json();
+    const tb = document.querySelector("#tablaActivos tbody");
+    tb.innerHTML = activos.filter(j => !["done","failed","cancelled"].includes(j.estado))
+      .map(j => `<tr class="row" onclick="verDetalle('${j.id}')"><td><span class="id">${j.id}</span></td><td>${j.name}</td><td>${fmt.estado(j.estado)}</td><td><button onclick="event.stopPropagation();cancelar('${j.id}')">cancelar</button></td></tr>`).join("");
+
+    const todos = await (await fetch("/jobs?solo_roots=true&limite=30")).json();
+    const tbh = document.querySelector("#tablaHist tbody");
+    tbh.innerHTML = todos.map(j => `<tr class="row" onclick="verDetalle('${j.id}')"><td><span class="id">${j.id}</span></td><td>${j.name}</td><td>${fmt.estado(j.estado)}</td><td>${fmt.hora(j.started_at)}</td><td>${fmt.hora(j.finished_at)}</td><td>${j.exit_code ?? "—"}</td></tr>`).join("");
+
+    const evs = await (await fetch(`/events?desde=${eventOffset}`)).json();
+    if (evs.lineas.length) {
+      const ediv = document.getElementById("events");
+      evs.lineas.forEach(l => {
+        const ev = (l.match(/JOB\|(\w+)\|/) || ["",""])[1];
+        const div = document.createElement("div");
+        div.className = "ev-" + ev;
+        div.textContent = l;
+        ediv.appendChild(div);
+      });
+      ediv.scrollTop = ediv.scrollHeight;
+      eventOffset = evs.siguiente;
+    }
+
+    if (detalleId) await refrescarDetalle();
+    document.getElementById("lastRefresh").textContent = "actualizado " + new Date().toLocaleTimeString();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function verDetalle(id) {
+  detalleId = id;
+  detalleLogOffset = 0;
+  document.getElementById("detalleCard").style.display = "block";
+  document.getElementById("detalleLog").textContent = "";
+  await refrescarDetalle();
+}
+
+async function refrescarDetalle() {
+  const j = await (await fetch(`/jobs/${detalleId}`)).json();
+  document.getElementById("detalleTitulo").innerHTML = `${j.name} <span class="id">(${j.id})</span> ${fmt.estado(j.estado)}`;
+  let meta = `<div class="small">cmd: <code>${j.command || "(pipeline padre)"}</code></div>`;
+  if (j.steps) {
+    meta += "<table style='margin-top:8px'><thead><tr><th>step</th><th>estado</th><th>exit</th><th>deps</th></tr></thead><tbody>";
+    j.steps.forEach(s => meta += `<tr><td>${s.step_id}</td><td>${fmt.estado(s.estado)}</td><td>${s.exit_code ?? "—"}</td><td class="small">${(s.depends_on || []).join(", ")}</td></tr>`);
+    meta += "</tbody></table>";
+  }
+  document.getElementById("detalleMeta").innerHTML = meta;
+
+  const out = await (await fetch(`/jobs/${detalleId}/output?desde=${detalleLogOffset}&max_lineas=500`)).json();
+  if (out.lineas.length) {
+    const log = document.getElementById("detalleLog");
+    log.textContent += out.lineas.join("\n") + "\n";
+    log.scrollTop = log.scrollHeight;
+    detalleLogOffset = out.siguiente;
+  }
+}
+
+async function cancelar(id) {
+  if (!confirm("¿Cancelar el job " + id + "?")) return;
+  await fetch(`/jobs/${id}`, { method: "DELETE" });
+  await refrescar();
+}
+
+refrescar();
+setInterval(refrescar, POLL_MS);
+</script>
+</body>
+</html>

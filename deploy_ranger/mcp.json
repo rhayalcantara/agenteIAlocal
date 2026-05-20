@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "telegram-ranger": {
+      "command": "python3",
+      "args": ["mcp_telegram_ranger.py"],
+      "type": "stdio"
+    }
+  }
+}

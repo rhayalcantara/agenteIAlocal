@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Test Results · Descuento Único · 2026-05-18 11:02:17</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px;
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #0e1116; color: #d6dde6; max-width: 1100px; margin: 0 auto;
+  }
+  h1 { font-size: 22px; margin: 0 0 4px; color: #2f9eff; }
+  h2 { font-size: 16px; margin: 24px 0 12px; padding-bottom: 6px; border-bottom: 1px solid #21262d; }
+  .meta { color: #8b949e; font-size: 12px; margin-bottom: 24px; }
+  .summary { display: flex; gap: 12px; flex-wrap: wrap; }
+  .card {
+    background: #161b22; border: 1px solid #21262d;
+    border-radius: 8px; padding: 14px 18px; flex: 1; min-width: 140px;
+  }
+  .card .label { color: #8b949e; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .card .value { font-size: 24px; font-weight: 600; }
+  .ok { color: #2ec869; }
+  .fail { color: #ff6b6b; }
+  .warn { color: #ffb144; }
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+  }
+  .badge.ok { background: #1f3a2a; color: #2ec869; }
+  .badge.fail { background: #4a1c1c; color: #ff6b6b; }
+  ul.cases { list-style: none; padding: 0; margin: 0; }
+  ul.cases li {
+    padding: 8px 12px; border-bottom: 1px solid #21262d;
+    display: flex; align-items: center; gap: 10px;
+  }
+  ul.cases li:last-child { border-bottom: none; }
+  .icon { width: 18px; text-align: center; flex-shrink: 0; }
+  .case-title { flex: 1; }
+  .case-ancestor { color: #8b949e; font-size: 11px; margin-right: 6px; }
+  .case-duration { color: #8b949e; font-size: 11px; font-variant-numeric: tabular-nums; }
+  .suite { background: #161b22; border: 1px solid #21262d; border-radius: 8px; overflow: hidden; }
+  .suite-header { padding: 12px 16px; background: #1c2128; border-bottom: 1px solid #21262d; font-weight: 600; }
+  pre.code {
+    background: #0d1117; border: 1px solid #21262d; border-radius: 6px;
+    padding: 12px; overflow-x: auto; font-size: 12px;
+  }
+  .step {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 6px 0; border-bottom: 1px dashed #21262d;
+  }
+  .step:last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+
+<h1>Descuento Único — Resultados de tests</h1>
+<div class="meta">
+  Generado el 2026-05-18 11:02:17 · backend-ranger-nomina · branch <code>feat/descuento-unico</code>
+</div>
+
+<div class="summary">
+  <div class="card">
+    <div class="label">Total</div>
+    <div class="value">8</div>
+  </div>
+  <div class="card">
+    <div class="label">Passed</div>
+    <div class="value ok">8</div>
+  </div>
+  <div class="card">
+    <div class="label">Failed</div>
+    <div class="value ok">0</div>
+  </div>
+  <div class="card">
+    <div class="label">Tiempo</div>
+    <div class="value">0.00s</div>
+  </div>
+  <div class="card">
+    <div class="label">Resultado</div>
+    <div class="value ok">PASS</div>
+  </div>
+</div>
+
+<h2>Tests por suite</h2>
+<div class="suite" style="margin-bottom:16px;">  <div class="suite-header"><span class="badge ok">passed</span> &nbsp; cuotaDescuentoUnico.test.js</div>  <ul class="cases">
+        <li>
+          <span class="icon ok">✓</span>
+          <span class="case-title">
+            <span class="case-ancestor">cuotaModel.crear — Descuento Único</span>inserta tipo_captura="unico" cuando se pasa explícitamente
+          </span>
+          <span class="case-duration">15ms</span>
+        </li>
+        <li>
+          <span class="icon ok">✓</span>
+          <span class="case-title">
+            <span class="case-ancestor">cuotaModel.crear — Descuento Único</span>inserta tipo_captura="cuotas" cuando se pasa explícitamente
+          </span>
+          <span class="case-duration">2ms</span>
+        </li>
+        <li>
+          <span class="icon ok">✓</span>
+          <span class="case-title">
+            <span class="case-ancestor">cuotaModel.crear — Descuento Único</span>usa "cuotas" como default cuando tipo_captura no se envía
+          </span>
+          <span class="case-duration">2ms</span>
+        </li>
+        <li>
+          <span class="icon ok">✓</span>
+          <span class="case-title">
+            <span class="case-ancestor">cuotaModel.crear — Descuento Único</span>rechaza valores fuera del enum convirtiéndolos a "cuotas"
+          </span>
+          <span class="case-duration">2ms</span>
+        </li>
+        <li>
+          <span class="icon ok">✓</span>
+          <span class="case-title">
+            <span class="case-ancestor">Route POST /api/cuotas — fuerza cantidad_cuotas=1 cuando tipo_captura="unico"</span>modo "unico": fuerza cantidad_cuotas=1 aunque el body envíe otro valor
+          </span>
+          <span class="case-duration">296ms</span>
+        </li>
+        <li>
+          <span class="icon ok">✓</span>
+          <span class="case-title">
+            <span class="case-ancestor">Route POST /api/cuotas — fuerza cantidad_cuotas=1 cuando tipo_captura="unico"</span>modo "unico" sin cantidad_cuotas en body: igual crea con 1
+          </span>
+          <span class="case-duration">1ms</span>
+        </li>
+        <li>
+          <span class="icon ok">✓</span>
+          <span class="case-title">
+            <span class="case-ancestor">Route POST /api/cuotas — fuerza cantidad_cuotas=1 cuando tipo_captura="unico"</span>modo "cuotas": respeta cantidad_cuotas del body
+          </span>
+          <span class="case-duration">1ms</span>
+        </li>
+        <li>
+          <span class="icon ok">✓</span>
+          <span class="case-title">
+            <span class="case-ancestor">Route POST /api/cuotas — fuerza cantidad_cuotas=1 cuando tipo_captura="unico"</span>sin tipo_captura: cae a "cuotas" y respeta cantidad
+          </span>
+          <span class="case-duration">2ms</span>
+        </li>  </ul></div>
+<h2>Migración DB local</h2>
+<div class="suite">
+  <div class="suite-header"><span class="badge ok">ok</span> &nbsp; migrations/run_20260518_descuento_unico.js</div>  <div style="padding:12px 16px;">    <div class="step"><span class="icon ok">✓</span><span>Conectado a localhost/db_aae4a2_ranger</span></div>    <div class="step"><span class="icon ok">✓</span><span>Columna 'tipo_captura' ya existe — skip ALTER</span></div>    <div class="step"><span class="icon ok">✓</span><span>Verificación: columna presente — Type=enum('cuotas','unico') Default=cuotas</span></div>    <div class="step"><span class="icon ok">✓</span><span>Filas en no_cuotas — total=205 cuotas=205 unico=0</span></div>  </div></div>
+<h2>Notas</h2>
+<ul>
+  <li>El test usa mocks (no toca la DB real). Cubre 3 escenarios del modelo y 4 del route handler.</li>
+  <li>La migración se ejecutó contra <code>db_aae4a2_ranger</code> en localhost. 205 filas existentes quedaron como <code>tipo_captura='cuotas'</code> (backward compatible).</li>
+  <li>Branch: backend <code>feat/descuento-unico</code> (commits 9f2914a). Frontend igual (commits 08010c5, cc44211).</li>
+  <li>Pendiente: QA manual desde la UI antes de push a producción.</li>
+</ul>
+
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#0e1116" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Claude" />
+<link rel="manifest" href="/static/manifest.json" />
+<link rel="icon" type="image/png" href="/static/favicon.png" />
+<link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
+<title>Claude Bridge</title>
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<header>
+  <h1>Claude Bridge</h1>
+  <div class="status">
+    <span id="conn-status" class="dot off"></span>
+    <select id="node-select" title="Nodo destino">
+      <option value="local">local</option>
+      <option value="ranger" disabled>ranger (fase 5)</option>
+    </select>
+    <input id="device-name" placeholder="device-id" />
+    <button id="voice-toggle" type="button" title="Recibir respuestas en voz">🔇</button>
+    <button id="config-btn" type="button">Token</button>
+  </div>
+</header>
+
+<main id="chat"></main>
+
+<div id="attach-tray" class="attach-tray hidden"></div>
+
+<form id="send-form">
+  <label class="attach-btn" title="Cámara">
+    📷
+    <input id="camera-input" type="file" accept="image/*" capture="environment" hidden />
+  </label>
+  <button id="mic-btn" type="button" class="attach-btn" title="Grabar voz">🎙</button>
+  <button id="geo-btn" type="button" class="attach-btn" title="Compartir ubicación">📍</button>
+  <label class="attach-btn" title="Adjuntar archivo">
+    📎
+    <input id="attach-input" type="file" multiple hidden />
+  </label>
+  <textarea id="msg" rows="2" placeholder="Escribe a Claude…"></textarea>
+  <button id="send-btn" type="submit">Enviar</button>
+</form>
+
+<dialog id="config-dialog">
+  <form method="dialog">
+    <label>Token de autenticación
+      <input id="token-input" type="password" autocomplete="off" />
+    </label>
+    <p class="hint">Se guarda en localStorage. Borrar tab no lo pierde.</p>
+    <menu>
+      <button value="cancel">Cancelar</button>
+      <button id="token-save" value="ok">Guardar</button>
+    </menu>
+  </form>
+</dialog>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

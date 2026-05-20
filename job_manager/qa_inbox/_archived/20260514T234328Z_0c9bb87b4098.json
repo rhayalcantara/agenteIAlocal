@@ -1,0 +1,30 @@
+{
+  "id": "0c9bb87b4098",
+  "q1": "azul",
+  "q2": "qa flow funciona ya",
+  "_recibido_at": "2026-05-14T23:43:28.157259+00:00",
+  "_pregunta_original": {
+    "id": "0c9bb87b4098",
+    "from": "claude",
+    "context": "Re-test del flow Q&A",
+    "questions": [
+      {
+        "text": "Color favorito?",
+        "type": "options",
+        "options": [
+          "rojo",
+          "verde",
+          "azul"
+        ],
+        "id": null
+      },
+      {
+        "text": "Comentario libre",
+        "type": "text",
+        "options": null,
+        "id": null
+      }
+    ],
+    "created_at": "2026-05-14T23:43:26.757581+00:00"
+  }
+}
