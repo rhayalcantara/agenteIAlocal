@@ -7,7 +7,7 @@ import os
 import requests
 from mcp.server.fastmcp import FastMCP
 
-TELEGRAM_TOKEN = os.getenv("RANGER_TELEGRAM_TOKEN", "8728278032:AAF9C-pPkQJ2ZCqXcF2JUO3lFQn0fxFvZSU")
+TELEGRAM_TOKEN = os.getenv("RANGER_TELEGRAM_TOKEN", "")  # solo desde entorno/.env
 API = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}"
 
 mcp = FastMCP("telegram-ranger", instructions="Bot de Telegram para el servidor Ranger. Recibe instrucciones y reporta resultados.")

@@ -13,13 +13,16 @@ import time
 import subprocess
 import requests
 
-# Bot del servidor Ranger
-RANGER_TOKEN = os.getenv("RANGER_TELEGRAM_TOKEN", "8728278032:AAF9C-pPkQJ2ZCqXcF2JUO3lFQn0fxFvZSU")
+# Bot del servidor Ranger (token solo desde entorno / .env, NUNCA hardcodeado)
+RANGER_TOKEN = os.getenv("RANGER_TELEGRAM_TOKEN", "")
 RANGER_API = f"https://api.telegram.org/bot{RANGER_TOKEN}"
 
 # Bot de Claude local (para que el pueda ver las respuestas)
-CLAUDY_TOKEN = os.getenv("CLAUDY_TELEGRAM_TOKEN", "8761021691:AAFXhD5W4yUzbyVj0EGm05EpqgLX8nneABI")
+CLAUDY_TOKEN = os.getenv("CLAUDY_TELEGRAM_TOKEN", "")
 CLAUDY_API = f"https://api.telegram.org/bot{CLAUDY_TOKEN}"
+
+if not RANGER_TOKEN:
+    raise SystemExit("Falta RANGER_TELEGRAM_TOKEN en el entorno/.env")
 
 POLL_INTERVAL = 5
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))

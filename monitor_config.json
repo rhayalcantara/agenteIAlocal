@@ -13,7 +13,8 @@
       "type": "telegram",
       "name": "ranger",
       "poll_interval": 10,
-      "token": "8728278032:AAF9C-pPkQJ2ZCqXcF2JUO3lFQn0fxFvZSU"
+      "token": "",
+      "_token_note": "deshabilitado; al reactivar, poner el token en .env (RANGER_TELEGRAM_TOKEN) y leerlo desde ahi, NO hardcodear"
     },
     "whatsapp": {
       "enabled": true,
