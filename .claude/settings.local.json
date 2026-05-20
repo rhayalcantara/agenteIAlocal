@@ -1,9 +1,43 @@
 {
+  "mcpServers": {                                                                                                 
+    "telegram": {                                                                                                 
+        "command": "python",                                                                                        
+        "args": ["C:/proyectos/agenteIAlocal/mcp_telegram.py"],                                                     
+        "type": "stdio"                                                                                             
+    }
+    } ,
   "permissions": {
     "allow": [
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(rm /c/Users/rhay_/.claude/projects/C--proyectos-agenteIAlocal/memory/project_eval_contextual.md)",
+      "Bash(echo \"\")",
+      "Bash(python *)",
+      "Skill(telegram:configure)",
+      "Bash(curl *)",
+      "Bash(chmod 600 *)",
+      "Bash(tasklist)",
+      "Bash(ls C:/proyectos/agenteIAlocal/*.log)",
+      "mcp__telegram__enviar_mensaje",
+      "mcp__telegram__leer_mensajes",
+      "mcp__telegram__enviar_archivo",
+      "mcp__telegram__enviar_voz",
+      "mcp__telegram__info_bot"
     ],
     "deny": [],
     "ask": []
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/scripts/session-start.sh",
+            "timeout": 20,
+            "statusMessage": "Iniciando WhatsApp monitor + cargando contexto..."
+          }
+        ]
+      }
+    ]
   }
 }

@@ -1,0 +1,36 @@
+version: "3.9"
+
+# RuView — Detección de presencia por WiFi
+# Uso:
+#   docker-compose -f docker/docker-compose.ruview.yml up -d
+#
+# Modos de CSI_SOURCE:
+#   simulated  — datos simulados (sin hardware, para desarrollo)
+#   auto       — detecta ESP32 por UDP, fallback a simulación
+#   esp32      — solo ESP32 (requiere hardware conectado)
+
+services:
+  ruview-sensing:
+    image: ruvnet/wifi-densepose:latest
+    container_name: ruview-sensing
+    restart: unless-stopped
+    ports:
+      - "3000:3000"   # REST API
+      - "3001:3001"   # WebSocket (streaming en tiempo real)
+      - "5005:5005/udp"  # Recepción de datos ESP32
+    environment:
+      - RUST_LOG=info
+      - CSI_SOURCE=auto          # auto | simulated | esp32
+      - MODELS_DIR=data/models
+    volumes:
+      - ruview-data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  ruview-data:
+    driver: local
