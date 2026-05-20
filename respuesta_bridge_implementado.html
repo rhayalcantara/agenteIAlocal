@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bridge implementado — fase 1 lista</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f0e9dc;
+  --paper-2: #e6dec9;
+  --ink: #1a1614;
+  --ink-2: #4a3f37;
+  --brick: #b8412e;
+  --teal: #1f5d5c;
+  --rule: #2a221c;
+  --mute: #807060;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--paper); }
+body {
+  font-family: "Source Serif 4", Georgia, serif;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--paper);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(26,22,20,0.07) 1px, transparent 0);
+  background-size: 4px 4px;
+  min-height: 100vh;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.18'/></svg>");
+  z-index: 1;
+  mix-blend-mode: multiply;
+}
+.wrap { max-width: 980px; margin: 0 auto; padding: 56px 28px 100px; position: relative; z-index: 2; }
+
+/* HEADER */
+.tag-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 28px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.tag-row .pill {
+  border: 1.5px solid var(--brick);
+  color: var(--brick);
+  padding: 4px 12px;
+  background: var(--paper-2);
+  transform: rotate(-1deg);
+}
+.tag-row .pill.b { border-color: var(--teal); color: var(--teal); transform: rotate(0.8deg); }
+.tag-row .arrow { font-size: 18px; color: var(--ink-2); }
+
+h1 {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-variation-settings: "opsz" 96, "wght" 720;
+  font-size: clamp(56px, 9vw, 108px);
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  margin-bottom: 14px;
+  color: var(--ink);
+}
+h1 .ink-brick {
+  color: var(--brick);
+  font-variation-settings: "opsz" 96, "wght" 540;
+  font-style: italic;
+}
+h1 .strike {
+  display: inline-block;
+  position: relative;
+}
+h1 .strike::after {
+  content: "";
+  position: absolute;
+  left: -8px;
+  right: -8px;
+  top: 56%;
+  height: 8px;
+  background: var(--teal);
+  opacity: 0.85;
+  transform: rotate(-2deg);
+}
+.subline {
+  font-family: "Source Serif 4", serif;
+  font-style: italic;
+  font-size: 22px;
+  line-height: 1.45;
+  color: var(--ink-2);
+  max-width: 640px;
+  margin-bottom: 64px;
+}
+.subline strong {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--brick);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+/* SECCIÓN */
+section { margin-bottom: 72px; position: relative; }
+h2 {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-variation-settings: "wght" 700;
+  font-size: 40px;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin-bottom: 8px;
+}
+h2 .lab {
+  display: inline-block;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  font-variation-settings: normal;
+  letter-spacing: 0.18em;
+  padding: 3px 10px;
+  margin-right: 14px;
+  transform: translateY(-6px);
+  font-weight: normal;
+}
+.lede {
+  font-family: "Source Serif 4", serif;
+  font-style: italic;
+  font-size: 19px;
+  color: var(--mute);
+  max-width: 660px;
+  margin-bottom: 28px;
+}
+
+/* CHECKLIST DONE */
+.done-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.done-list li {
+  background: var(--paper-2);
+  border: 1.5px solid var(--rule);
+  padding: 18px 22px;
+  position: relative;
+  font-family: "Source Serif 4", serif;
+  font-size: 16px;
+  line-height: 1.4;
+}
+.done-list li::before {
+  content: "✓";
+  position: absolute;
+  top: -14px;
+  left: 14px;
+  background: var(--brick);
+  color: var(--paper);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-family: "Bricolage Grotesque", sans-serif;
+  border: 2px solid var(--rule);
+}
+.done-list li code, code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  background: var(--paper);
+  padding: 1px 6px;
+  border: 1px solid var(--rule);
+}
+.done-list li strong { color: var(--teal); }
+
+/* TEST OUTPUT */
+.console {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  padding: 22px 24px;
+  border: 1.5px solid var(--rule);
+  position: relative;
+  overflow-x: auto;
+  line-height: 1.6;
+}
+.console::before {
+  content: "BASH · OUT";
+  position: absolute;
+  top: -12px;
+  right: 16px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  padding: 3px 10px;
+  border: 1.5px solid var(--rule);
+}
+.console .ok { color: #7dd87d; }
+.console .err { color: #ff9b81; }
+.console .lab { color: #f7b969; }
+.console .dim { color: #9b9588; }
+
+/* USO */
+.usage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 8px; }
+@media (max-width: 720px) { .usage-grid { grid-template-columns: 1fr; } }
+.usage {
+  background: var(--paper-2);
+  border: 1.5px solid var(--rule);
+  padding: 22px 26px;
+  position: relative;
+}
+.usage h4 {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-variation-settings: "wght" 600;
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+.usage h4 .from-tag {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  background: var(--teal);
+  color: var(--paper);
+  padding: 2px 8px;
+  margin-left: 8px;
+  letter-spacing: 0.15em;
+  vertical-align: middle;
+  font-variation-settings: normal;
+}
+.usage pre {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 16px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  line-height: 1.65;
+  overflow-x: auto;
+  margin-top: 8px;
+}
+.usage pre .k { color: #ff8b80; }
+.usage pre .s { color: #7dd87d; }
+.usage pre .c { color: #9b9588; font-style: italic; }
+.usage pre .fn { color: #7ec0ee; }
+
+/* TODO */
+.todo {
+  background: var(--paper-2);
+  border-left: 6px solid var(--brick);
+  padding: 26px 28px;
+  margin-top: 8px;
+}
+.todo ol { padding-left: 22px; }
+.todo li { margin-bottom: 14px; }
+.todo li strong {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-variation-settings: "wght" 700;
+  color: var(--ink);
+}
+.todo li p { color: var(--mute); margin-top: 3px; font-size: 15px; line-height: 1.5; }
+
+/* Q */
+.question {
+  margin-top: 56px;
+  padding: 30px 32px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  position: relative;
+}
+.question::before {
+  content: "↘";
+  position: absolute;
+  top: -22px;
+  left: -22px;
+  background: var(--teal);
+  color: var(--paper);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-weight: bold;
+}
+.question h3 {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-variation-settings: "wght" 700;
+  font-size: 30px;
+  letter-spacing: -0.015em;
+  margin-bottom: 6px;
+}
+.question p {
+  font-family: "Source Serif 4", serif;
+  font-style: italic;
+  color: var(--mute);
+  font-size: 17px;
+}
+
+.foot {
+  margin-top: 72px;
+  padding-top: 16px;
+  border-top: 1.5px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--mute);
+}
+
+/* anim */
+.reveal { opacity: 0; transform: translateY(14px); transition: opacity .7s ease, transform .7s ease; }
+.reveal.in { opacity: 1; transform: translateY(0); }
+[data-d="1"] { transition-delay: .05s; }
+[data-d="2"] { transition-delay: .12s; }
+[data-d="3"] { transition-delay: .2s; }
+[data-d="4"] { transition-delay: .28s; }
+[data-d="5"] { transition-delay: .36s; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="tag-row reveal">
+    <span class="pill">FASE 01</span><span class="arrow">→</span>
+    <span class="pill b">LADO LOCAL VERDE</span>
+  </div>
+
+  <h1 class="reveal" data-d="1">
+    Bridge <span class="ink-brick">vivo</span>.<br>
+    Local <span class="strike">listo</span>.
+  </h1>
+
+  <p class="subline reveal" data-d="2">FastAPI corriendo en <code>localhost:8765</code>. Auth con token, persistencia en JSON, helpers Python listos. Falta: <strong>cloudflared</strong> y replicar en Ranger.</p>
+
+  <section class="reveal" data-d="3">
+    <h2><span class="lab">A</span>Lo que ya funciona</h2>
+    <p class="lede">Probado end-to-end en localhost. POST con token devuelve id, GET drena el inbox, segunda llamada vuelve vacía.</p>
+
+    <ul class="done-list">
+      <li><strong>server.py</strong> — FastAPI con <code>POST /inbox</code>, <code>GET /poll</code>, <code>GET /health</code>. Auth header <code>X-Bridge-Token</code>.</li>
+      <li><strong>client.py</strong> — helpers <code>send()</code>, <code>poll()</code>, <code>health()</code> reutilizables.</li>
+      <li><strong>requirements.txt</strong> — fastapi · uvicorn · pydantic · python-dotenv · requests.</li>
+      <li><strong>.env</strong> — <code>BRIDGE_TOKEN</code> aleatorio (32 chars), <code>BRIDGE_PORT</code>, <code>BRIDGE_NODE</code>.</li>
+      <li><strong>.gitignore</strong> — <code>bridge_inbox.json</code> excluido.</li>
+      <li><strong>README.md</strong> — instalación + uso + cloudflared.</li>
+    </ul>
+
+    <div class="console">
+<span class="lab">$</span> python -c "from bridge.client import send, poll, health; ..."
+<span class="dim">1.</span> health: <span class="ok">{'ok': True, 'node': 'local', 'pending': 0}</span>
+<span class="dim">2.</span> sin token... status: <span class="err">401 {'detail': 'bad token'}</span>
+<span class="dim">3.</span> con token... resp: <span class="ok">{'ok': True, 'id': 1778712148906, 'queued': 1}</span>
+<span class="dim">4.</span> polleando inbox...
+   <span class="ok">→ {'text': 'hola ranger, este es claude-local probando', 'from': 'claude-local'}</span>
+<span class="dim">5.</span> segunda poll (consume=true)... count: <span class="ok">0</span>
+<span class="dim">6.</span> health final: <span class="ok">{'pending': 0}</span></div>
+  </section>
+
+  <section class="reveal" data-d="4">
+    <h2><span class="lab">B</span>Cómo usarlo desde Claude</h2>
+    <p class="lede">Dos verbos: enviar al inbox del otro lado, leer el propio.</p>
+
+    <div class="usage-grid">
+      <div class="usage">
+        <h4>Enviar <span class="from-tag">CLAUDE → OTRO</span></h4>
+        <pre><span class="k">from</span> bridge.client <span class="k">import</span> send
+
+send(
+    <span class="s">"git status del repo"</span>,
+    to_url=<span class="s">"https://claude-ranger.xxx"</span>,
+    from_=<span class="s">"claude-local"</span>
+)
+<span class="c"># → {'ok': True, 'id': 1778..., 'queued': 1}</span></pre>
+      </div>
+      <div class="usage">
+        <h4>Leer <span class="from-tag">MIS MENSAJES</span></h4>
+        <pre><span class="k">from</span> bridge.client <span class="k">import</span> poll
+
+<span class="k">for</span> m <span class="k">in</span> poll():
+    <span class="fn">print</span>(m[<span class="s">"from"</span>], m[<span class="s">"text"</span>])
+<span class="c"># consume=true por default — vacía el inbox</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="reveal" data-d="5">
+    <h2><span class="lab">C</span>Lo que falta</h2>
+    <p class="lede">Tres pasos para llegar al setup completo bidireccional cross-network.</p>
+
+    <div class="todo">
+      <ol>
+        <li>
+          <strong>Cloudflared instalado + túnel nombrado</strong>
+          <p>Bajar binario, <code>cloudflared tunnel login</code>, <code>cloudflared tunnel create claude-local</code>, route DNS al dominio (o trycloudflare ephemeral para test rápido).</p>
+        </li>
+        <li>
+          <strong>Servicio persistente</strong>
+          <p>NSSM o Tarea Programada al boot — server FastAPI + cloudflared. Sobrevive reinicio.</p>
+        </li>
+        <li>
+          <strong>Replicar en Ranger</strong>
+          <p>git pull → pip install → token compartido en su .env → cloudflared con nombre <code>claude-ranger</code>. Cada lado escribe <code>BRIDGE_REMOTE_URL</code> apuntando al otro.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <div class="question reveal">
+    <h3>¿Cloudflared ahora o paramos aquí?</h3>
+    <p>Opciones: (1) instalo cloudflared y levanto túnel trycloudflare para testear de afuera ya mismo, (2) lo dejamos aquí, todo merge-ready, mañana seguimos.</p>
+  </div>
+
+  <div class="foot">
+    <span>SESIÓN · 2026-05-13</span>
+    <span>BRIDGE v0.1 · OPUS 4.7</span>
+  </div>
+
+</div>
+
+<script>
+const io = new IntersectionObserver((es) => {
+  es.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.06 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

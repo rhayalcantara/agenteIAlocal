@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bridge roadmap — siguientes pasos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@75..125,200..900&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bone: #f4f1ea;
+  --ink: #1c1c1a;
+  --ink-2: #4a4844;
+  --pencil: #b8b5ac;
+  --grid-line: rgba(28, 28, 26, 0.07);
+  --blue: #2147ff;
+  --green: #2d8043;
+  --amber: #d6843a;
+  --red: #c43232;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--bone); }
+body {
+  font-family: "Geist", system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--bone);
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 26px 26px;
+  min-height: 100vh;
+}
+.wrap { max-width: 1020px; margin: 0 auto; padding: 56px 28px 100px; }
+
+/* HEADER */
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: "Geist Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--ink-2);
+  text-transform: uppercase;
+  margin-bottom: 32px;
+  padding-bottom: 12px;
+  border-bottom: 1.5px solid var(--ink);
+}
+.meta-row span:nth-child(2) { color: var(--blue); }
+
+h1 {
+  font-family: "Anybody", "Geist", sans-serif;
+  font-variation-settings: "wdth" 110, "wght" 800;
+  font-size: clamp(56px, 9vw, 96px);
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+h1 .accent {
+  font-variation-settings: "wdth" 80, "wght" 200;
+  font-style: italic;
+  color: var(--blue);
+}
+.lead {
+  font-family: "Geist", sans-serif;
+  font-size: 20px;
+  font-weight: 300;
+  color: var(--ink-2);
+  max-width: 660px;
+  margin-bottom: 56px;
+}
+
+/* STATUS BAR */
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5px;
+  background: var(--ink);
+  margin-bottom: 64px;
+  border: 1.5px solid var(--ink);
+}
+@media (max-width: 720px) { .status-grid { grid-template-columns: repeat(2, 1fr); } }
+.stat {
+  background: var(--bone);
+  padding: 22px 20px;
+}
+.stat .label {
+  font-family: "Geist Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  margin-bottom: 8px;
+}
+.stat .val {
+  font-family: "Geist Mono", monospace;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.stat .val.ok::before { content: "● "; color: var(--green); }
+.stat .val.wait::before { content: "○ "; color: var(--amber); }
+.stat .val.fail::before { content: "× "; color: var(--red); }
+
+/* SECTION */
+section { margin-bottom: 72px; }
+.section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  margin-bottom: 28px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--pencil);
+}
+h2 {
+  font-family: "Anybody", sans-serif;
+  font-variation-settings: "wdth" 110, "wght" 700;
+  font-size: 36px;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.section-head .num {
+  font-family: "Geist Mono", monospace;
+  font-size: 13px;
+  color: var(--blue);
+  letter-spacing: 0.12em;
+}
+
+/* MILESTONES */
+.milestones {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5px;
+  background: var(--ink);
+  border: 1.5px solid var(--ink);
+}
+.m {
+  display: grid;
+  grid-template-columns: 80px 1fr 200px;
+  background: var(--bone);
+  align-items: stretch;
+}
+@media (max-width: 720px) {
+  .m { grid-template-columns: 60px 1fr; }
+  .m .m-cmd { grid-column: 1 / -1; border-top: 1.5px solid var(--ink); padding-left: 18px; }
+}
+.m-num {
+  background: var(--ink);
+  color: var(--bone);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Anybody", sans-serif;
+  font-variation-settings: "wdth" 90, "wght" 800;
+  font-size: 32px;
+}
+.m.done .m-num { background: var(--green); }
+.m.next .m-num { background: var(--blue); }
+.m.wait .m-num { background: var(--amber); color: var(--ink); }
+
+.m-body { padding: 22px 24px; }
+.m-body .badge {
+  display: inline-block;
+  font-family: "Geist Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  padding: 3px 9px;
+  background: var(--ink);
+  color: var(--bone);
+  margin-bottom: 8px;
+}
+.m.done .m-body .badge { background: var(--green); }
+.m.next .m-body .badge { background: var(--blue); }
+.m.wait .m-body .badge { background: var(--amber); color: var(--ink); }
+
+.m-body h3 {
+  font-family: "Geist", sans-serif;
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+.m.done .m-body h3 { text-decoration: line-through; text-decoration-color: var(--green); text-decoration-thickness: 1.5px; opacity: 0.7; }
+.m-body p {
+  color: var(--ink-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.m-cmd {
+  border-left: 1.5px dashed var(--pencil);
+  padding: 18px 20px;
+  font-family: "Geist Mono", monospace;
+  font-size: 11.5px;
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  background: rgba(33, 71, 255, 0.04);
+}
+.m.done .m-cmd { background: rgba(45, 128, 67, 0.05); }
+.m.next .m-cmd { background: rgba(33, 71, 255, 0.08); }
+.m.wait .m-cmd { background: rgba(214, 132, 58, 0.06); }
+.m-cmd code {
+  background: var(--ink);
+  color: var(--bone);
+  padding: 2px 7px;
+  font-family: "Geist Mono", monospace;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* DEPENDENCY */
+.dep-note {
+  margin-top: 14px;
+  padding: 16px 20px;
+  background: rgba(33, 71, 255, 0.08);
+  border-left: 4px solid var(--blue);
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.dep-note strong { color: var(--blue); font-family: "Geist Mono", monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+/* QUESTION */
+.choose {
+  margin-top: 80px;
+  background: var(--ink);
+  color: var(--bone);
+  padding: 36px 40px;
+  position: relative;
+}
+.choose::before {
+  content: "?";
+  position: absolute;
+  top: -20px;
+  left: 24px;
+  background: var(--blue);
+  color: var(--bone);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Anybody", sans-serif;
+  font-variation-settings: "wght" 800;
+  font-size: 28px;
+}
+.choose h3 {
+  font-family: "Anybody", sans-serif;
+  font-variation-settings: "wdth" 110, "wght" 700;
+  font-size: 32px;
+  letter-spacing: -0.01em;
+  margin: 12px 0 14px;
+  line-height: 1.1;
+}
+.choose p { color: rgba(244, 241, 234, 0.7); font-size: 16px; max-width: 560px; }
+.choose ul { list-style: none; padding: 0; margin-top: 18px; display: grid; gap: 12px; }
+.choose li {
+  padding: 12px 16px 12px 42px;
+  position: relative;
+  font-size: 15px;
+  background: rgba(244, 241, 234, 0.06);
+  border-left: 3px solid var(--blue);
+}
+.choose li::before {
+  position: absolute;
+  left: 14px;
+  font-family: "Geist Mono", monospace;
+  font-weight: 700;
+  color: var(--blue);
+}
+.choose li:nth-child(1)::before { content: "A"; }
+.choose li:nth-child(2)::before { content: "B"; }
+.choose li:nth-child(3)::before { content: "C"; }
+.choose li strong { color: var(--bone); }
+
+.foot {
+  margin-top: 56px;
+  display: flex;
+  justify-content: space-between;
+  font-family: "Geist Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--ink-2);
+  text-transform: uppercase;
+}
+
+.reveal { opacity: 0; transform: translateY(12px); transition: opacity .65s ease, transform .65s ease; }
+.reveal.in { opacity: 1; transform: translateY(0); }
+[data-d="1"] { transition-delay: .05s; }
+[data-d="2"] { transition-delay: .12s; }
+[data-d="3"] { transition-delay: .2s; }
+[data-d="4"] { transition-delay: .28s; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="meta-row reveal">
+    <span>BRIDGE · ROADMAP</span>
+    <span>FASE 02 → 03</span>
+    <span>14·MAY·26</span>
+  </div>
+
+  <h1 class="reveal" data-d="1">Falta solo<br><span class="accent">el otro lado.</span></h1>
+  <p class="lead reveal" data-d="2">Local está completo: Tailscale autenticado, bridge corriendo, /health OK. Lo que queda son tres hitos en la PC del cliente Ranger.</p>
+
+  <div class="status-grid reveal" data-d="3">
+    <div class="stat">
+      <div class="label">Tailscale local</div>
+      <div class="val ok">100.89.251.75</div>
+    </div>
+    <div class="stat">
+      <div class="label">Bridge server</div>
+      <div class="val ok">:8765 vivo</div>
+    </div>
+    <div class="stat">
+      <div class="label">Nodo Ranger</div>
+      <div class="val wait">sin registrar</div>
+    </div>
+    <div class="stat">
+      <div class="label">URL pública</div>
+      <div class="val ok">no aplica</div>
+    </div>
+  </div>
+
+  <section>
+    <div class="section-head reveal">
+      <span class="num">[ 01 ]</span>
+      <h2>Lo ya cerrado</h2>
+    </div>
+
+    <div class="milestones">
+      <div class="m done reveal">
+        <div class="m-num">✓</div>
+        <div class="m-body">
+          <span class="badge">DONE</span>
+          <h3>Mini-bridge HTTP en Python</h3>
+          <p>FastAPI con /inbox, /poll, /health. Auth X-Bridge-Token. Persistencia JSON. Helpers client.py.</p>
+        </div>
+        <div class="m-cmd"><code>bridge/server.py</code></div>
+      </div>
+
+      <div class="m done reveal">
+        <div class="m-num">✓</div>
+        <div class="m-body">
+          <span class="badge">DONE</span>
+          <h3>Tailscale instalado + autenticado</h3>
+          <p>winget install. Login con cuenta personal. IP estable asignada.</p>
+        </div>
+        <div class="m-cmd"><code>100.89.251.75</code></div>
+      </div>
+
+      <div class="m done reveal">
+        <div class="m-num">✓</div>
+        <div class="m-body">
+          <span class="badge">DONE</span>
+          <h3>Round-trip end-to-end local</h3>
+          <p>POST + GET con token correcto y rechazo de inválido (401). Verificado en localhost y por trycloudflare (ya apagado, sustituido por Tailscale).</p>
+        </div>
+        <div class="m-cmd"><code>health = ok</code></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head reveal">
+      <span class="num">[ 02 ]</span>
+      <h2>Hitos que siguen</h2>
+    </div>
+
+    <div class="milestones">
+      <div class="m next reveal">
+        <div class="m-num">04</div>
+        <div class="m-body">
+          <span class="badge">SIGUIENTE</span>
+          <h3>Tailscale en Ranger</h3>
+          <p>Instalar Tailscale en la PC del cliente, login con tu misma cuenta. Aparece en el tailnet con su IP <code style="font-family:'Geist Mono',monospace;font-size:.85em;background:var(--ink);color:var(--bone);padding:1px 6px;">100.x.y.z</code> visible desde acá. Lo haces tú porque ese PC no está a mi alcance.</p>
+        </div>
+        <div class="m-cmd"><code>winget install Tailscale.Tailscale</code></div>
+      </div>
+
+      <div class="m wait reveal">
+        <div class="m-num">05</div>
+        <div class="m-body">
+          <span class="badge">PENDIENTE</span>
+          <h3>Bridge en Ranger</h3>
+          <p>git pull → pip install -r bridge/requirements.txt → mismo BRIDGE_TOKEN en su .env → python -m bridge.server. Listening en :8765, accesible desde acá vía su IP Tailscale.</p>
+        </div>
+        <div class="m-cmd"><code>python -m bridge.server</code></div>
+      </div>
+
+      <div class="m wait reveal">
+        <div class="m-num">06</div>
+        <div class="m-body">
+          <span class="badge">PENDIENTE</span>
+          <h3>Cross-link y test</h3>
+          <p>BRIDGE_REMOTE_URL en cada lado apuntando al IP Tailscale del otro. Round-trip de prueba desde Claude local → Ranger y viceversa.</p>
+        </div>
+        <div class="m-cmd"><code>send(...) ↔ poll()</code></div>
+      </div>
+
+      <div class="m wait reveal">
+        <div class="m-num">07</div>
+        <div class="m-body">
+          <span class="badge">DESPUÉS</span>
+          <h3>Persistencia (Windows service)</h3>
+          <p>NSSM o Tarea Programada para bridge + Tailscale autostart al boot en ambas PCs. Sobrevive reinicio.</p>
+        </div>
+        <div class="m-cmd"><code>nssm install claude-bridge</code></div>
+      </div>
+    </div>
+
+    <div class="dep-note reveal">
+      <strong>DEPENDENCIA</strong><br>
+      Los hitos 04 y 05 requieren acceso a la PC de Ranger. No puedo hacerlos desde aquí. Te puedo preparar un script <code style="background:var(--ink);color:var(--bone);padding:1px 6px;font-family:'Geist Mono',monospace;font-size:.85em;">install_ranger.ps1</code> que automatice ambos: winget Tailscale + login + git pull + pip install + arrancar bridge. Tú lo corres allá una sola vez.
+    </div>
+  </section>
+
+  <div class="choose reveal">
+    <h3>Qué hacemos ahora</h3>
+    <p>Sin acceso al Ranger PC, las opciones desde acá:</p>
+    <ul>
+      <li><strong>Te preparo <code>install_ranger.ps1</code></strong> — script idempotente que hace todo el setup remoto en una corrida. Lo subo al repo, tú lo bajas allá.</li>
+      <li><strong>Documento alternativa con dos archivos</strong> — <code>install_ranger.sh</code> + <code>install_ranger.bat</code> según OS del Ranger PC, plus checklist manual paso-a-paso.</li>
+      <li><strong>Esperamos hasta tener acceso</strong> — paramos aquí y retomamos cuando estés en el Ranger PC o tengamos SSH/RDP.</li>
+    </ul>
+  </div>
+
+  <div class="foot">
+    <span>BRIDGE v0.1 · TAILSCALE EDITION</span>
+    <span>OPUS 4.7 · 1M</span>
+  </div>
+
+</div>
+
+<script>
+const io = new IntersectionObserver((es) => {
+  es.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.06 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

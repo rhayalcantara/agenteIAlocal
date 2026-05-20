@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reporte — Claude Local ↔ Ranger</title>
+<style>
+:root {
+  --bg: #fefefe;
+  --fg: #1a1a1a;
+  --muted: #666;
+  --link: #0066cc;
+  --code-bg: #f5f5f5;
+  --border: #ddd;
+  --table-head: #f0f0f0;
+  --accent: #c4302b;
+}
+[data-theme="dark"] {
+  --bg: #1a1a1a;
+  --fg: #e8e8e8;
+  --muted: #aaa;
+  --link: #6db3f2;
+  --code-bg: #2a2a2a;
+  --border: #444;
+  --table-head: #2a2a2a;
+  --accent: #ff6b6b;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.6;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 24px 20px 80px;
+  transition: background .15s, color .15s;
+}
+h1, h2, h3, h4 { line-height: 1.25; margin-top: 1.8em; }
+h1 { font-size: 2em; border-bottom: 2px solid var(--accent); padding-bottom: .3em; margin-top: 0; }
+h2 { font-size: 1.45em; border-bottom: 1px solid var(--border); padding-bottom: .25em; }
+h3 { font-size: 1.15em; }
+p, li { font-size: 16px; }
+a { color: var(--link); }
+code {
+  background: var(--code-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+  font-size: 0.92em;
+}
+pre {
+  background: var(--code-bg);
+  padding: 14px 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+}
+pre code { background: transparent; padding: 0; font-size: 13px; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 14px 0;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: var(--table-head); font-weight: 600; }
+ul, ol { padding-left: 1.6em; }
+li > input[type="checkbox"] { margin-right: 8px; }
+blockquote {
+  border-left: 4px solid var(--accent);
+  margin: 1em 0;
+  padding: 4px 14px;
+  color: var(--muted);
+  background: var(--code-bg);
+  border-radius: 0 6px 6px 0;
+}
+.toolbar {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  padding: 8px 0 12px;
+  border-bottom: 1px solid var(--border);
+  margin: -24px -20px 24px;
+  padding-left: 20px;
+  padding-right: 20px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  z-index: 10;
+}
+.toolbar button {
+  background: var(--code-bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.toolbar button:hover { border-color: var(--accent); }
+.meta { font-size: 13px; color: var(--muted); margin-left: auto; }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <button id="themeToggle">Tema</button>
+  <button id="printBtn">Imprimir</button>
+  <span class="meta" id="meta"></span>
+</div>
+<h1 id="comunicacion-claude-local-claude-ranger">Comunicación Claude Local ↔ Claude Ranger</h1>
+<p>Reporte preparado mientras Rhay caminaba (2026-05-13 17:00–18:00).</p>
+<h2 id="tldr">TL;DR</h2>
+<p>Ya diseñaste todo el <code>deploy_ranger/</code> el 2026-04-28 (hace 2 semanas). Nunca se desplegó. Solo falta:
+1. Re-crear el bot <code>@claudy_*_bot</code> (su token está muerto)
+2. Subir <code>deploy_ranger/</code> al servidor de Ranger
+3. Agregar un segundo MCP local que escuche al bot Claudy</p>
+<p>Tiempo estimado: 30-45 min de trabajo manual cuando estés disponible.</p>
+<h2 id="hallazgos">Hallazgos</h2>
+<h3 id="lo-que-ya-existe-carpeta-deploy_ranger">Lo que ya existe (carpeta <code>deploy_ranger/</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Archivo</th>
+<th>Qué hace</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mcp_telegram_ranger.py</code></td>
+<td>MCP server para que Claude del servidor lea/envíe Telegram</td>
+</tr>
+<tr>
+<td><code>telegram_loop_ranger.py</code></td>
+<td>Loop persistente: cuando llega mensaje al bot Ranger, ejecuta <code>claude -p &lt;prompt&gt;</code> y responde por AMBOS bots</td>
+</tr>
+<tr>
+<td><code>auto_deploy.sh</code></td>
+<td>Watcher que detecta commits y dispara <code>git pull</code></td>
+</tr>
+<tr>
+<td><code>mcp.json</code></td>
+<td>Config MCP del lado Ranger (renombrar a <code>.mcp.json</code> en su raíz)</td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code></td>
+<td>Instrucciones para el Claude del servidor</td>
+</tr>
+<tr>
+<td><code>INSTALL.md</code></td>
+<td>Pasos de instalación en macOS</td>
+</tr>
+</tbody>
+</table>
+<h3 id="estado-de-los-bots">Estado de los bots</h3>
+<table>
+<thead>
+<tr>
+<th>Bot</th>
+<th>Token</th>
+<th>Estado</th>
+<th>Uso</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@bobito_rhay_bot</code></td>
+<td>en <code>.env</code> (<code>TELEGRAM_TOKEN</code>)</td>
+<td>✅ vivo</td>
+<td>Bot actual local (lo usa esta sesión)</td>
+</tr>
+<tr>
+<td><code>@rhayranger_claude_bot</code></td>
+<td>hardcoded en <code>deploy_ranger/*.py</code> (<code>8728278032:...</code>)</td>
+<td>✅ vivo</td>
+<td>Para Claude del servidor</td>
+</tr>
+<tr>
+<td><code>@claudy_*_bot</code></td>
+<td>hardcoded <code>8761021691:...</code></td>
+<td>❌ <strong>token inválido</strong></td>
+<td>Diseñado como puente para que Local "vea" respuestas de Ranger</td>
+</tr>
+</tbody>
+</table>
+<p>El bot Claudy está roto — alguien lo eliminó/revocó. Hay que decidir si re-crearlo o cambiar el patrón.</p>
+<h3 id="diseno-original-de-telegram_loop_rangerpy">Diseño original (de <code>telegram_loop_ranger.py</code>)</h3>
+<pre><code>Rhay (DM) ──(orden)──&gt; @rhayranger_claude_bot ──&gt; Claude Ranger ejecuta
+                                                       │
+                       ┌───────────────────────────────┤
+                       │ respuesta dual                │
+                       ▼                               ▼
+              @rhayranger_claude_bot          @claudy_*_bot
+                       │                               │
+                       ▼                               ▼
+              Rhay la ve                  Claude Local la lee (vía MCP)
+</code></pre>
+<p>El problema con este diseño aun resuelto: <strong>Claude Local no tiene forma de ORIGINAR mensajes a Ranger</strong>. Solo recibe. Si quieres bidireccional real, falta el camino inverso.</p>
+<h3 id="opciones-para-activar-de-menos-a-mas-cambio">Opciones para activar (de menos a más cambio)</h3>
+<p><strong>Opción A — Restaurar el diseño original (1 vía: Local recibe, Rhay origina)</strong>
+1. Re-crear bot Claudy en <code>@BotFather</code>, obtener token nuevo
+2. Subir <code>deploy_ranger/</code> al servidor + instalar deps + <code>claude login</code> + correr <code>telegram_loop_ranger.py</code>
+3. Agregar MCP local nuevo <code>telegram-claudy</code> que polle el bot Claudy
+4. Resultado: Rhay manda órdenes a Ranger, ambos Claudes ven las respuestas</p>
+<p><strong>Opción B — Bridge bidireccional con dos bots dedicados (recomendada)</strong>
+1. Re-crear bot Claudy
+2. En <code>telegram_loop_ranger.py</code>, en vez de filtrar <code>is_bot</code>, aceptar mensajes que vienen del <strong>chat_id del bot Claudy</strong> (Local manda a Ranger usando Claudy → un mensaje en el grupo, Ranger lo lee con Bot R, ignora todos los <code>is_bot</code> excepto cuando <code>from.id == claudy_bot_id</code>)
+3. Resultado: ambos Claudes pueden hablar entre sí en un grupo común con Rhay como espectador</p>
+<p><strong>Opción C — HTTP cola en gateway propio (más limpia, más trabajo)</strong>
+1. Añadir endpoints <code>POST /bridge/send</code> y <code>GET /bridge/poll?for=local|ranger</code> al backend del gateway <code>ntempurl.com</code>
+2. Cada Claude usa Bash/WebFetch
+3. Pros: payloads grandes, sin límites Telegram, encaja con tu Job Manager
+4. Contras: ~1h de código en el gateway, sin push (solo polling)</p>
+<p><strong>Opción D — Anthropic Routines API (descartar por ahora)</strong>
+- Routines tienen trigger HTTP pero crean sesión nueva en cloud, no inyectan a la sesión local viva del otro lado. No sirve para tiempo real.</p>
+<h2 id="recomendacion">Recomendación</h2>
+<p><strong>Empieza con Opción A</strong> (mínimo viable, restaura tu diseño). Si va bien, gradúa a B agregando el filtro inverso en <code>telegram_loop_ranger.py</code>. C lo dejas para cuando necesites payloads grandes (archivos, imágenes).</p>
+<h2 id="punch-list-para-opcion-a">Punch list para Opción A</h2>
+<p>Cuando estés disponible:</p>
+<p><strong>En tu PC local (cambios de código)</strong>:
+- [ ] Re-crear bot Claudy en BotFather, guardar token nuevo
+- [ ] Actualizar token hardcoded en <code>deploy_ranger/telegram_loop_ranger.py:21</code> y <code>deploy_ranger/mcp_telegram_ranger.py:10</code> (o usar env var)
+- [ ] Crear <code>mcp_telegram_claudy.py</code> clon del <code>mcp_telegram.py</code> actual pero con el token Claudy
+- [ ] Agregar entrada en <code>.mcp.json</code> local: <code>"telegram-claudy": { ... }</code>
+- [ ] Commit y push a GitHub</p>
+<p><strong>En el servidor de Ranger</strong> (necesito te lo hagas tú, no tengo acceso):
+- [ ] <code>git pull</code> en el proyecto Ranger para traer <code>deploy_ranger/</code>
+- [ ] <code>pip3 install mcp requests</code>
+- [ ] Verificar <code>claude</code> CLI instalado y autenticado (<code>claude login</code>)
+- [ ] Copiar <code>deploy_ranger/mcp.json</code> a <code>.mcp.json</code> en la raíz del proyecto
+- [ ] Copiar <code>deploy_ranger/CLAUDE.md</code> a la raíz
+- [ ] Levantar <code>python3 telegram_loop_ranger.py</code> como servicio persistente (systemd, launchd o <code>nohup</code>)</p>
+<p><strong>Verificación end-to-end</strong>:
+- [ ] Desde tu Telegram, mandar al bot Ranger: "leer status del repo"
+- [ ] Ver respuesta llegar por Bot Ranger Y por Bot Claudy
+- [ ] Yo (local) confirmo que mi MCP claudy la ve</p>
+<h2 id="costosriesgos">Costos/riesgos</h2>
+<ul>
+<li><strong>Token en código fuente</strong>: los 2 tokens están hardcoded en <code>deploy_ranger/*.py</code> (ya commiteados al repo). Idealmente moverlos a env vars antes de push final. Mientras tanto NO compartir el repo con terceros.</li>
+<li><strong>Bot Ranger ejecuta Claude CLI sin sandbox</strong>: cualquiera con acceso al bot puede ejecutar arbitrariamente. Solo Rhay (chat_id <code>5483766132</code>) debe poder mandarle. Filtrar <code>if chat_id != 5483766132: continue</code> en el loop.</li>
+<li><strong>Costo Claude</strong>: cada mensaje al bot Ranger lanza una sesión nueva. Si quedan loops, gasta tu cuota.</li>
+</ul>
+<h2 id="lo-que-no-hice-por-seguridad">Lo que NO hice (por seguridad)</h2>
+<ul>
+<li>No commit ni push de cambios al repo</li>
+<li>No tocar el servidor de Ranger (no tengo acceso)</li>
+<li>No mandar mensajes de prueba a ningún bot que no fuera el actual</li>
+</ul>
+<script>
+const root = document.documentElement;
+const saved = localStorage.getItem('theme');
+if (saved) root.dataset.theme = saved;
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  root.dataset.theme = next;
+  localStorage.setItem('theme', next);
+});
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+document.getElementById('meta').textContent = 'Generado ' + new Date().toLocaleString('es-DO');
+
+// Convertir items "- [ ]" / "- [x]" en checkboxes reales (markdown py no los hace nativos)
+document.querySelectorAll('li').forEach(li => {
+  const t = li.firstChild;
+  if (t && t.nodeType === 3) {
+    const raw = t.textContent;
+    if (raw.startsWith('[ ] ')) {
+      t.textContent = raw.slice(4);
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.addEventListener('change', e => {
+        li.style.opacity = e.target.checked ? 0.55 : 1;
+        li.style.textDecoration = e.target.checked ? 'line-through' : 'none';
+      });
+      li.insertBefore(cb, t);
+    } else if (raw.startsWith('[x] ') || raw.startsWith('[X] ')) {
+      t.textContent = raw.slice(4);
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = true;
+      li.style.opacity = 0.55;
+      li.style.textDecoration = 'line-through';
+      li.insertBefore(cb, t);
+    }
+  }
+});
+</script>
+</body>
+</html>

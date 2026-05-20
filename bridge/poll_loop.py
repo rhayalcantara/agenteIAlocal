@@ -1,6 +1,7 @@
 """Loop de polling al inbox local del bridge — emite cada mensaje como linea para Monitor.
 
-Stdout format: BRIDGE|from|text   (truncado a 300 chars)
+Stdout format: BRIDGE|from|text   (truncado a 8000 chars; la notificacion del harness
+               puede recortar, pero la linea completa queda en el .output del Monitor)
 Errores:       BRIDGE_ERR|<msg>
 """
 import os
@@ -36,7 +37,7 @@ while True:
         else:
             for m in r.json().get("messages", []):
                 src = m.get("from", "?")
-                txt = (m.get("text", "") or "")[:300].replace("\n", " ")
+                txt = (m.get("text", "") or "")[:8000].replace("\n", " ")
                 print(f"BRIDGE|{src}|{txt}", flush=True)
     except Exception as e:
         print(f"BRIDGE_ERR|{type(e).__name__}: {e}", flush=True)
