@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carrusel #1 · Conoce a Ranger · Listo para publicar</title>
+<style>
+  :root{
+    --bg:#0a0e1a;
+    --card:#141a2b;
+    --border:#1f2740;
+    --text:#e8eef7;
+    --muted:#8a96b0;
+    --rd-red:#ce1126;
+    --rd-blue:#0049a4;
+    --rd-blue-2:#1768d4;
+    --accent:#00c896;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+    padding:30px 20px;
+  }
+  .head{text-align:center;max-width:760px;margin:0 auto 30px}
+  .head h1{font-size:1.8rem;margin-bottom:8px}
+  .head p{color:var(--muted);font-size:.95rem;line-height:1.6}
+  .head .actions{margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .head button{
+    background:var(--rd-red);color:#fff;border:none;
+    padding:12px 22px;border-radius:10px;
+    cursor:pointer;font-weight:700;font-family:inherit;
+    box-shadow:0 6px 20px rgba(206,17,38,.3);
+    transition:.2s;
+  }
+  .head button:hover{transform:translateY(-2px)}
+  .head button.alt{background:var(--card);border:1px solid var(--border);box-shadow:none}
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(360px,1fr));
+    gap:20px;
+    max-width:1400px;margin:0 auto;
+  }
+  .slide-card{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:14px;padding:14px;
+  }
+  .slide-card h3{
+    font-size:.8rem;color:var(--rd-blue-2);
+    text-transform:uppercase;letter-spacing:1.5px;
+    margin-bottom:10px;display:flex;justify-content:space-between;
+  }
+  .slide-card h3 .sn{color:var(--muted);font-weight:500}
+  .slide-frame{
+    width:100%;aspect-ratio:1/1;
+    border-radius:10px;overflow:hidden;
+    background:#000;display:block;
+  }
+  .slide-frame svg{display:block;width:100%;height:100%}
+  .slide-card button{
+    margin-top:10px;width:100%;
+    background:var(--card);border:1px solid var(--border);
+    color:var(--text);padding:9px;border-radius:8px;
+    cursor:pointer;font-size:.85rem;font-family:inherit;
+    transition:.2s;
+  }
+  .slide-card button:hover{background:var(--rd-blue);border-color:var(--rd-blue-2)}
+
+  .caption-box{
+    max-width:760px;margin:40px auto;
+    background:var(--card);border:1px solid var(--border);
+    border-radius:14px;padding:24px;
+  }
+  .caption-box h2{font-size:1.05rem;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+  .caption-box h2 .pill{
+    font-size:.7rem;color:var(--accent);
+    background:rgba(0,200,150,.1);
+    border:1px solid rgba(0,200,150,.3);
+    padding:3px 10px;border-radius:12px;font-weight:600;
+    text-transform:uppercase;letter-spacing:1px;
+  }
+  .caption-text{
+    background:#0f1422;border-radius:8px;
+    padding:18px;font-family:'Consolas','Monaco',monospace;
+    font-size:.88rem;line-height:1.6;color:var(--text);
+    white-space:pre-wrap;
+    border:1px dashed var(--border);
+  }
+  .caption-actions{margin-top:14px;display:flex;gap:10px}
+  .caption-actions button{
+    flex:1;background:var(--rd-blue);color:#fff;border:none;
+    padding:11px;border-radius:8px;cursor:pointer;font-weight:600;
+    font-family:inherit;
+  }
+  .caption-actions button:hover{background:var(--rd-blue-2)}
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    background:var(--accent);color:#0a0e1a;
+    padding:12px 22px;border-radius:10px;font-weight:700;
+    opacity:0;pointer-events:none;transition:.3s;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-8px)}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>Carrusel #1 · "Conoce a Ranger"</h1>
+  <p>8 slides listas. Haz click en <b>"Descargar todas"</b> y se bajan los 8 PNG en orden. Luego súbelas a Instagram como publicación múltiple en el mismo orden.</p>
+  <div class="actions">
+    <button onclick="downloadAll()">⬇ Descargar las 8 slides (PNG)</button>
+    <button class="alt" onclick="copyCaption()">📋 Copiar caption IG</button>
+  </div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="caption-box">
+  <h2>Caption para Instagram <span class="pill">copia y pega</span></h2>
+  <div class="caption-text" id="caption">Si tienes empleados en RD, esto te toca:
+
+Cada mes hay que calcular ISR, AFP, ARS, SFS. Cada año regalía, vacaciones, bonificaciones. Y cada cierre puede ser una multa esperando.
+
+Construí Ranger Nómina porque vi demasiados contadores peleando con Excel para algo que debería ser simple.
+
+Cálculos legales RD precisos. Cierres auditados. Reportes a banco en 3 clicks.
+
+Síguenos para nómina RD sin dolor 👉 @ranger.nomina
+
+DM "INFO" si quieres saber más.
+
+#NominaRD #ContadoresRD #PyMEsRD #SoftwareDominicano #RRHH #DGII #TSS #Empresarios #NóminaDigital #SantoDomingo</div>
+  <div class="caption-actions">
+    <button onclick="copyCaption()">Copiar al portapapeles</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const slides = [
+  {
+    n:1, name:'01-portada',
+    svg:`
+<svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1080" height="1080" fill="#ce1126"/>
+  <rect x="0" y="0" width="1080" height="1080" fill="url(#g1a)" opacity=".25"/>
+  <defs>
+    <radialGradient id="g1a" cx="80%" cy="20%">
+      <stop offset="0%" stop-color="#fff" stop-opacity=".25"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <text x="80" y="380" font-family="Inter,Arial,sans-serif" font-size="108" font-weight="900" fill="#fff" letter-spacing="-2">¿TIENES</text>
+  <text x="80" y="500" font-family="Inter,Arial,sans-serif" font-size="108" font-weight="900" fill="#fff" letter-spacing="-2">EMPLEADOS</text>
+  <text x="80" y="620" font-family="Inter,Arial,sans-serif" font-size="108" font-weight="900" fill="#fff" letter-spacing="-2">EN RD?</text>
+  <text x="80" y="780" font-family="Inter,Arial,sans-serif" font-size="58" font-weight="500" fill="#fff" opacity=".85">Esto te interesa.</text>
+  <g transform="translate(80,940)"><rect width="200" height="6" fill="#fff" opacity=".5"/></g>
+  <text x="80" y="1015" font-family="Inter,Arial,sans-serif" font-size="26" font-weight="700" fill="#fff" letter-spacing="2">@RANGER.NOMINA</text>
+  <text x="940" y="1015" font-family="Inter,Arial,sans-serif" font-size="26" font-weight="700" fill="#fff" opacity=".7" text-anchor="end">1 / 8 →</text>
+</svg>`
+  },
+  {
+    n:2, name:'02-problema',
+    svg:`
+<svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1080" height="1080" fill="#0a0e1a"/>
+  <defs>
+    <radialGradient id="g2" cx="20%" cy="80%">
+      <stop offset="0%" stop-color="#ce1126" stop-opacity=".15"/>
+      <stop offset="100%" stop-color="#0a0e1a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1080" height="1080" fill="url(#g2)"/>
+  <text x="80" y="160" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700" fill="#ce1126" letter-spacing="3">EL PROBLEMA</text>
+  <text x="80" y="280" font-family="Inter,Arial,sans-serif" font-size="48" font-weight="700" fill="#8a96b0">Cada mes:</text>
+  <text x="80" y="380" font-family="Inter,Arial,sans-serif" font-size="76" font-weight="900" fill="#fff" letter-spacing="-1">ISR · AFP · ARS · SFS</text>
+  <text x="80" y="500" font-family="Inter,Arial,sans-serif" font-size="48" font-weight="700" fill="#8a96b0">Cada año:</text>
+  <text x="80" y="600" font-family="Inter,Arial,sans-serif" font-size="72" font-weight="900" fill="#fff" letter-spacing="-1">Regalía · Vacaciones</text>
+  <text x="80" y="685" font-family="Inter,Arial,sans-serif" font-size="72" font-weight="900" fill="#fff" letter-spacing="-1">Bonificación</text>
+  <text x="80" y="810" font-family="Inter,Arial,sans-serif" font-size="48" font-weight="700" fill="#8a96b0">Cada cierre:</text>
+  <text x="80" y="910" font-family="Inter,Arial,sans-serif" font-size="72" font-weight="900" fill="#ce1126" letter-spacing="-1">Multas esperando.</text>
+  <text x="80" y="1015" font-family="Inter,Arial,sans-serif" font-size="22" font-weight="700" fill="#8a96b0" letter-spacing="2">@RANGER.NOMINA</text>
+  <text x="940" y="1015" font-family="Inter,Arial,sans-serif" font-size="22" font-weight="700" fill="#8a96b0" text-anchor="end">2 / 8</text>
+</svg>`
+  },
+  {
+    n:3, name:'03-pregunta',
+    svg:`
+<svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1080" height="1080" fill="#0a0e1a"/>
+  <text x="540" y="500" font-family="Inter,Arial,sans-serif" font-size="120" font-weight="900" fill="#fff" letter-spacing="-3" text-anchor="middle">¿Y si fuera</text>
+  <text x="540" y="640" font-family="Inter,Arial,sans-serif" font-size="120" font-weight="900" fill="#00c896" letter-spacing="-3" text-anchor="middle">más simple?</text>
+  <text x="540" y="780" font-family="Inter,Arial,sans-serif" font-size="36" font-weight="500" fill="#8a96b0" text-anchor="middle">→ desliza</text>
+  <text x="80" y="1015" font-family="Inter,Arial,sans-serif" font-size="22" font-weight="700" fill="#8a96b0" letter-spacing="2">@RANGER.NOMINA</text>
+  <text x="940" y="1015" font-family="Inter,Arial,sans-serif" font-size="22" font-weight="700" fill="#8a96b0" text-anchor="end">3 / 8</text>
+</svg>`
+  },
+  {
+    n:4, name:'04-marca',
+    svg:`
+<svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1080" height="1080" fill="#0049a4"/>
+  <defs>
+    <radialGradient id="g4" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#1768d4" stop-opacity=".4"/>
+      <stop offset="100%" stop-color="#002d62" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1080" height="1080" fill="url(#g4)"/>
+  <g transform="translate(420,300)">
+    <rect width="240" height="240" rx="48" fill="#ce1126"/>
+    <path d="M70 130 L110 170 L180 90" stroke="#fff" stroke-width="20" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="540" y="680" font-family="Inter,Arial,sans-serif" font-size="96" font-weight="900" fill="#fff" letter-spacing="-2" text-anchor="middle">RANGER NÓMINA</text>
+  <text x="540" y="760" font-family="Inter,Arial,sans-serif" font-size="34" font-weight="500" fill="#a8c1ee" text-anchor="middle">El sistema de nómina</text>
+  <text x="540" y="805" font-family="Inter,Arial,sans-serif" font-size="34" font-weight="500" fill="#a8c1ee" text-anchor="middle">que sí entiende</text>
+  <text x="540" y="855" font-family="Inter,Arial,sans-serif" font-size="40" font-weight="900" fill="#fff" letter-spacing="2" text-anchor="middle">REPÚBLICA DOMINICANA 🇩🇴</text>
+  <text x="80" y="1015" font-family="Inter,Arial,sans-serif" font-size="22" font-weight="700" fill="#fff" opacity=".7" letter-spacing="2">@RANGER.NOMINA</text>
+  <text x="940" y="1015" font-family="Inter,Arial,sans-serif" font-size="22" font-weight="700" fill="#fff" opacity=".7" text-anchor="end">4 / 8</text>
+</svg>`
+  },
+  {
+    n:5, name:'05-features',
+    svg:`
+<svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1080" height="1080" fill="#0a0e1a"/>
+  <text x="80" y="160" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700" fill="#00c896" letter-spacing="3">QUÉ HACE RANGER</text>
+  <text x="80" y="260" font-family="Inter,Arial,sans-serif" font-size="68" font-weight="900" fill="#fff" letter-spacing="-1">Lo que necesitas,</text>
+  <text x="80" y="340" font-family="Inter,Arial,sans-serif" font-size="68" font-weight="900" fill="#fff" letter-spacing="-1">como lo necesitas:</text>
+  <g font-family="Inter,Arial,sans-serif" font-size="42" font-weight="600" fill="#e8eef7">
+    <text x="80" y="490">✓ Cálculo ISR exacto (tramos 2026)</text>
+    <text x="80" y="570">✓ AFP y ARS capeados</text>
+    <text x="80" y="650">✓ Regalía sin enredos</text>
+    <text x="80" y="730">✓ Cierres auditados con evidencia</text>
+    <text x="80" y="810">✓ Reportes a banco en CSV</text>
+    <text x="80" y="890">✓ Importación masiva desde Excel</text>
+  </g>
+  <text x="80" y="1015" font-family="Inter,Arial,sans-serif" font-size="22" font-weight="700" fill="#8a96b0" letter-spacing="2">@RANGER.NOMINA</text>
+  <text x="940" y="1015" font-family="Inter,Arial,sans-serif" font-size="22" font-weight="700" fill="#8a96b0" text-anchor="end">5 / 8</text>
+</svg>`
+  },
+  {
+    n:6, name:'06-target',
+    svg:`
+<svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1080" height="1080" fill="#0a0e1a"/>
+  <text x="80" y="160" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700" fill="#1768d4" letter-spacing="3">PARA QUIÉN ES</text>
+  <text x="80" y="280" font-family="Inter,Arial,sans-serif" font-size="76" font-weight="900" fill="#fff" letter-spacing="-1">Si tienes entre</text>
+  <text x="80" y="410" font-family="Inter,Arial,sans-serif" font-size="160" font-weight="900" fill="#ce1126" letter-spacing="-4">10 y 500</text>
+  <text x="80" y="500" font-family="Inter,Arial,sans-serif" font-size="76" font-weight="900" fill="#fff" letter-spacing="-1">empleados:</text>
+  <text x="80" y="610" font-family="Inter,Arial,sans-serif" font-size="56" font-weight="900" fill="#00c896">Ranger es para ti.</text>
+  <g font-family="Inter,Arial,sans-serif" font-size="36" font-weight="500" fill="#8a96b0">
+    <text x="80" y="740">Contadores de PyMEs.</text>
+    <text x="80" y="800">RRHH de empresas medianas.</text>
+    <text x="80" y="860">Dueños que pagan nómina.</text>
+  </g>
+  <text x="80" y="1015" font-family="Inter,Arial,sans-serif" font-size="22" font-weight="700" fill="#8a96b0" letter-spacing="2">@RANGER.NOMINA</text>
+  <text x="940" y="1015" font-family="Inter,Arial,sans-serif" font-size="22" font-weight="700" fill="#8a96b0" text-anchor="end">6 / 8</text>
+</svg>`
+  },
+  {
+    n:7, name:'07-diferencial',
+    svg:`
+<svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1080" height="1080" fill="#0a0e1a"/>
+  <text x="80" y="160" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700" fill="#ffb800" letter-spacing="3">NUESTRO DIFERENCIAL</text>
+  <text x="80" y="290" font-family="Inter,Arial,sans-serif" font-size="76" font-weight="900" fill="#fff" letter-spacing="-1">Cada cierre queda</text>
+  <text x="80" y="370" font-family="Inter,Arial,sans-serif" font-size="76" font-weight="900" fill="#fff" letter-spacing="-1">con evidencia.</text>
+  <text x="80" y="510" font-family="Inter,Arial,sans-serif" font-size="76" font-weight="900" fill="#fff" letter-spacing="-1">Cada cálculo se</text>
+  <text x="80" y="590" font-family="Inter,Arial,sans-serif" font-size="76" font-weight="900" fill="#fff" letter-spacing="-1">puede auditar.</text>
+  <text x="80" y="730" font-family="Inter,Arial,sans-serif" font-size="76" font-weight="900" fill="#00c896" letter-spacing="-1">Cada peso queda</text>
+  <text x="80" y="810" font-family="Inter,Arial,sans-serif" font-size="76" font-weight="900" fill="#00c896" letter-spacing="-1">trazado.</text>
+  <g transform="translate(800,860)">
+    <rect width="180" height="100" rx="20" fill="#ce1126"/>
+    <text x="90" y="65" font-family="Inter,Arial,sans-serif" font-size="32" font-weight="900" fill="#fff" text-anchor="middle">AUDITADO</text>
+  </g>
+  <text x="80" y="1015" font-family="Inter,Arial,sans-serif" font-size="22" font-weight="700" fill="#8a96b0" letter-spacing="2">@RANGER.NOMINA</text>
+  <text x="940" y="1015" font-family="Inter,Arial,sans-serif" font-size="22" font-weight="700" fill="#8a96b0" text-anchor="end">7 / 8</text>
+</svg>`
+  },
+  {
+    n:8, name:'08-cta',
+    svg:`
+<svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1080" height="1080" fill="#ce1126"/>
+  <defs>
+    <radialGradient id="g8" cx="50%" cy="30%">
+      <stop offset="0%" stop-color="#fff" stop-opacity=".25"/>
+      <stop offset="100%" stop-color="#ce1126" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1080" height="1080" fill="url(#g8)"/>
+  <text x="540" y="280" font-family="Inter,Arial,sans-serif" font-size="120" font-weight="900" fill="#fff" letter-spacing="-3" text-anchor="middle">SÍGUENOS</text>
+  <text x="540" y="390" font-family="Inter,Arial,sans-serif" font-size="44" font-weight="500" fill="#fff" opacity=".9" text-anchor="middle">para nómina RD sin dolor.</text>
+  <g transform="translate(290,520)">
+    <rect width="500" height="180" rx="32" fill="#fff"/>
+    <text x="250" y="86" font-family="Inter,Arial,sans-serif" font-size="34" font-weight="600" fill="#0a0e1a" text-anchor="middle">DM la palabra</text>
+    <text x="250" y="148" font-family="Inter,Arial,sans-serif" font-size="68" font-weight="900" fill="#ce1126" text-anchor="middle">"INFO"</text>
+  </g>
+  <text x="540" y="800" font-family="Inter,Arial,sans-serif" font-size="36" font-weight="500" fill="#fff" opacity=".9" text-anchor="middle">para conocer el sistema.</text>
+  <text x="540" y="960" font-family="Inter,Arial,sans-serif" font-size="42" font-weight="900" fill="#fff" letter-spacing="3" text-anchor="middle">@RANGER.NOMINA</text>
+  <text x="940" y="1040" font-family="Inter,Arial,sans-serif" font-size="22" font-weight="700" fill="#fff" opacity=".7" text-anchor="end">8 / 8 ✓</text>
+</svg>`
+  },
+];
+
+const grid = document.getElementById('grid');
+slides.forEach(s=>{
+  const div = document.createElement('div');
+  div.className = 'slide-card';
+  div.innerHTML = `
+    <h3><span>Slide ${s.n}</span><span class="sn">${s.name}</span></h3>
+    <div class="slide-frame" id="frame-${s.n}">${s.svg}</div>
+    <button onclick="downloadOne(${s.n})">⬇ Descargar PNG</button>`;
+  grid.appendChild(div);
+});
+
+function svgToPNG(svgEl, name){
+  return new Promise((resolve)=>{
+    const data = new XMLSerializer().serializeToString(svgEl);
+    const blob = new Blob([data], {type:'image/svg+xml'});
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = ()=>{
+      const canvas = document.createElement('canvas');
+      canvas.width = 1080; canvas.height = 1080;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, 1080, 1080);
+      canvas.toBlob(b=>{
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(b);
+        a.download = name + '.png';
+        document.body.appendChild(a); a.click(); a.remove();
+        URL.revokeObjectURL(url);
+        setTimeout(resolve, 200);
+      });
+    };
+    img.src = url;
+  });
+}
+
+function downloadOne(n){
+  const s = slides.find(x=>x.n===n);
+  const svg = document.querySelector(`#frame-${n} svg`);
+  svgToPNG(svg, `ranger-carrusel1-slide-${s.name}`);
+}
+
+async function downloadAll(){
+  showToast('Descargando 8 slides...');
+  for(const s of slides){
+    const svg = document.querySelector(`#frame-${s.n} svg`);
+    await svgToPNG(svg, `ranger-carrusel1-slide-${s.name}`);
+  }
+  showToast('✓ Listo. Revisa tu carpeta de Descargas.');
+}
+
+function copyCaption(){
+  const text = document.getElementById('caption').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    showToast('✓ Caption copiado');
+  });
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window._tt);
+  window._tt = setTimeout(()=>t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pivot — Cloudflare Tunnel gana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blueprint: #0c1c2e;
+  --blueprint-2: #102438;
+  --grid: #1a3a5c;
+  --ink: #e8e0cf;
+  --ink-dim: #9bb0c4;
+  --cyan: #5dd3f3;
+  --cyan-soft: #5dd3f322;
+  --red: #d96458;
+  --red-soft: #d9645822;
+  --amber: #f4b942;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--blueprint); color: var(--ink); }
+body {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 14px;
+  line-height: 1.65;
+  min-height: 100vh;
+  background-image:
+    linear-gradient(rgba(26, 58, 92, 0.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(26, 58, 92, 0.18) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-attachment: fixed;
+  position: relative;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 70% 30%, rgba(93, 211, 243, 0.06), transparent 50%);
+  pointer-events: none;
+}
+.wrap { max-width: 980px; margin: 0 auto; padding: 56px 28px 100px; position: relative; }
+
+/* HEADER */
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1.5px solid var(--red);
+  color: var(--red);
+  padding: 5px 14px;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  font-weight: 700;
+  transform: rotate(-1.5deg);
+  margin-bottom: 32px;
+  background: var(--red-soft);
+}
+.stamp::before { content: "▲"; font-size: 9px; }
+
+h1 {
+  font-family: "DM Serif Display", serif;
+  font-weight: 400;
+  font-size: clamp(48px, 7vw, 80px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+h1 .accent { color: var(--cyan); font-style: italic; }
+.subtitle {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  color: var(--ink-dim);
+  letter-spacing: 0.05em;
+  margin-bottom: 56px;
+  max-width: 640px;
+}
+.subtitle::before {
+  content: "└─ ";
+  color: var(--cyan);
+}
+
+/* RESTRICCIONES BOX */
+.constraints {
+  border: 1px dashed var(--grid);
+  padding: 24px 28px;
+  margin-bottom: 56px;
+  position: relative;
+  background: rgba(10, 22, 36, 0.5);
+}
+.constraints-label {
+  position: absolute;
+  top: -10px;
+  left: 20px;
+  background: var(--blueprint);
+  padding: 0 12px;
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: var(--cyan);
+}
+.constraints ul { list-style: none; padding: 0; }
+.constraints li {
+  padding: 8px 0 8px 26px;
+  position: relative;
+  font-size: 14px;
+}
+.constraints li::before {
+  content: "■";
+  position: absolute;
+  left: 0;
+  color: var(--cyan);
+  font-size: 11px;
+  top: 11px;
+}
+.constraints li strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+.constraints li span.note {
+  color: var(--ink-dim);
+  font-style: italic;
+}
+
+/* CORRECTION */
+.diff {
+  display: grid;
+  grid-template-columns: 1fr 60px 1fr;
+  gap: 20px;
+  align-items: stretch;
+  margin-bottom: 64px;
+}
+@media (max-width: 720px) {
+  .diff { grid-template-columns: 1fr; }
+  .arrow { transform: rotate(90deg); }
+}
+.diff-card {
+  border: 1px solid var(--grid);
+  padding: 24px;
+  background: var(--blueprint-2);
+  position: relative;
+}
+.diff-card.old { opacity: 0.65; }
+.diff-card.old h3 {
+  text-decoration: line-through;
+  text-decoration-color: var(--red);
+  text-decoration-thickness: 2px;
+}
+.diff-card.new { border-color: var(--cyan); box-shadow: 0 0 0 1px var(--cyan-soft); }
+.diff-card .tag {
+  position: absolute;
+  top: -10px;
+  left: 16px;
+  background: var(--blueprint);
+  padding: 0 10px;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+}
+.diff-card.old .tag { color: var(--red); }
+.diff-card.new .tag { color: var(--cyan); }
+.diff-card h3 {
+  font-family: "DM Serif Display", serif;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1.15;
+  margin: 8px 0 14px;
+}
+.diff-card p {
+  font-size: 13px;
+  color: var(--ink-dim);
+  line-height: 1.6;
+}
+.arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: var(--cyan);
+}
+.arrow::before { content: "▶"; }
+
+/* PLAN */
+section { margin-bottom: 56px; }
+h2 {
+  font-family: "DM Serif Display", serif;
+  font-weight: 400;
+  font-size: 30px;
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+h2 .num {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  color: var(--cyan);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  display: block;
+  margin-bottom: 4px;
+}
+.lede {
+  font-family: "DM Serif Display", serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 18px;
+  color: var(--ink-dim);
+  max-width: 680px;
+  line-height: 1.4;
+  margin-bottom: 28px;
+}
+
+.steps {
+  list-style: none;
+  padding: 0;
+  counter-reset: step;
+}
+.steps li {
+  padding: 18px 22px 18px 70px;
+  position: relative;
+  border-left: 2px solid var(--grid);
+  margin-left: 24px;
+  background: rgba(16, 36, 56, 0.4);
+  margin-bottom: 4px;
+}
+.steps li::before {
+  counter-increment: step;
+  content: counter(step, decimal-leading-zero);
+  position: absolute;
+  left: -24px;
+  top: 14px;
+  background: var(--blueprint);
+  border: 2px solid var(--cyan);
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--cyan);
+}
+.steps li h4 {
+  font-family: "DM Serif Display", serif;
+  font-weight: 400;
+  font-size: 18px;
+  margin-bottom: 4px;
+  color: var(--ink);
+}
+.steps li p { color: var(--ink-dim); font-size: 13px; }
+.steps li code {
+  background: var(--blueprint);
+  padding: 2px 8px;
+  font-size: 12px;
+  border: 1px solid var(--grid);
+  color: var(--cyan);
+}
+.steps li .meta {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--amber);
+  letter-spacing: 0.1em;
+}
+
+/* FALLBACK */
+.fallback {
+  margin-top: 56px;
+  padding: 28px;
+  border: 1px solid var(--grid);
+  background: var(--blueprint-2);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 24px;
+  align-items: center;
+}
+.fallback-icon {
+  width: 56px;
+  height: 56px;
+  border: 2px solid var(--amber);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "DM Serif Display", serif;
+  font-size: 28px;
+  color: var(--amber);
+  font-style: italic;
+}
+.fallback h4 {
+  font-family: "DM Serif Display", serif;
+  font-weight: 400;
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+.fallback p { color: var(--ink-dim); font-size: 13px; }
+.fallback code {
+  background: var(--blueprint);
+  padding: 2px 8px;
+  border: 1px solid var(--grid);
+  color: var(--amber);
+}
+
+/* Q */
+.question {
+  margin-top: 72px;
+  padding: 32px 0;
+  border-top: 1px solid var(--grid);
+  border-bottom: 1px solid var(--grid);
+  text-align: center;
+}
+.question-eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--cyan);
+  margin-bottom: 12px;
+}
+.question h3 {
+  font-family: "DM Serif Display", serif;
+  font-weight: 400;
+  font-size: 28px;
+  font-style: italic;
+}
+.question h3 .pick { color: var(--cyan); font-style: normal; }
+
+/* FOOT */
+.foot {
+  margin-top: 60px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--ink-dim);
+  letter-spacing: 0.15em;
+}
+
+/* anim */
+.fadeup { opacity: 0; transform: translateY(14px); transition: opacity .7s ease, transform .7s ease; }
+.fadeup.in { opacity: 1; transform: translateY(0); }
+[data-d="1"] { transition-delay: .05s; }
+[data-d="2"] { transition-delay: .12s; }
+[data-d="3"] { transition-delay: .2s; }
+[data-d="4"] { transition-delay: .28s; }
+
+.cursor::after {
+  content: "▌";
+  color: var(--cyan);
+  animation: blink 1.1s steps(2, start) infinite;
+  margin-left: 4px;
+}
+@keyframes blink { to { visibility: hidden; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="stamp fadeup">RECOMENDACIÓN · ANTERIOR · CORREGIDA</div>
+  <h1 class="fadeup" data-d="1">Pivot.<br><span class="accent">Cloudflare gana.</span></h1>
+  <p class="subtitle fadeup" data-d="2">Cuando supe que ntempurl es pago y que sales de C#, el gateway dejó de ser la opción simple. Tu instinto original tenía la información que a mí me faltaba.<span class="cursor"></span></p>
+
+  <div class="constraints fadeup" data-d="3">
+    <span class="constraints-label">RESTRICCIONES NUEVAS</span>
+    <ul>
+      <li><strong>ntempurl.com es pago</strong> <span class="note">— sumar features ahí es invertir en algo de lo que quieres salir.</span></li>
+      <li><strong>Te alejas de C#</strong> <span class="note">— el backend del gateway está en .NET; cada endpoint nuevo profundiza ese stack.</span></li>
+      <li><strong>Free + portable manda</strong> <span class="note">— no-ip de plan B si Cloudflare cambia su free tier.</span></li>
+    </ul>
+  </div>
+
+  <div class="diff fadeup" data-d="4">
+    <div class="diff-card old">
+      <span class="tag">RECOMENDABA</span>
+      <h3>Gateway propio</h3>
+      <p>2 endpoints en ntempurl. Asumí infra libre y stack en crecimiento. Falso.</p>
+    </div>
+    <div class="arrow"></div>
+    <div class="diff-card new">
+      <span class="tag">CORREGIDO</span>
+      <h3>Cloudflare Tunnel + mini-bridge local</h3>
+      <p>Tu PC y la de Ranger exponen un FastAPI mínimo vía túnel. Cero costo, cero C#, cero ntempurl.</p>
+    </div>
+  </div>
+
+  <section>
+    <h2><span class="num">// PLAN</span>Cómo se ve concretamente</h2>
+    <p class="lede">Dos PCs, dos túneles, una mini-API en Python. Bidireccional sin intermediario.</p>
+
+    <ol class="steps">
+      <li>
+        <h4>Mini-bridge HTTP (~30 LOC)</h4>
+        <p>FastAPI con <code>POST /inbox</code> y <code>GET /poll</code>. Cola en memoria o JSON-file. Auth con header <code>X-Bridge-Token</code>. Mismo binario en ambas PCs.</p>
+        <div class="meta">STACK · python · ~10 min</div>
+      </li>
+      <li>
+        <h4>Cuenta gratis Cloudflare + túnel nombrado</h4>
+        <p><code>cloudflared tunnel create claude-local</code> y <code>cloudflared tunnel create claude-ranger</code>. URLs estables tipo <code>claude-local.tudominio.workers.dev</code> — sobreviven reinicio.</p>
+        <div class="meta">RED · cloudflared · ~15 min las dos</div>
+      </li>
+      <li>
+        <h4>Servicio persistente</h4>
+        <p>En Windows: <code>nssm</code> o tarea programada al boot. En Mac/Linux servidor Ranger: <code>launchd</code> o <code>systemd</code>. Mata-y-resucita automático.</p>
+        <div class="meta">PERSISTENCIA · ~5 min</div>
+      </li>
+      <li>
+        <h4>Cliente del otro lado</h4>
+        <p>Cada Claude usa Bash/WebFetch para <code>POST</code> al inbox del otro y <code>GET</code> a su propio inbox. Polling 5-10s o webhook si quieres push.</p>
+        <div class="meta">INTEGRACIÓN · 0 cambios en infra existente</div>
+      </li>
+    </ol>
+  </section>
+
+  <div class="fallback fadeup">
+    <div class="fallback-icon">B</div>
+    <div>
+      <h4>Plan B — si Cloudflare cobra</h4>
+      <p>no-ip.com sigue free con renovación cada 30 días (un click). Cambia solo la URL de cada túnel; el FastAPI es portable. También funcionan <code>ngrok</code> (plan free 1 endpoint por cuenta) y <code>localtunnel</code>.</p>
+    </div>
+  </div>
+
+  <div class="question">
+    <p class="question-eyebrow">SIGUIENTE DECISIÓN</p>
+    <h3>¿Python o Node para el mini-bridge? <span class="pick">→</span></h3>
+  </div>
+
+  <div class="foot">
+    <span>SESIÓN · 2026·05·13</span>
+    <span>OPUS 4.7 · 1M ctx</span>
+  </div>
+
+</div>
+
+<script>
+const io = new IntersectionObserver((es) => {
+  es.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.fadeup').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

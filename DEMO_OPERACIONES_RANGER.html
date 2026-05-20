@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OperacionesRanger · demo 40s</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0e1a;
+  --bg-2: #141a2b;
+  --bg-3: #1f2740;
+  --ink: #e8eef7;
+  --mute: #8a96b0;
+  --gold: #d4a843;
+  --gold-soft: #d4a84322;
+  --red: #c43225;
+  --green: #3ea866;
+  --rule: #2a334d;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "DM Sans", system-ui, sans-serif;
+  overflow: hidden;
+}
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stage {
+  width: min(100vw, 1280px);
+  height: min(100vh, 720px);
+  max-height: 80vh;
+  aspect-ratio: 16/9;
+  position: relative;
+  background: radial-gradient(ellipse at top right, rgba(212, 168, 67, 0.08), transparent 50%),
+              radial-gradient(ellipse at bottom left, rgba(62, 168, 102, 0.04), transparent 60%),
+              var(--bg);
+  overflow: hidden;
+  border: 1px solid var(--bg-3);
+}
+
+/* HUD permanente arriba */
+.hud {
+  position: absolute;
+  top: 18px;
+  left: 24px;
+  right: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: "Space Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--mute);
+  text-transform: uppercase;
+  z-index: 10;
+}
+.hud .left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hud .left .dot {
+  width: 8px; height: 8px;
+  background: var(--red);
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse { 50% { opacity: 0.3; } }
+
+.hud .right {
+  display: flex;
+  gap: 20px;
+}
+
+.progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--bg-3);
+  z-index: 10;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--gold);
+  width: 0;
+  animation: prog 40s linear forwards;
+}
+@keyframes prog { to { width: 100%; } }
+
+.panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px 80px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 720px) { .panel { padding: 56px 32px; } }
+
+/* PANEL 1 — Hook 0-4s */
+.panel-1 { animation: panel1 4s ease-in-out forwards; }
+@keyframes panel1 {
+  0% { opacity: 0; transform: translateY(10px); }
+  10%, 90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+.brand {
+  font-family: "Space Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+.brand::before { content: "▌ "; }
+.title {
+  font-family: "Anton", sans-serif;
+  font-size: clamp(56px, 9vw, 120px);
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+.title .gold { color: var(--gold); }
+.sub-title {
+  font-family: "DM Sans", sans-serif;
+  font-weight: 400;
+  font-size: clamp(18px, 2.2vw, 26px);
+  color: var(--mute);
+  margin-top: 18px;
+  max-width: 720px;
+}
+
+/* PANEL 2 — El problema 4-11s */
+.panel-2 { animation: panel2 7s ease-in-out forwards; animation-delay: 4s; }
+@keyframes panel2 {
+  0% { opacity: 0; transform: translateY(10px); }
+  8%, 92% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+.problem-eyebrow {
+  font-family: "Space Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: var(--red);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.problem-line {
+  font-family: "Anton", sans-serif;
+  font-size: clamp(40px, 5.5vw, 76px);
+  line-height: 1;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.problem-line.dim { color: var(--mute); }
+.problem-stats {
+  margin-top: 36px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  max-width: 720px;
+}
+.stat {
+  border-left: 3px solid var(--red);
+  padding-left: 14px;
+}
+.stat .v {
+  font-family: "Anton", sans-serif;
+  font-size: 48px;
+  line-height: 1;
+}
+.stat .l {
+  font-family: "Space Mono", monospace;
+  font-size: 11px;
+  color: var(--mute);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* PANEL 3 — Feature 1 (auto-calc) 11-19s */
+.panel-3 { animation: panel3 8s ease-in-out forwards; animation-delay: 11s; }
+@keyframes panel3 {
+  0% { opacity: 0; transform: translateY(10px); }
+  7%, 93% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+.feature-tag {
+  font-family: "Space Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.feature-tag::before { content: "01 ▸ "; }
+.feature-title {
+  font-family: "Anton", sans-serif;
+  font-size: clamp(40px, 6vw, 80px);
+  line-height: 0.95;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+.feature-title .gold { color: var(--gold); }
+.feature-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin-top: 18px;
+}
+.input-card {
+  background: var(--bg-2);
+  border: 1px solid var(--bg-3);
+  padding: 22px;
+  border-radius: 4px;
+}
+.input-card .tag {
+  font-family: "Space Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin-bottom: 12px;
+}
+.input-card .row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 15px;
+  border-bottom: 1px dashed var(--rule);
+}
+.input-card .row:last-child { border-bottom: 0; }
+.input-card .row .k { color: var(--mute); }
+.input-card .row .v { font-family: "Space Mono", monospace; color: var(--ink); }
+.output-card { border-color: var(--gold); background: var(--gold-soft); }
+.output-card .tag { color: var(--gold); }
+.output-card .row .v { font-weight: 700; color: var(--gold); }
+.arrow {
+  position: absolute;
+  font-family: "Anton", sans-serif;
+  color: var(--gold);
+  font-size: 28px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* PANEL 4 — Feature 2 (Holidays) 19-26s */
+.panel-4 { animation: panel4 7s ease-in-out forwards; animation-delay: 19s; }
+@keyframes panel4 {
+  0% { opacity: 0; transform: translateY(10px); }
+  8%, 92% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-top: 22px;
+  max-width: 720px;
+}
+.cal-day {
+  aspect-ratio: 1.4;
+  background: var(--bg-2);
+  border: 1px solid var(--bg-3);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 8px 10px;
+  font-family: "Space Mono", monospace;
+  font-size: 12px;
+  color: var(--mute);
+  position: relative;
+}
+.cal-day.holiday {
+  background: rgba(196, 50, 37, 0.18);
+  border-color: var(--red);
+  color: var(--ink);
+}
+.cal-day.holiday::after {
+  content: "FERIADO";
+  position: absolute;
+  bottom: 6px;
+  left: 10px;
+  font-size: 8px;
+  color: var(--red);
+  letter-spacing: 0.1em;
+}
+
+/* PANEL 5 — Feature 3 (Payroll CSV) 26-33s */
+.panel-5 { animation: panel5 7s ease-in-out forwards; animation-delay: 26s; }
+@keyframes panel5 {
+  0% { opacity: 0; transform: translateY(10px); }
+  8%, 92% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+.csv-box {
+  background: var(--bg-2);
+  border: 1px solid var(--bg-3);
+  padding: 20px;
+  font-family: "Space Mono", monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  margin-top: 20px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.csv-box .head {
+  color: var(--gold);
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+.csv-box .row { color: var(--mute); }
+.csv-export {
+  margin-top: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: "Space Mono", monospace;
+  font-size: 13px;
+  background: var(--gold);
+  color: var(--bg);
+  padding: 12px 22px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.csv-export::before { content: "↓"; font-size: 18px; }
+
+/* PANEL 6 — Cierre 33-40s */
+.panel-6 { animation: panel6 7s ease-in-out forwards; animation-delay: 33s; }
+@keyframes panel6 {
+  0% { opacity: 0; transform: translateY(10px); }
+  8%, 100% { opacity: 1; transform: translateY(0); }
+}
+.close-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  max-width: 920px;
+  margin-bottom: 36px;
+}
+.close-stat .v {
+  font-family: "Anton", sans-serif;
+  font-size: clamp(48px, 6vw, 80px);
+  line-height: 1;
+  color: var(--gold);
+}
+.close-stat .l {
+  font-family: "Space Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin-top: 6px;
+}
+.cta {
+  font-family: "Anton", sans-serif;
+  font-size: clamp(40px, 6vw, 84px);
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+.cta .gold { color: var(--gold); }
+.cta-sub {
+  font-family: "DM Sans", sans-serif;
+  color: var(--mute);
+  font-size: 18px;
+  margin-top: 18px;
+  max-width: 560px;
+}
+
+.replay {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  padding: 8px 16px;
+  font-family: "Space Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  opacity: 0;
+  animation: showReplay 1s ease 39s forwards;
+  z-index: 11;
+}
+@keyframes showReplay { to { opacity: 1; } }
+.replay:hover { background: var(--gold); color: var(--bg); }
+
+/* counter animation */
+@keyframes count {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+
+  <div class="hud">
+    <div class="left"><span class="dot"></span><span id="hud-label">PANEL 01 / 06</span></div>
+    <div class="right"><span>OPERACIONESRANGER · DEMO</span><span id="hud-time">00:00</span></div>
+  </div>
+
+  <!-- PANEL 1: Hook -->
+  <div class="panel panel-1">
+    <div class="brand">Demo · 40 segundos</div>
+    <h1 class="title">Operaciones<span class="gold">Ranger</span></h1>
+    <p class="sub-title">Sistema de gestión de turnos para guardianes de seguridad. Cálculo automático, integrado con nómina.</p>
+  </div>
+
+  <!-- PANEL 2: El problema -->
+  <div class="panel panel-2">
+    <div class="problem-eyebrow">▲ El problema actual</div>
+    <h2 class="problem-line">Calcular turnos a mano.</h2>
+    <h2 class="problem-line dim">Cada quincena. 850 guardianes.</h2>
+    <div class="problem-stats">
+      <div class="stat"><div class="v">~12h</div><div class="l">Por quincena en cálculos</div></div>
+      <div class="stat"><div class="v">~5%</div><div class="l">Tasa de error humano</div></div>
+      <div class="stat"><div class="v">RD$</div><div class="l">Reclamos por horas mal pagadas</div></div>
+    </div>
+  </div>
+
+  <!-- PANEL 3: Feature 1 — Cálculo automático -->
+  <div class="panel panel-3">
+    <div class="feature-tag">Cálculo automático</div>
+    <h2 class="feature-title">El sistema <span class="gold">divide solo</span><br>normales, extras, día y noche.</h2>
+    <div class="feature-body">
+      <div class="input-card">
+        <div class="tag">INPUT — turno registrado</div>
+        <div class="row"><span class="k">Empleado</span><span class="v">#1001</span></div>
+        <div class="row"><span class="k">Entrada</span><span class="v">07:00</span></div>
+        <div class="row"><span class="k">Salida</span><span class="v">19:00</span></div>
+        <div class="row"><span class="k">Puesto</span><span class="v">P001</span></div>
+      </div>
+      <div class="input-card output-card">
+        <div class="tag">OUTPUT — auto-calculado</div>
+        <div class="row"><span class="k">Tipo turno</span><span class="v">DIURNO</span></div>
+        <div class="row"><span class="k">Horas normales</span><span class="v">10.00</span></div>
+        <div class="row"><span class="k">Horas extras</span><span class="v">2.00</span></div>
+        <div class="row"><span class="k">Incentivo</span><span class="v">RD$ 120.00</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 4: Feature 2 — Feriados -->
+  <div class="panel panel-4">
+    <div class="feature-tag" style="--feature-num: 02">Feriados nacionales + decretos</div>
+    <h2 class="feature-title">Identifica <span class="gold">feriados</span> sin intervención.</h2>
+    <p class="sub-title" style="max-width:680px;margin-top:0;">Calendario sincronizado. NACIONAL anual + DECRETO presidencial. Sin reclamos por horas mal pagadas.</p>
+    <div class="calendar">
+      <div class="cal-day">L 26</div>
+      <div class="cal-day">M 27</div>
+      <div class="cal-day">M 28</div>
+      <div class="cal-day">J 29</div>
+      <div class="cal-day">V 30</div>
+      <div class="cal-day">S 31</div>
+      <div class="cal-day">D 01</div>
+      <div class="cal-day holiday">L 02</div>
+      <div class="cal-day">M 03</div>
+      <div class="cal-day">M 04</div>
+      <div class="cal-day">J 05</div>
+      <div class="cal-day">V 06</div>
+      <div class="cal-day">S 07</div>
+      <div class="cal-day">D 08</div>
+    </div>
+  </div>
+
+  <!-- PANEL 5: Feature 3 — Export CSV nómina -->
+  <div class="panel panel-5">
+    <div class="feature-tag" style="--feature-num: 03">Integración nómina</div>
+    <h2 class="feature-title">Un clic <span class="gold">→</span> CSV listo para tu sistema de nómina.</h2>
+    <div class="csv-box">
+      <div class="head">fecha,empleado_id,puesto,h_norm,h_extra,tipo,feriado,incentivo</div>
+      <div class="row">2026-01-02,1001,P001,10.00,2.00,DIURNO,NACIONAL,120.00</div>
+      <div class="row">2026-01-03,1001,P002,8.00,2.00,DIURNO,NO,80.00</div>
+      <div class="row">2026-01-04,1042,P001,10.00,2.00,NOCTURNO,NO,120.00</div>
+      <div class="row">2026-01-05,1042,P003,12.00,0.00,DIURNO,NO,144.00</div>
+    </div>
+    <div class="csv-export">EXPORTAR &nbsp;·&nbsp; nomina_2026Q1.csv</div>
+  </div>
+
+  <!-- PANEL 6: Cierre / CTA -->
+  <div class="panel panel-6">
+    <div class="close-stats">
+      <div class="close-stat"><div class="v">12h → &lt;5min</div><div class="l">Por quincena</div></div>
+      <div class="close-stat"><div class="v">0%</div><div class="l">Error de cálculo</div></div>
+      <div class="close-stat"><div class="v">100%</div><div class="l">Integrado con su nómina</div></div>
+    </div>
+    <h2 class="cta">¿Lo activamos?<br><span class="gold">Demo en vivo cuando quieran.</span></h2>
+    <p class="cta-sub">OperacionesRanger ya está construido. Backend + Frontend listos. Solo falta tu OK para poner en producción.</p>
+  </div>
+
+  <button class="replay" onclick="location.reload()">↻ REPLAY</button>
+
+  <div class="progress"><div class="progress-fill"></div></div>
+</div>
+
+<script>
+const labels = [
+  { until: 4,  text: 'PANEL 01 / 06 · HOOK' },
+  { until: 11, text: 'PANEL 02 / 06 · PROBLEMA' },
+  { until: 19, text: 'PANEL 03 / 06 · AUTO-CÁLCULO' },
+  { until: 26, text: 'PANEL 04 / 06 · FERIADOS' },
+  { until: 33, text: 'PANEL 05 / 06 · NÓMINA CSV' },
+  { until: 40, text: 'PANEL 06 / 06 · CIERRE' },
+];
+const start = Date.now();
+const tick = () => {
+  const t = (Date.now() - start) / 1000;
+  const mm = String(Math.floor(t / 60)).padStart(2, '0');
+  const ss = String(Math.floor(t % 60)).padStart(2, '0');
+  document.getElementById('hud-time').textContent = `${mm}:${ss}`;
+  const lab = labels.find(l => t < l.until);
+  if (lab) document.getElementById('hud-label').textContent = lab.text;
+  if (t < 41) requestAnimationFrame(tick);
+};
+tick();
+</script>
+</body>
+</html>

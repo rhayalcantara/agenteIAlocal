@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan Marketing — Ranger Nómina</title>
+<style>
+  :root{
+    --bg:#0a0e1a;
+    --bg-2:#0f1422;
+    --card:#141a2b;
+    --card-hover:#1a2138;
+    --border:#1f2740;
+    --text:#e8eef7;
+    --muted:#8a96b0;
+    --rd-red:#ce1126;
+    --rd-blue:#0049a4;
+    --rd-blue-2:#1768d4;
+    --accent:#00c896;
+    --warn:#ffb800;
+    --shadow:0 8px 32px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+    line-height:1.55;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:"";
+    position:fixed;inset:0;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(206,17,38,.08), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(0,73,164,.10), transparent 45%);
+    pointer-events:none;
+    z-index:-1;
+  }
+
+  /* NAV */
+  nav.top{
+    position:sticky;top:0;z-index:100;
+    backdrop-filter:blur(12px);
+    background:rgba(10,14,26,.75);
+    border-bottom:1px solid var(--border);
+    padding:14px 32px;
+    display:flex;justify-content:space-between;align-items:center;
+    gap:24px;
+    flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.5px}
+  .brand-dot{
+    width:10px;height:10px;border-radius:50%;
+    background:linear-gradient(135deg,var(--rd-red),var(--rd-blue));
+    box-shadow:0 0 12px var(--rd-red);
+  }
+  nav.top ul{display:flex;list-style:none;gap:6px;flex-wrap:wrap}
+  nav.top a{
+    color:var(--muted);text-decoration:none;font-size:13px;
+    padding:6px 12px;border-radius:6px;transition:.2s;
+  }
+  nav.top a:hover{color:var(--text);background:var(--card)}
+
+  /* HERO */
+  .hero{
+    padding:80px 32px 60px;
+    text-align:center;
+    max-width:980px;margin:0 auto;
+  }
+  .badge{
+    display:inline-block;padding:6px 14px;
+    background:rgba(0,200,150,.1);
+    border:1px solid rgba(0,200,150,.3);
+    color:var(--accent);
+    border-radius:20px;font-size:12px;font-weight:600;
+    text-transform:uppercase;letter-spacing:1.5px;
+    margin-bottom:24px;
+  }
+  h1{
+    font-size:clamp(2rem,5vw,3.5rem);
+    line-height:1.15;font-weight:800;
+    margin-bottom:18px;
+    background:linear-gradient(135deg,#fff,#a8c1ee);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  .hero p.sub{
+    font-size:1.15rem;color:var(--muted);
+    max-width:680px;margin:0 auto 36px;
+  }
+  .hero-meta{
+    display:flex;justify-content:center;gap:18px;flex-wrap:wrap;
+    font-size:13px;color:var(--muted);
+  }
+  .hero-meta span b{color:var(--text);font-weight:600}
+  .cta{
+    display:inline-block;margin-top:32px;
+    padding:14px 28px;
+    background:linear-gradient(135deg,var(--rd-red),#a30d1f);
+    color:#fff;text-decoration:none;
+    border-radius:8px;font-weight:600;
+    box-shadow:0 8px 24px rgba(206,17,38,.35);
+    transition:transform .2s,box-shadow .2s;
+  }
+  .cta:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(206,17,38,.5)}
+
+  /* SECTIONS */
+  section{padding:60px 32px;max-width:1240px;margin:0 auto}
+  h2{
+    font-size:1.9rem;font-weight:700;margin-bottom:8px;
+    display:flex;align-items:center;gap:12px;
+  }
+  h2 .num{
+    font-size:.8rem;color:var(--rd-red);font-weight:800;
+    background:rgba(206,17,38,.12);padding:4px 10px;border-radius:6px;
+  }
+  .lead{color:var(--muted);margin-bottom:36px;max-width:680px}
+
+  /* PILARES grid */
+  .pilares{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+  .pilar{
+    background:var(--card);border:1px solid var(--border);
+    padding:24px;border-radius:14px;
+    transition:transform .2s,border-color .2s;
+  }
+  .pilar:hover{transform:translateY(-4px);border-color:var(--rd-blue-2)}
+  .pilar .pct{
+    font-size:2.2rem;font-weight:800;
+    background:linear-gradient(135deg,var(--rd-red),var(--rd-blue-2));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  .pilar h3{margin:8px 0 8px;font-size:1.1rem}
+  .pilar p{color:var(--muted);font-size:.9rem}
+
+  /* TABS PLATAFORMAS */
+  .tabs{
+    display:flex;gap:8px;margin-bottom:24px;
+    border-bottom:1px solid var(--border);
+    flex-wrap:wrap;
+  }
+  .tab{
+    padding:12px 20px;background:transparent;border:none;
+    color:var(--muted);cursor:pointer;font-size:.95rem;font-weight:500;
+    border-bottom:2px solid transparent;
+    transition:.2s;font-family:inherit;
+  }
+  .tab.active{color:var(--text);border-bottom-color:var(--rd-red)}
+  .tab:hover{color:var(--text)}
+  .tab-content{display:none;animation:fadeIn .3s ease}
+  .tab-content.active{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+  .platform-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;
+  }
+  .platform-info{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:14px;padding:28px;
+  }
+  .platform-info h3{
+    margin-bottom:16px;font-size:1.25rem;
+    display:flex;align-items:center;gap:10px;
+  }
+  .platform-info ul{list-style:none;padding:0}
+  .platform-info li{
+    padding:10px 0;border-bottom:1px dashed var(--border);
+    display:flex;align-items:flex-start;gap:10px;font-size:.92rem;
+  }
+  .platform-info li:last-child{border-bottom:none}
+  .platform-info li::before{
+    content:"";display:inline-block;
+    width:6px;height:6px;background:var(--accent);
+    border-radius:50%;margin-top:8px;flex-shrink:0;
+  }
+  .hashtags{
+    margin-top:18px;padding:14px;
+    background:var(--bg-2);border-radius:8px;
+    font-size:.8rem;color:var(--rd-blue-2);font-family:monospace;
+    word-break:break-word;
+  }
+
+  /* PHONE MOCKUP */
+  .phone{
+    background:#000;border-radius:32px;
+    padding:8px;
+    box-shadow:var(--shadow),0 0 0 2px var(--border);
+    width:100%;max-width:300px;margin:0 auto;
+    aspect-ratio:9/19;
+    overflow:hidden;
+    position:relative;
+  }
+  .phone-screen{
+    width:100%;height:100%;
+    background:#0f1422;
+    border-radius:26px;
+    overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+  .phone-header{
+    padding:12px;border-bottom:1px solid var(--border);
+    display:flex;align-items:center;gap:8px;
+    font-size:.7rem;font-weight:600;
+  }
+  .phone-avatar{
+    width:28px;height:28px;border-radius:50%;
+    background:linear-gradient(135deg,var(--rd-red),var(--rd-blue));
+    display:flex;align-items:center;justify-content:center;
+    font-size:.7rem;font-weight:800;
+  }
+  .phone-body{
+    flex:1;padding:16px;display:flex;flex-direction:column;
+    justify-content:center;align-items:center;text-align:center;
+    background:linear-gradient(180deg,#1a2138,#0f1422);
+  }
+  .phone-body .big{
+    font-size:1.4rem;font-weight:800;line-height:1.2;
+    margin-bottom:8px;
+  }
+  .phone-body .small{font-size:.65rem;color:var(--muted)}
+  .phone-footer{
+    padding:10px;font-size:.6rem;color:var(--muted);
+    text-align:center;border-top:1px solid var(--border);
+  }
+
+  /* TIMELINE */
+  .timeline-wrap{
+    overflow-x:auto;padding:8px 4px 24px;
+    scrollbar-width:thin;scrollbar-color:var(--border) transparent;
+  }
+  .timeline-wrap::-webkit-scrollbar{height:8px}
+  .timeline-wrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+  .timeline{
+    display:flex;gap:14px;padding:4px;min-width:max-content;
+  }
+  .week{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:12px;padding:18px;
+    width:240px;flex-shrink:0;
+    cursor:pointer;transition:.2s;
+    position:relative;
+  }
+  .week:hover{
+    transform:translateY(-6px);
+    border-color:var(--rd-blue-2);
+    background:var(--card-hover);
+  }
+  .week .num-week{
+    position:absolute;top:-10px;left:14px;
+    background:var(--bg);
+    padding:2px 10px;border-radius:6px;
+    font-size:.7rem;font-weight:700;
+    border:1px solid var(--border);
+    color:var(--rd-red);letter-spacing:1px;
+  }
+  .week.mes-1 .num-week{color:var(--rd-red)}
+  .week.mes-2 .num-week{color:var(--warn)}
+  .week.mes-3 .num-week{color:var(--accent)}
+  .week h4{font-size:1rem;margin:6px 0 8px}
+  .week p{font-size:.82rem;color:var(--muted)}
+  .month-bar{
+    display:flex;gap:8px;margin-bottom:18px;
+    font-size:.75rem;color:var(--muted);
+    flex-wrap:wrap;
+  }
+  .month-bar span{
+    padding:4px 10px;border-radius:6px;
+    border:1px solid var(--border);
+  }
+  .month-bar span.m1{color:var(--rd-red);border-color:rgba(206,17,38,.3)}
+  .month-bar span.m2{color:var(--warn);border-color:rgba(255,184,0,.3)}
+  .month-bar span.m3{color:var(--accent);border-color:rgba(0,200,150,.3)}
+
+  /* MOCKUPS posts */
+  .posts{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:24px;
+  }
+  .post-card{
+    background:#fff;color:#111;border-radius:12px;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+    transition:transform .2s;
+  }
+  .post-card:hover{transform:translateY(-4px)}
+  .post-head{
+    display:flex;align-items:center;gap:10px;
+    padding:12px;border-bottom:1px solid #eee;
+  }
+  .post-avatar{
+    width:32px;height:32px;border-radius:50%;
+    background:linear-gradient(135deg,var(--rd-red),var(--rd-blue));
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:800;font-size:.8rem;
+  }
+  .post-handle{font-size:.85rem;font-weight:700}
+  .post-img{
+    aspect-ratio:1/1;
+    background:linear-gradient(135deg,#1a2138,#0f1422);
+    display:flex;align-items:center;justify-content:center;
+    padding:24px;text-align:center;
+    color:#fff;
+    position:relative;
+  }
+  .post-img.red{background:linear-gradient(135deg,var(--rd-red),#7a0b18)}
+  .post-img.blue{background:linear-gradient(135deg,var(--rd-blue),#002d62)}
+  .post-img.dark{background:linear-gradient(135deg,#0f1422,#1a2138)}
+  .post-img .ttl{font-size:1.3rem;font-weight:800;line-height:1.2;margin-bottom:8px}
+  .post-img .sub-ttl{font-size:.8rem;opacity:.85}
+  .post-img .swipe{
+    position:absolute;bottom:12px;right:12px;
+    background:rgba(0,0,0,.4);color:#fff;padding:4px 10px;
+    border-radius:12px;font-size:.7rem;
+  }
+  .post-foot{
+    padding:10px 12px;font-size:.78rem;color:#444;
+  }
+  .post-foot b{color:#111}
+
+  /* KPIs */
+  .kpis{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:16px;
+  }
+  .kpi{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:12px;padding:20px;
+  }
+  .kpi-title{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+  .kpi-num{font-size:2rem;font-weight:800;margin:6px 0}
+  .kpi-num.red{color:var(--rd-red)}
+  .kpi-num.blue{color:var(--rd-blue-2)}
+  .kpi-num.green{color:var(--accent)}
+  .kpi-num.yellow{color:var(--warn)}
+  .kpi-stages{display:flex;gap:4px;margin-top:10px}
+  .kpi-stage{
+    flex:1;height:4px;background:var(--border);border-radius:2px;
+    position:relative;overflow:hidden;
+  }
+  .kpi-stage.filled::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(90deg,var(--rd-red),var(--rd-blue-2));
+    animation:fillBar .8s ease forwards;
+  }
+  @keyframes fillBar{from{width:0}to{width:100%}}
+  .kpi-prog{
+    font-size:.7rem;color:var(--muted);margin-top:6px;
+    display:flex;justify-content:space-between;
+  }
+
+  /* STACK */
+  .stack-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:14px;
+  }
+  .tool{
+    background:var(--card);border:1px solid var(--border);
+    padding:18px;border-radius:10px;
+    display:flex;justify-content:space-between;align-items:center;
+    gap:12px;transition:.2s;
+  }
+  .tool:hover{border-color:var(--rd-blue-2);transform:translateX(4px)}
+  .tool-name{font-weight:600}
+  .tool-cost{
+    font-size:.78rem;font-weight:700;
+    padding:4px 10px;border-radius:6px;
+  }
+  .tool-cost.free{background:rgba(0,200,150,.15);color:var(--accent)}
+  .tool-cost.paid{background:rgba(255,184,0,.15);color:var(--warn)}
+  .tool-uso{font-size:.75rem;color:var(--muted);display:block;margin-top:3px}
+
+  /* CHECKLIST */
+  .checklist{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:14px;padding:28px;
+  }
+  .check-item{
+    display:flex;align-items:flex-start;gap:12px;
+    padding:12px 0;border-bottom:1px dashed var(--border);
+    cursor:pointer;user-select:none;
+    transition:.2s;
+  }
+  .check-item:last-child{border-bottom:none}
+  .check-item:hover{background:var(--bg-2);padding-left:8px;border-radius:6px}
+  .check-box{
+    width:22px;height:22px;
+    border:2px solid var(--border);
+    border-radius:6px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    transition:.2s;background:transparent;
+  }
+  .check-item.done .check-box{
+    background:var(--accent);border-color:var(--accent);
+  }
+  .check-item.done .check-box::after{
+    content:"";width:6px;height:11px;
+    border:solid #0a0e1a;border-width:0 2px 2px 0;
+    transform:rotate(45deg) translate(-1px,-2px);
+  }
+  .check-text{font-size:.95rem}
+  .check-item.done .check-text{
+    text-decoration:line-through;color:var(--muted);
+  }
+  .progress-bar{
+    height:6px;background:var(--border);border-radius:3px;
+    margin-top:18px;overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg,var(--rd-red),var(--accent));
+    width:0%;transition:width .4s;
+  }
+  .progress-label{
+    margin-top:10px;font-size:.85rem;color:var(--muted);
+    text-align:right;
+  }
+
+  /* MODAL */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.7);
+    backdrop-filter:blur(6px);
+    display:none;align-items:center;justify-content:center;
+    z-index:1000;padding:20px;animation:fadeIn .2s;
+  }
+  .modal-overlay.active{display:flex}
+  .modal{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:16px;padding:32px;
+    max-width:560px;width:100%;
+    max-height:80vh;overflow-y:auto;
+    position:relative;
+    animation:slideUp .3s ease;
+  }
+  @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .modal-close{
+    position:absolute;top:14px;right:14px;
+    background:var(--border);border:none;color:var(--text);
+    width:32px;height:32px;border-radius:50%;
+    cursor:pointer;font-size:1.2rem;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .modal-close:hover{background:var(--rd-red)}
+  .modal h3{margin-bottom:8px;font-size:1.4rem}
+  .modal .modal-sub{color:var(--muted);font-size:.85rem;margin-bottom:18px}
+  .modal-section{margin-top:18px}
+  .modal-section h4{font-size:.85rem;color:var(--rd-blue-2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+  .modal-section ul{list-style:none;padding:0}
+  .modal-section li{padding:6px 0;font-size:.92rem;display:flex;gap:10px;align-items:flex-start}
+  .modal-section li::before{content:"→";color:var(--rd-red);font-weight:700}
+
+  /* FOOTER */
+  footer{
+    text-align:center;padding:48px 24px;
+    border-top:1px solid var(--border);
+    color:var(--muted);font-size:.85rem;
+    margin-top:60px;
+  }
+  footer b{color:var(--text)}
+
+  /* RESPONSIVE */
+  @media (max-width:768px){
+    nav.top{padding:12px 16px}
+    nav.top ul{font-size:12px}
+    section{padding:48px 18px}
+    .platform-grid{grid-template-columns:1fr}
+    .phone{max-width:240px}
+    h1{font-size:2.2rem}
+    .hero{padding:48px 18px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="brand">
+    <span class="brand-dot"></span>
+    <span>Ranger Nómina · Plan Marketing</span>
+  </div>
+  <ul>
+    <li><a href="#estrategia">Estrategia</a></li>
+    <li><a href="#plataformas">Plataformas</a></li>
+    <li><a href="#timeline">Calendario</a></li>
+    <li><a href="#mockups">Mockups</a></li>
+    <li><a href="#kpis">KPIs</a></li>
+    <li><a href="#stack">Stack</a></li>
+    <li><a href="#checklist">Semana 1</a></li>
+  </ul>
+</nav>
+
+<header class="hero">
+  <span class="badge">Plan 12 semanas · Orgánico</span>
+  <h1>El sistema de nómina<br>que sí entiende RD.</h1>
+  <p class="sub">Ranger Nómina para Instagram, Facebook y YouTube. Plan orgánico de 3 meses con foco en contadores y PyMEs dominicanas. Producción mínima, máximo impacto.</p>
+  <div class="hero-meta">
+    <span><b>15 may → 6 ago 2026</b></span>
+    <span>·</span>
+    <span><b>0-2h/sem</b> producción</span>
+    <span>·</span>
+    <span><b>USD 20-40</b>/mes</span>
+    <span>·</span>
+    <span>Demo: <b>Distribuidora Demo SRL</b></span>
+  </div>
+  <a class="cta" href="#timeline">Ver calendario editorial →</a>
+</header>
+
+<section id="estrategia">
+  <h2><span class="num">01</span> Pilares de contenido</h2>
+  <p class="lead">Cuatro frentes que se rotan cada semana. La educación legal y los demos de producto cargan el 70% del peso porque generan autoridad y dejan ver el sistema funcionando.</p>
+  <div class="pilares">
+    <div class="pilar">
+      <div class="pct">40%</div>
+      <h3>Educación legal RD</h3>
+      <p>ISR, AFP, ARS, regalía, vacaciones. Carruseles densos y precisos, validados con fuentes DGII/MT.</p>
+    </div>
+    <div class="pilar">
+      <div class="pct">30%</div>
+      <h3>Producto & demos</h3>
+      <p>Reels screencast del sistema con voiceover IA. Foco en cálculo, cierre, auditoría y bancos.</p>
+    </div>
+    <div class="pilar">
+      <div class="pct">15%</div>
+      <h3>Detrás de cámaras</h3>
+      <p>Stories, snippets de código, vistas casuales del dashboard. Construye humanidad técnica.</p>
+    </div>
+    <div class="pilar">
+      <div class="pct">15%</div>
+      <h3>Casos Distribuidora Demo</h3>
+      <p>Narrativa de "una empresa cliente ficticia" para mostrar antes/después sin riesgo legal.</p>
+    </div>
+  </div>
+</section>
+
+<section id="plataformas">
+  <h2><span class="num">02</span> Plataformas y cadencia</h2>
+  <p class="lead">Instagram es el eje. Facebook hereda con cross-post. YouTube acumula autoridad SEO de largo plazo.</p>
+  <div class="tabs">
+    <button class="tab active" data-tab="ig">Instagram</button>
+    <button class="tab" data-tab="fb">Facebook</button>
+    <button class="tab" data-tab="yt">YouTube</button>
+  </div>
+
+  <div class="tab-content active" id="tab-ig">
+    <div class="platform-grid">
+      <div class="platform-info">
+        <h3>📷 Instagram · eje del plan</h3>
+        <ul>
+          <li><b>2 carruseles educativos/semana</b> — "5 errores al calcular ISR", "Regalía paso a paso"</li>
+          <li><b>2 reels screencast/semana</b> — 15-30s del sistema con voiceover IA y captions grandes</li>
+          <li><b>3-5 stories/día</b> — snippets, polls, vista del dashboard</li>
+          <li><b>Bio</b> con propuesta de valor y CTA a DM ("Escribe DEMO")</li>
+        </ul>
+        <div class="hashtags">#NominaRD #ContadoresRD #PyMEsRD #SoftwareDominicano #RRHH #DGII #TSS</div>
+      </div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-header">
+            <div class="phone-avatar">RN</div>
+            <span>@ranger.nomina</span>
+          </div>
+          <div class="phone-body">
+            <div class="big">5 errores al calcular ISR en RD</div>
+            <div class="small">Desliza →</div>
+          </div>
+          <div class="phone-footer">♥ 247 · 💬 18 · 📤 32</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-fb">
+    <div class="platform-grid">
+      <div class="platform-info">
+        <h3>📘 Facebook · alcance y grupos</h3>
+        <ul>
+          <li><b>Cross-post automático desde IG</b> vía Meta Business Suite</li>
+          <li><b>+1 post largo educativo/semana</b> (800-1200 caracteres). FB tolera más texto que IG.</li>
+          <li><b>Participación en grupos</b>: Contadores Dominicanos, Emprendedores RD, RRHH República Dominicana</li>
+          <li><b>Estrategia</b>: responder dudas técnicas; firma sutil "soy Rhay, hago Ranger Nómina"</li>
+        </ul>
+        <div class="hashtags">Meta Business Suite · cero costo adicional · sin spam en grupos</div>
+      </div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-header">
+            <div class="phone-avatar">RN</div>
+            <span>Ranger Nómina</span>
+          </div>
+          <div class="phone-body" style="background:linear-gradient(180deg,var(--rd-blue),var(--rd-blue-2))">
+            <div class="big">Regalía pascual: la fórmula real</div>
+            <div class="small">Post largo · 1,200 caracteres</div>
+          </div>
+          <div class="phone-footer">👍 89 · 💬 23 · ↗ 14</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-yt">
+    <div class="platform-grid">
+      <div class="platform-info">
+        <h3>▶️ YouTube · autoridad de largo plazo</h3>
+        <ul>
+          <li><b>1 video largo/mes</b> (10-15 min) — tutorial profundo SEO-optimizado</li>
+          <li><b>2 shorts/semana</b> (≤60s) — cortes verticales reciclados de los reels IG</li>
+          <li><b>SEO keywords</b>: "nómina República Dominicana", "calcular ISR DGII", "regalía pascual"</li>
+          <li><b>CTA en descripción</b>: enlace a calculadora ISR y agenda demo</li>
+        </ul>
+        <div class="hashtags">Watch time objetivo > 50% · Mes 3: video lead magnet "Migra de Excel a Ranger"</div>
+      </div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-header">
+            <div class="phone-avatar">RN</div>
+            <span>Ranger Nómina RD</span>
+          </div>
+          <div class="phone-body" style="background:linear-gradient(180deg,#0f1422,var(--rd-red))">
+            <div class="big">Cómo calcular ISR 2026 paso a paso</div>
+            <div class="small">12:47 · 4,2K vistas</div>
+          </div>
+          <div class="phone-footer">👍 312 · 💬 47 · 🔔 +89</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="timeline">
+  <h2><span class="num">03</span> Calendario editorial</h2>
+  <p class="lead">12 semanas en 3 fases: autoridad, demos, conversión. Cada tarjeta es clickeable.</p>
+  <div class="month-bar">
+    <span class="m1">Mes 1 · Awareness</span>
+    <span class="m2">Mes 2 · Producto</span>
+    <span class="m3">Mes 3 · Conversión</span>
+  </div>
+  <div class="timeline-wrap">
+    <div class="timeline" id="timeline"></div>
+  </div>
+</section>
+
+<section id="mockups">
+  <h2><span class="num">04</span> Mockups de posts</h2>
+  <p class="lead">Tres ejemplos visuales del estilo gráfico. Tipografía grande, fondos sólidos, máximo contraste para feed.</p>
+  <div class="posts">
+    <div class="post-card">
+      <div class="post-head">
+        <div class="post-avatar">RN</div>
+        <div><div class="post-handle">@ranger.nomina</div><div style="font-size:.7rem;color:#888">Santo Domingo · Patrocinado · No</div></div>
+      </div>
+      <div class="post-img red">
+        <div>
+          <div class="ttl">5 ERRORES al calcular ISR en RD</div>
+          <div class="sub-ttl">(el #3 le cuesta multas al 70% de las PyMEs)</div>
+        </div>
+        <div class="swipe">1/6 →</div>
+      </div>
+      <div class="post-foot"><b>247 me gusta</b> · ranger.nomina <b>5 errores al calcular ISR...</b> Guarda este post 📌</div>
+    </div>
+
+    <div class="post-card">
+      <div class="post-head">
+        <div class="post-avatar">RN</div>
+        <div><div class="post-handle">@ranger.nomina</div><div style="font-size:.7rem;color:#888">Reel · 0:24</div></div>
+      </div>
+      <div class="post-img blue">
+        <div>
+          <div class="ttl">CALCULA una nómina completa en 90 segundos</div>
+          <div class="sub-ttl">Demo en vivo del sistema 👀</div>
+        </div>
+        <div class="swipe">▶ Reel</div>
+      </div>
+      <div class="post-foot"><b>1,847 reproducciones</b> · ranger.nomina <b>Esto es lo que toma con Ranger...</b></div>
+    </div>
+
+    <div class="post-card">
+      <div class="post-head">
+        <div class="post-avatar">RN</div>
+        <div><div class="post-handle">@ranger.nomina</div><div style="font-size:.7rem;color:#888">Carrusel · Lead magnet</div></div>
+      </div>
+      <div class="post-img dark">
+        <div>
+          <div class="ttl">GRATIS: Guía 2026 de cálculo de nómina RD</div>
+          <div class="sub-ttl">DM la palabra "GUIA" 📩</div>
+        </div>
+        <div class="swipe">1/8 →</div>
+      </div>
+      <div class="post-foot"><b>89 me gusta</b> · ranger.nomina <b>Toda la información oficial DGII...</b></div>
+    </div>
+  </div>
+</section>
+
+<section id="kpis">
+  <h2><span class="num">05</span> KPIs objetivo</h2>
+  <p class="lead">Targets acumulados al cierre de cada mes. Las barras muestran progreso esperado mes a mes.</p>
+  <div class="kpis" id="kpis"></div>
+</section>
+
+<section id="stack">
+  <h2><span class="num">06</span> Stack de producción</h2>
+  <p class="lead">Lo mínimo viable. Costo total mensual estimado: USD 20-40.</p>
+  <div class="stack-grid" id="stack"></div>
+</section>
+
+<section id="checklist">
+  <h2><span class="num">07</span> Checklist · Semana 1</h2>
+  <p class="lead">Lista arrancable. Los checkboxes se guardan localmente — refresca y siguen marcados.</p>
+  <div class="checklist">
+    <div id="checks"></div>
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+    <div class="progress-label" id="progress-label">0 de 10 completadas</div>
+  </div>
+</section>
+
+<footer>
+  <p><b>Plan de Marketing Ranger Nómina</b> · Generado por Claudy · 14 may 2026</p>
+  <p style="margin-top:8px">Próximo paso: aprobar el plan y crear cuentas. Luego Claudy genera el banco de 30 ideas y el primer carrusel.</p>
+</footer>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" id="modal-close">×</button>
+    <h3 id="modal-title"></h3>
+    <div class="modal-sub" id="modal-sub"></div>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+  /* DATOS */
+  const semanas = [
+    {n:'S1', mes:1, fechas:'15-21 may', hito:'Lanzamiento perfiles',
+      contenido:['Post manifiesto: "Por qué construí Ranger Nómina"','Carrusel "Conoce a Ranger" (8 slides)','Story diaria mostrando dashboard','Bio IG/FB con CTA DM "DEMO"']},
+    {n:'S2', mes:1, fechas:'22-28 may', hito:'Serie errores #1',
+      contenido:['Carrusel "5 errores al calcular ISR" (6 slides)','Reel 24s screencast módulo ISR','3 stories con polls "¿usas Excel para ISR?"','Post FB largo educativo sobre tramos ISR 2026']},
+    {n:'S3', mes:1, fechas:'29 may-4 jun', hito:'Serie errores #2',
+      contenido:['Carrusel "El error de regalía que cuesta multas"','Reel 30s screencast módulo regalía','Video YouTube mes 1: "Cómo calcular ISR 2026 paso a paso" (12 min)','Short YT vertical 45s recortado del reel']},
+    {n:'S4', mes:1, fechas:'5-11 jun', hito:'Serie errores #3',
+      contenido:['Carrusel "Vacaciones: días hábiles vs calendario"','Reel 20s mostrando cálculo de vacaciones','Story serie de 5 con preguntas frecuentes','Recap del mes en post estático']},
+    {n:'S5', mes:2, fechas:'12-18 jun', hito:'Demo módulo empleados',
+      contenido:['Reel screencast 30s "Tu primer empleado en Ranger"','Carrusel "10 datos que Ranger guarda de cada empleado"','Stories detrás de cámaras del desarrollo','Post FB largo: importar empleados desde Excel']},
+    {n:'S6', mes:2, fechas:'19-25 jun', hito:'Demo cálculo nómina',
+      contenido:['Reel 30s "Calcula una nómina completa en 90s"','Post historia Distribuidora Demo SRL (carrusel narrativo)','Comparativa Excel vs Ranger (carrusel)','Short YT recortado']},
+    {n:'S7', mes:2, fechas:'26 jun-2 jul', hito:'Demo cierre + auditoría',
+      contenido:['Reel "Cierra tu nómina con un click"','Video YT mes 2: "Cierre auditado de nómina paso a paso"','Carrusel "Por qué auditar tus cierres te salva en una fiscalización"','Story polls sobre fiscalizaciones DGII']},
+    {n:'S8', mes:2, fechas:'3-9 jul', hito:'Demo reportes/bancos',
+      contenido:['Reel "Tu archivo de banco en 3 clicks"','Caso Distribuidora Demo SRL: carrusel narrativo final','Short YT con el reel del archivo de banco','Recap del mes producto']},
+    {n:'S9', mes:3, fechas:'10-16 jul', hito:'Lead magnet #1 PDF',
+      contenido:['Lanzamiento PDF "Guía 2026 cálculo nómina RD" gratis','Carrusel "Lo que aprenderás en la guía"','CTA fuerte: DM "GUIA" para recibir','Stories con extractos de la guía']},
+    {n:'S10', mes:3, fechas:'17-23 jul', hito:'Lead magnet #2 Calculadora',
+      contenido:['Calculadora ISR online publicada (mini-app HTML)','Carrusel "Pruébala tú mismo"','Reel mostrando la calculadora en acción','Captura de emails con desglose extendido']},
+    {n:'S11', mes:3, fechas:'24-30 jul', hito:'Lead magnet #3 Excel',
+      contenido:['Plantilla Excel horas extras descargable','Video YT mes 3: "Migra de Excel a Ranger en 30 días"','Carrusel "Tu Excel actual + nuestra plantilla = import limpio"','Short YT recortado']},
+    {n:'S12', mes:3, fechas:'31 jul-6 ago', hito:'Push final demos',
+      contenido:['Reel testimonio Distribuidora Demo (voiceover IA)','CTA fuerte: "Agenda demo gratis 30 min"','Recap 12 semanas en carrusel','Story takeover con resultados del plan']},
+  ];
+
+  const kpis = [
+    {t:'Seguidores Instagram', m1:200, m2:500, m3:1000, c:'red'},
+    {t:'Seguidores Facebook', m1:100, m2:250, m3:500, c:'blue'},
+    {t:'Suscriptores YouTube', m1:30, m2:100, m3:200, c:'yellow'},
+    {t:'Emails capturados', m1:10, m2:50, m3:150, c:'green'},
+    {t:'Demos agendadas', m1:0, m2:2, m3:8, c:'red'},
+    {t:'Clientes pagos', m1:0, m2:0, m3:2, c:'green'},
+  ];
+
+  const stack = [
+    {n:'Canva Pro', u:'Carruseles, miniaturas YT, PDF', c:'USD 13/mes', free:false},
+    {n:'OBS Studio', u:'Screencast Ranger', c:'Gratis', free:true},
+    {n:'CapCut', u:'Edición reels y shorts', c:'Gratis', free:true},
+    {n:'ElevenLabs / TTS', u:'Voiceover IA en español', c:'USD 5-22/mes', free:false},
+    {n:'Meta Business Suite', u:'Programación IG + FB', c:'Gratis', free:true},
+    {n:'Buffer (free)', u:'Backup programación', c:'Gratis', free:true},
+    {n:'Notion', u:'CRM ligero + calendario', c:'Gratis', free:true},
+    {n:'Bitly', u:'Tracking de links', c:'Gratis', free:true},
+  ];
+
+  const tareas = [
+    'Crear perfil Instagram @ranger.nomina',
+    'Crear página Facebook "Ranger Nómina"',
+    'Crear canal YouTube "Ranger Nómina RD"',
+    'Diseñar logo simple en Canva (texto + ícono)',
+    'Bio IG/FB con propuesta de valor + CTA DM',
+    'Foto de perfil + portada FB consistentes',
+    'Vincular cuenta Meta Business Suite',
+    'Configurar Notion como calendario editorial',
+    '4 carruseles del Mes 1 pre-diseñados en Canva',
+    'Primer screencast OBS del módulo dashboard',
+  ];
+
+  /* RENDER timeline */
+  const tl = document.getElementById('timeline');
+  semanas.forEach((s,i)=>{
+    const el = document.createElement('div');
+    el.className = `week mes-${s.mes}`;
+    el.innerHTML = `<span class="num-week">${s.n} · ${s.fechas}</span>
+      <h4>${s.hito}</h4>
+      <p>${s.contenido.length} pieza${s.contenido.length>1?'s':''} clave esta semana</p>`;
+    el.onclick = ()=>openModal(s);
+    tl.appendChild(el);
+  });
+
+  /* MODAL */
+  const overlay = document.getElementById('modal');
+  function openModal(s){
+    document.getElementById('modal-title').textContent = `${s.n} · ${s.hito}`;
+    document.getElementById('modal-sub').textContent = `${s.fechas} · Mes ${s.mes}`;
+    document.getElementById('modal-content').innerHTML =
+      `<div class="modal-section"><h4>Piezas de contenido</h4><ul>${s.contenido.map(c=>`<li>${c}</li>`).join('')}</ul></div>`;
+    overlay.classList.add('active');
+  }
+  document.getElementById('modal-close').onclick = ()=>overlay.classList.remove('active');
+  overlay.onclick = e=>{if(e.target===overlay) overlay.classList.remove('active')};
+
+  /* TABS */
+  document.querySelectorAll('.tab').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      document.getElementById('tab-'+b.dataset.tab).classList.add('active');
+    };
+  });
+
+  /* KPIs */
+  const kEl = document.getElementById('kpis');
+  kpis.forEach(k=>{
+    const div = document.createElement('div');
+    div.className = 'kpi';
+    div.innerHTML = `
+      <div class="kpi-title">${k.t}</div>
+      <div class="kpi-num ${k.c}">${k.m3.toLocaleString()}</div>
+      <div class="kpi-stages">
+        <div class="kpi-stage filled" style="animation-delay:.1s"></div>
+        <div class="kpi-stage filled" style="animation-delay:.3s"></div>
+        <div class="kpi-stage filled" style="animation-delay:.5s"></div>
+      </div>
+      <div class="kpi-prog">
+        <span>M1: ${k.m1}</span><span>M2: ${k.m2}</span><span>M3: ${k.m3}</span>
+      </div>`;
+    kEl.appendChild(div);
+  });
+
+  /* STACK */
+  const sEl = document.getElementById('stack');
+  stack.forEach(t=>{
+    const d = document.createElement('div');
+    d.className = 'tool';
+    d.innerHTML = `<div><div class="tool-name">${t.n}</div><span class="tool-uso">${t.u}</span></div>
+      <div class="tool-cost ${t.free?'free':'paid'}">${t.c}</div>`;
+    sEl.appendChild(d);
+  });
+
+  /* CHECKLIST con localStorage */
+  const cEl = document.getElementById('checks');
+  const STORE_KEY = 'ranger_marketing_w1';
+  let state = JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
+  if(!Array.isArray(state) || state.length !== tareas.length){
+    state = new Array(tareas.length).fill(false);
+  }
+  function renderChecks(){
+    cEl.innerHTML = '';
+    tareas.forEach((t,i)=>{
+      const el = document.createElement('div');
+      el.className = 'check-item' + (state[i] ? ' done' : '');
+      el.innerHTML = `<div class="check-box"></div><div class="check-text">${t}</div>`;
+      el.onclick = ()=>{
+        state[i] = !state[i];
+        localStorage.setItem(STORE_KEY, JSON.stringify(state));
+        renderChecks();
+      };
+      cEl.appendChild(el);
+    });
+    const done = state.filter(Boolean).length;
+    document.getElementById('progress').style.width = (done/tareas.length*100)+'%';
+    document.getElementById('progress-label').textContent = `${done} de ${tareas.length} completadas`;
+  }
+  renderChecks();
+</script>
+
+</body>
+</html>

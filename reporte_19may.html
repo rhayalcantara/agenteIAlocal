@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Reporte 19-may-2026 · agenteIAlocal</title>
+<style>
+  :root {
+    --bg: #0e1116;
+    --panel: #161b22;
+    --panel-2: #1c2128;
+    --border: #21262d;
+    --text: #d6dde6;
+    --muted: #8b949e;
+    --accent: #2f9eff;
+    --ok: #2ec869;
+    --warn: #ffb144;
+    --fail: #ff6b6b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 100%);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 24px 18px 60px; }
+  header.hero {
+    text-align: center;
+    padding: 28px 18px;
+    margin-bottom: 24px;
+    background: rgba(15, 20, 34, 0.6);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  header.hero h1 {
+    margin: 0 0 8px;
+    font-size: 26px;
+    background: linear-gradient(90deg, #2f9eff, #2ec869);
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+  }
+  header.hero .meta {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .stat .label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  .stat .value {
+    margin-top: 6px;
+    font-size: 26px;
+    font-weight: 600;
+  }
+  .stat .value.ok { color: var(--ok); }
+  .stat .value.warn { color: var(--warn); }
+  .stat .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  section {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+  }
+  section h2 {
+    margin: 0 0 14px;
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  section h2 .icon {
+    width: 22px; height: 22px; display: inline-flex;
+    align-items: center; justify-content: center;
+    background: var(--panel-2); border-radius: 6px;
+    font-size: 13px;
+  }
+  section .desc { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+
+  .feature {
+    border-left: 3px solid var(--ok);
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    background: var(--panel-2);
+    border-radius: 0 8px 8px 0;
+  }
+  .feature.pending { border-left-color: var(--warn); }
+  .feature.future { border-left-color: var(--muted); }
+  .feature .title {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 12px; flex-wrap: wrap;
+  }
+  .feature .title strong { font-size: 14px; }
+  .feature .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .badge.done { background: #1f3a2a; color: var(--ok); }
+  .badge.pending { background: #3a2f10; color: var(--warn); }
+  .badge.future { background: #2a2f3a; color: var(--muted); }
+  .feature .body { font-size: 13px; color: var(--text); margin-top: 4px; }
+  .feature .meta {
+    font-size: 11px; color: var(--muted); margin-top: 6px;
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .feature .meta code { background: #0d1117; padding: 1px 6px; border-radius: 3px; color: var(--accent); }
+
+  table {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+  }
+  table th, table td {
+    text-align: left; padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  table th {
+    color: var(--muted); font-weight: 600; font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .pill { padding: 3px 9px; border-radius: 10px; font-size: 11px; font-weight: 600; display: inline-block; }
+  .pill.up { background: #1f3a2a; color: var(--ok); }
+  .pill.down { background: #4a1c1c; color: var(--fail); }
+
+  details {
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 14px; margin: 8px 0;
+  }
+  details summary {
+    cursor: pointer; font-weight: 600;
+    list-style: none;
+  }
+  details[open] summary { margin-bottom: 8px; }
+  details summary::after { content: " ▼"; font-size: 10px; color: var(--muted); }
+  details[open] summary::after { content: " ▲"; }
+
+  pre.code {
+    background: #0d1117; border: 1px solid var(--border);
+    border-radius: 6px; padding: 10px 12px;
+    overflow-x: auto; font-size: 12px; line-height: 1.5;
+    color: #c9d6e2;
+  }
+  a { color: var(--accent); }
+  a:hover { text-decoration: underline; }
+
+  .filters {
+    display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap;
+  }
+  .filters button {
+    background: var(--panel-2); border: 1px solid var(--border);
+    color: var(--text); padding: 6px 12px; border-radius: 6px;
+    font: inherit; cursor: pointer; font-size: 12px;
+  }
+  .filters button.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .filters button:hover:not(.active) { background: #21262d; }
+
+  footer {
+    text-align: center; color: var(--muted); font-size: 12px;
+    margin-top: 30px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>Reporte del día · 19 may 2026</h1>
+  <div class="meta">agenteIAlocal · branch main @ <code>227772e</code> · servicios on</div>
+</header>
+
+<div class="summary-grid">
+  <div class="stat">
+    <div class="label">Entregados hoy</div>
+    <div class="value ok">5</div>
+    <div class="sub">features + 2 commits push</div>
+  </div>
+  <div class="stat">
+    <div class="label">Servicios live</div>
+    <div class="value ok">6</div>
+    <div class="sub">monitor_hub · gateway · server · job · mcp · whatsapp.js</div>
+  </div>
+  <div class="stat">
+    <div class="label">Smoke tests</div>
+    <div class="value ok">15+</div>
+    <div class="sub">unit + e2e cross-relay</div>
+  </div>
+  <div class="stat">
+    <div class="label">Pendientes</div>
+    <div class="value warn">6</div>
+    <div class="sub">2 chicos, 2 medianos, 2 grandes</div>
+  </div>
+</div>
+
+<section>
+  <h2><span class="icon">✅</span> Entregado hoy (en producción)</h2>
+  <p class="desc">Cuatro features del backlog + dos arreglos de coexistencia, todo commiteado y pusheado en <code>main</code>.</p>
+
+  <div class="filters">
+    <button class="active" data-filter="all">Todos</button>
+    <button data-filter="done">Hechos</button>
+    <button data-filter="pending">Pendientes</button>
+    <button data-filter="future">Futuros</button>
+  </div>
+
+  <div class="feature done" data-cat="done">
+    <div class="title"><strong>#1 Cross-channel relay urgente</strong><span class="badge done">done</span></div>
+    <div class="body">Cuando llega un mensaje con <code>priority='urgent'</code> desde un canal no-Telegram, se reenvía al chat de Telegram configurado. Formato 🔴 URGENTE [canal:chat_name].</div>
+    <div class="meta"><span>📄 <code>agente_core/monitor_hub/hub.py</code></span><span>commit <code>f4fd7bb</code></span><span>5/5 unit + e2e</span></div>
+  </div>
+
+  <div class="feature done" data-cat="done">
+    <div class="title"><strong>#2 Plugin Gmail Monitor Hub</strong><span class="badge done">done</span></div>
+    <div class="body">Poll periódico de Gmail con OAuth ya existente. Dedup por deque(500). Marca urgente por <code>important_senders</code> o keywords. Seed inicial evita re-emitir viejos.</div>
+    <div class="meta"><span>📄 <code>agente_core/monitor_hub/plugins/gmail.py</code></span><span>commit <code>f4fd7bb</code></span><span>e2e probado: enviado email "URGENTE" a mí mismo → relay Telegram OK</span></div>
+  </div>
+
+  <div class="feature done" data-cat="done">
+    <div class="title"><strong>#3 Anthropic Gateway · Fase 1 MVP</strong><span class="badge done">done</span></div>
+    <div class="body">FastAPI :8400 con <code>POST /v1/messages</code> compatible Anthropic SDK. Traduce a OpenAI <code>/chat/completions</code> del gateway LM Studio. Sync + streaming SSE estilo Anthropic.</div>
+    <div class="meta"><span>📁 <code>anthropic_gateway/</code></span><span>commit <code>f4fd7bb</code></span><span>validado con SDK oficial <code>anthropic</code> Python</span></div>
+  </div>
+
+  <div class="feature done" data-cat="done">
+    <div class="title"><strong>#4 WhatsApp consumer-only</strong><span class="badge done">done</span></div>
+    <div class="body">Plugin auto-detecta si <code>whatsapp_nuevos.json</code> es fresh (&lt;90s) → consumer-only, no spawn. Coexiste con el monitor.js del SessionStart hook sin duplicar PIDs ni conflictos de auth wwebjs.</div>
+    <div class="meta"><span>📄 <code>plugins/whatsapp.py</code></span><span>commit <code>227772e</code></span><span>4/4 unit + e2e (inyectado URGENTE en JSON → relay OK)</span></div>
+  </div>
+
+  <div class="feature done" data-cat="done">
+    <div class="title"><strong>#5 Telegram send-only mode</strong><span class="badge done">done</span></div>
+    <div class="body">Plugin Telegram con flag <code>poll_enabled</code>: si está false, no consume <code>getUpdates</code>. Permite que <code>mcp_telegram.py</code> sea el único consumidor y monitor_hub use el plugin solo como sink de <code>send()</code>.</div>
+    <div class="meta"><span>📄 <code>plugins/telegram.py</code></span><span>commit <code>227772e</code></span><span>Cierra la race condition que se manifestó hoy</span></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="icon">📊</span> Estado de servicios live</h2>
+  <table>
+    <thead><tr><th>Servicio</th><th>Puerto</th><th>Estado</th><th>Notas</th></tr></thead>
+    <tbody>
+      <tr><td><code>monitor_hub</code></td><td>stdout</td><td><span class="pill up">UP</span></td><td>telegram (send-only) · whatsapp (consumer) · jobs · gmail · relay activo</td></tr>
+      <tr><td><code>anthropic_gateway</code></td><td>:8400</td><td><span class="pill up">UP</span></td><td>/health 200, validado con SDK</td></tr>
+      <tr><td><code>claude_server</code></td><td>:8200</td><td><span class="pill up">UP</span></td><td>PWA con voz local (piper-tts), entregado 18-may</td></tr>
+      <tr><td><code>job_manager</code></td><td>:8090</td><td><span class="pill up">UP</span></td><td>SQLite, pipelines DAG, dashboard</td></tr>
+      <tr><td><code>mcp_telegram</code></td><td>stdio</td><td><span class="pill up">UP</span></td><td>consumidor único de bot principal</td></tr>
+      <tr><td><code>whatsapp_monitor.js</code></td><td>—</td><td><span class="pill up">UP</span></td><td>PID 652 desde SessionStart, append-only log</td></tr>
+      <tr><td><code>bridge</code> (local↔Ranger)</td><td>:8765</td><td><span class="pill up">UP</span></td><td>Tailscale + bridge HTTP</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2><span class="icon">⏳</span> Pendientes</h2>
+
+  <div class="feature pending" data-cat="pending">
+    <div class="title"><strong>NSSM: monitor_hub como servicio Windows</strong><span class="badge pending">~15 min</span></div>
+    <div class="body">Para que monitor_hub sobreviva al reinicio del PC sin intervención manual. Hay precedente: <code>scripts/install_service_windows.ps1</code> en bridge/.</div>
+    <div class="meta"><span>Riesgo: bajo</span></div>
+  </div>
+
+  <div class="feature pending" data-cat="pending">
+    <div class="title"><strong>Activar relay desde claude_server → monitor_hub</strong><span class="badge pending">~30 min</span></div>
+    <div class="body">Plugin nuevo en monitor_hub que consume el SQLite del claude_server. Útil si querés que mensajes urgentes desde tu PWA también disparen alertas.</div>
+    <div class="meta"><span>Opcional</span></div>
+  </div>
+
+  <div class="feature pending" data-cat="pending">
+    <div class="title"><strong>Anthropic Gateway Fase 2: tool use</strong><span class="badge pending">~3-4h</span></div>
+    <div class="body">Traducir <code>tool_use</code> / <code>tool_result</code> blocks Anthropic ↔ <code>tool_calls</code> / role:tool OpenAI. Desbloquea agentes con function calling vía el gateway. Hoy se aplana lossy.</div>
+    <div class="meta"><span>Proyecto medio</span></div>
+  </div>
+
+  <div class="feature pending" data-cat="pending">
+    <div class="title"><strong>Anthropic Gateway Fase 2: vision (image blocks)</strong><span class="badge pending">~2h</span></div>
+    <div class="body">Anthropic <code>image</code> blocks (base64 / URL) ↔ OpenAI <code>image_url</code>. Solo si el LLM destino soporta visión.</div>
+  </div>
+
+  <div class="feature pending" data-cat="pending">
+    <div class="title"><strong>Cloudflare Tunnel para gateway público</strong><span class="badge pending">~1h</span></div>
+    <div class="body">Exponer <code>anthropic_gateway</code> en dominio propio para que clientes Anthropic SDK externos puedan apuntar sin Tailscale.</div>
+  </div>
+
+  <div class="feature pending" data-cat="pending">
+    <div class="title"><strong>Tailscale Serve HTTPS para claude_server</strong><span class="badge pending">5 min</span></div>
+    <div class="body">Pendiente desde ayer: aprobar Serve en panel Tailscale y correr <code>tailscale serve --bg --https=443 http://localhost:8200</code>. Desbloquea mic/cam/geo en móvil (requieren HTTPS).</div>
+    <div class="meta"><span><a href="https://login.tailscale.com/f/serve?node=ngu37Nk48o11CNTRL">Aprobar acá</a></span></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="icon">🔭</span> Futuros (más allá del backlog inmediato)</h2>
+
+  <div class="feature future" data-cat="future">
+    <div class="title"><strong>Presencia (9 tareas)</strong><span class="badge future">esperan hardware</span></div>
+    <div class="body">Alertas proactivas, cruce mantenimiento, historial, ESP32 reales. Bloqueado por llegada de ESP32-S3 + cámaras.</div>
+  </div>
+
+  <div class="feature future" data-cat="future">
+    <div class="title"><strong>App Android terminales</strong><span class="badge future">backlog grande</span></div>
+    <div class="body">Para abrir cuando todo lo demás esté estable.</div>
+  </div>
+
+  <div class="feature future" data-cat="future">
+    <div class="title"><strong>Claude Ranger bot Telegram servidor</strong><span class="badge future">coordinar</span></div>
+    <div class="body">Coordinar primero con Ranger antes de implementar.</div>
+  </div>
+
+  <div class="feature future" data-cat="future">
+    <div class="title"><strong>Dashboard de estado del agente</strong><span class="badge future">opcional ~2h</span></div>
+    <div class="body">HTML standalone que muestre estado live de todos los servicios (uptime, mensajes/h, urgents, jobs corriendo). Auto-refresh.</div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="icon">📜</span> Bitácora de hoy</h2>
+  <details open>
+    <summary>Línea de tiempo (resumida)</summary>
+    <ul>
+      <li><strong>06:21</strong> — buenos días + clima Santo Domingo (alerta INDOMET)</li>
+      <li><strong>07:37</strong> — audit agenda · Sem 1-5 ya en producción · pendientes reales Sem 5-6</li>
+      <li><strong>07:43</strong> — arranque cola 3 features</li>
+      <li><strong>~08:00</strong> — #1 cross-relay listo (5/5 tests)</li>
+      <li><strong>~08:10</strong> — #2 plugin Gmail listo (smoke real OK)</li>
+      <li><strong>~08:30</strong> — #3 Anthropic Gateway Fase 1 MVP (SDK oficial validado)</li>
+      <li><strong>08:51</strong> — monitor_config.json + memoria guardados</li>
+      <li><strong>09:30</strong> — commit <code>f4fd7bb</code> push origin/main</li>
+      <li><strong>10:08</strong> — verificación producción inicia · gateway up, monitor_hub no corría desde 7 may</li>
+      <li><strong>10:27</strong> — smoke e2e Gmail urgente → relay Telegram OK</li>
+      <li><strong>~13:00</strong> — patch consumer-only WhatsApp (4/4 + e2e con inyección)</li>
+      <li><strong>~13:25</strong> — fix race telegram getUpdates · plugin → poll_enabled false</li>
+      <li><strong>13:34</strong> — commit <code>227772e</code> push</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>Commits del día</summary>
+    <pre class="code">227772e fix(monitor_hub): WhatsApp consumer-only + Telegram send-only
+f4fd7bb feat(monitor_hub + anthropic_gateway): cross-relay, plugin gmail, gateway</pre>
+  </details>
+</section>
+
+<footer>
+  Reporte generado por Claude Opus 4.7 · 19 may 2026
+</footer>
+
+</div>
+
+<script>
+  document.querySelectorAll(".filters button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const filter = btn.dataset.filter;
+      document.querySelectorAll(".filters button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      document.querySelectorAll("[data-cat]").forEach(el => {
+        el.style.display = (filter === "all" || el.dataset.cat === filter) ? "" : "none";
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

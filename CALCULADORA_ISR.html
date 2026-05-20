@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora ISR 2026 · Ranger Nómina</title>
+<style>
+  :root{
+    --bg:#0a0e1a;
+    --bg-2:#0f1422;
+    --card:#141a2b;
+    --card-2:#1a2138;
+    --border:#1f2740;
+    --text:#e8eef7;
+    --muted:#8a96b0;
+    --rd-red:#ce1126;
+    --rd-blue:#0049a4;
+    --rd-blue-2:#1768d4;
+    --accent:#00c896;
+    --warn:#ffb800;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+    line-height:1.5;
+    min-height:100vh;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;
+    background:
+      radial-gradient(circle at 15% 10%,rgba(206,17,38,.08),transparent 40%),
+      radial-gradient(circle at 85% 90%,rgba(0,73,164,.10),transparent 45%);
+    pointer-events:none;z-index:-1;
+  }
+
+  /* HEADER */
+  header{
+    padding:24px 32px;
+    border-bottom:1px solid var(--border);
+    display:flex;justify-content:space-between;align-items:center;
+    backdrop-filter:blur(12px);
+    background:rgba(10,14,26,.75);
+    position:sticky;top:0;z-index:10;
+    flex-wrap:wrap;gap:16px;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+  .brand-dot{
+    width:10px;height:10px;border-radius:50%;
+    background:linear-gradient(135deg,var(--rd-red),var(--rd-blue));
+    box-shadow:0 0 12px var(--rd-red);
+  }
+  .pill{
+    font-size:.72rem;font-weight:600;color:var(--accent);
+    background:rgba(0,200,150,.1);
+    border:1px solid rgba(0,200,150,.3);
+    padding:5px 12px;border-radius:20px;
+    letter-spacing:1px;text-transform:uppercase;
+  }
+
+  /* HERO */
+  .hero{
+    text-align:center;
+    max-width:740px;
+    margin:0 auto;
+    padding:48px 24px 24px;
+  }
+  h1{
+    font-size:clamp(1.8rem,4.5vw,2.8rem);
+    line-height:1.15;font-weight:800;margin-bottom:14px;
+    background:linear-gradient(135deg,#fff,#a8c1ee);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  .hero p{color:var(--muted);font-size:1.05rem}
+
+  /* LAYOUT */
+  .app{
+    display:grid;
+    grid-template-columns:1fr 1.2fr;
+    gap:24px;
+    max-width:1140px;
+    margin:32px auto;
+    padding:0 24px;
+  }
+  @media (max-width:880px){.app{grid-template-columns:1fr}}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:28px;
+    box-shadow:0 8px 32px rgba(0,0,0,.3);
+  }
+  .card h2{
+    font-size:1.15rem;margin-bottom:18px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .card h2 .badge{
+    font-size:.7rem;color:var(--rd-red);
+    background:rgba(206,17,38,.12);
+    padding:3px 8px;border-radius:6px;font-weight:700;
+  }
+
+  /* FORM */
+  label{
+    display:block;margin-bottom:6px;
+    font-size:.85rem;color:var(--muted);font-weight:500;
+  }
+  .input-group{margin-bottom:18px}
+  .input-with-symbol{
+    position:relative;
+  }
+  .input-with-symbol::before{
+    content:"RD$";position:absolute;
+    left:14px;top:50%;transform:translateY(-50%);
+    color:var(--muted);font-size:.9rem;font-weight:600;
+    pointer-events:none;
+  }
+  input[type=number],input[type=email],input[type=text]{
+    width:100%;
+    background:var(--bg-2);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:14px 16px 14px 50px;
+    border-radius:10px;
+    font-size:1.05rem;font-weight:600;
+    font-family:inherit;
+    transition:.2s;
+  }
+  input[type=email],input[type=text]{padding-left:16px}
+  input:focus{
+    outline:none;border-color:var(--rd-blue-2);
+    background:var(--card-2);
+    box-shadow:0 0 0 3px rgba(23,104,212,.15);
+  }
+  .row{display:flex;gap:14px}
+  .row .input-group{flex:1}
+
+  .toggle-group{
+    display:flex;gap:8px;margin-bottom:18px;
+  }
+  .toggle{
+    flex:1;
+    background:var(--bg-2);
+    border:1px solid var(--border);
+    color:var(--muted);
+    padding:10px;border-radius:8px;cursor:pointer;
+    font-size:.85rem;font-weight:600;font-family:inherit;
+    transition:.2s;
+  }
+  .toggle.active{
+    background:var(--rd-blue);
+    border-color:var(--rd-blue-2);
+    color:#fff;
+  }
+  .toggle:hover{color:var(--text)}
+
+  .btn{
+    width:100%;
+    padding:14px;
+    background:linear-gradient(135deg,var(--rd-red),#a30d1f);
+    color:#fff;border:none;
+    border-radius:10px;
+    font-size:1rem;font-weight:700;
+    cursor:pointer;font-family:inherit;
+    transition:transform .2s,box-shadow .2s;
+    box-shadow:0 8px 24px rgba(206,17,38,.35);
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(206,17,38,.5)}
+  .btn.secondary{
+    background:var(--card-2);
+    box-shadow:none;
+    color:var(--text);
+    border:1px solid var(--border);
+  }
+  .btn.secondary:hover{background:var(--card);border-color:var(--rd-blue-2)}
+
+  /* RESULTS */
+  .summary{
+    background:linear-gradient(135deg,var(--rd-blue),#002d62);
+    border-radius:14px;
+    padding:24px;
+    margin-bottom:18px;
+    text-align:center;
+    position:relative;overflow:hidden;
+  }
+  .summary::before{
+    content:"";position:absolute;
+    top:-50%;right:-30%;width:200px;height:200px;
+    background:radial-gradient(circle,rgba(255,255,255,.08),transparent 70%);
+    pointer-events:none;
+  }
+  .summary-label{
+    font-size:.75rem;color:rgba(255,255,255,.7);
+    text-transform:uppercase;letter-spacing:1.5px;font-weight:600;
+  }
+  .summary-amount{
+    font-size:2.4rem;font-weight:800;color:#fff;
+    margin:8px 0 4px;
+    font-variant-numeric:tabular-nums;
+  }
+  .summary-sub{font-size:.85rem;color:rgba(255,255,255,.8)}
+
+  .breakdown{display:flex;flex-direction:column;gap:1px;background:var(--border);border-radius:10px;overflow:hidden}
+  .row-item{
+    background:var(--card-2);
+    padding:14px 18px;
+    display:flex;justify-content:space-between;align-items:center;
+    transition:.2s;
+  }
+  .row-item:hover{background:var(--card)}
+  .row-item .lbl{font-size:.92rem;color:var(--muted)}
+  .row-item .val{font-weight:700;font-variant-numeric:tabular-nums}
+  .row-item.deduction .val{color:var(--rd-red)}
+  .row-item.add .val{color:var(--accent)}
+  .row-item.highlight{background:var(--card)}
+  .row-item.highlight .lbl{color:var(--text);font-weight:600}
+  .row-item.highlight .val{font-size:1.1rem;color:var(--accent)}
+
+  .tramos{
+    margin-top:18px;
+    background:var(--bg-2);
+    padding:18px;border-radius:10px;
+    border:1px dashed var(--border);
+  }
+  .tramos h4{
+    font-size:.78rem;color:var(--rd-blue-2);
+    text-transform:uppercase;letter-spacing:1px;
+    margin-bottom:10px;
+  }
+  .tramo{
+    display:flex;justify-content:space-between;
+    font-size:.85rem;padding:6px 0;
+    border-bottom:1px dashed var(--border);
+  }
+  .tramo:last-child{border-bottom:none}
+  .tramo.applied{color:var(--accent);font-weight:600}
+  .tramo .rng{color:var(--muted);font-size:.78rem}
+
+  .empty-state{
+    text-align:center;padding:60px 24px;color:var(--muted);
+  }
+  .empty-state .ico{
+    font-size:3rem;margin-bottom:14px;
+    opacity:.4;
+  }
+
+  /* EMAIL CAPTURE */
+  .email-capture{
+    margin-top:18px;padding:20px;
+    border-radius:12px;
+    background:linear-gradient(135deg,rgba(206,17,38,.08),rgba(0,73,164,.08));
+    border:1px solid var(--border);
+  }
+  .email-capture h3{
+    font-size:1rem;margin-bottom:6px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .email-capture p{font-size:.85rem;color:var(--muted);margin-bottom:14px}
+  .email-capture .ok-msg{
+    text-align:center;padding:12px;
+    background:rgba(0,200,150,.1);
+    border:1px solid rgba(0,200,150,.3);
+    border-radius:8px;color:var(--accent);
+    font-weight:600;display:none;
+  }
+  .email-capture .ok-msg.show{display:block}
+
+  /* DISCLAIMER */
+  .disclaimer{
+    max-width:740px;margin:32px auto;padding:18px 24px;
+    background:rgba(255,184,0,.05);
+    border:1px solid rgba(255,184,0,.2);
+    border-radius:10px;
+    color:var(--muted);font-size:.82rem;
+    line-height:1.6;
+  }
+  .disclaimer b{color:var(--warn)}
+
+  /* FOOTER */
+  footer{
+    text-align:center;padding:40px 24px;
+    color:var(--muted);font-size:.82rem;
+    border-top:1px solid var(--border);
+    margin-top:48px;
+  }
+  footer a{color:var(--rd-blue-2);text-decoration:none}
+  footer a:hover{text-decoration:underline}
+
+  @media (max-width:600px){
+    header{padding:18px 16px}
+    .hero{padding:32px 16px 16px}
+    .app{padding:0 16px;margin:20px auto}
+    .card{padding:20px}
+    .summary-amount{font-size:1.9rem}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="brand-dot"></span>
+    <span>Ranger Nómina</span>
+  </div>
+  <span class="pill">Calculadora ISR 2026 · gratis</span>
+</header>
+
+<div class="hero">
+  <h1>Calcula tu ISR en RD<br>en 5 segundos</h1>
+  <p>Salario mensual → deducciones de ley + tu ISR mensual y anual con desglose por tramos. Sin Excel, sin fórmulas, sin enredos.</p>
+</div>
+
+<div class="app">
+
+  <!-- INPUT CARD -->
+  <div class="card">
+    <h2>Tus datos <span class="badge">PASO 1</span></h2>
+
+    <div class="input-group">
+      <label>Salario bruto mensual</label>
+      <div class="input-with-symbol">
+        <input type="number" id="salario" placeholder="60,000" min="0" step="1000">
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>Tipo de empleado</label>
+      <div class="toggle-group">
+        <button class="toggle active" data-tipo="privado">Sector privado</button>
+        <button class="toggle" data-tipo="publico">Sector público</button>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>Ingreso adicional mensual <span style="color:var(--muted);font-weight:400;font-size:.78rem">(opcional)</span></label>
+      <div class="input-with-symbol">
+        <input type="number" id="otros" placeholder="0" min="0" step="500">
+      </div>
+    </div>
+
+    <button class="btn" id="calc">Calcular ISR →</button>
+    <button class="btn secondary" id="reset" style="margin-top:10px">Limpiar</button>
+
+    <div class="email-capture">
+      <h3>📩 Recibe el desglose completo</h3>
+      <p>Tu cálculo paso a paso + plantilla Excel con los tramos 2026. Te lo enviamos al correo.</p>
+      <div class="input-group" style="margin-bottom:10px">
+        <input type="email" id="email" placeholder="tu@correo.com">
+      </div>
+      <button class="btn secondary" id="send" style="background:var(--rd-blue)">Enviármelo</button>
+      <div class="ok-msg" id="ok-msg">✓ Listo. Revisa tu correo en unos minutos.</div>
+    </div>
+  </div>
+
+  <!-- RESULTS CARD -->
+  <div class="card">
+    <h2>Tu resultado <span class="badge">PASO 2</span></h2>
+    <div id="results">
+      <div class="empty-state">
+        <div class="ico">🧮</div>
+        <p>Ingresa tu salario mensual<br>y dale click a "Calcular ISR".</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="disclaimer">
+  <b>ℹ️ Tramos ISR 2026 oficiales</b> según la Resolución DDG-AR1-2026-00001 de la DGII. Estos tramos están vigentes sin cambios desde 2018 (no se han indexado a la inflación). Para casos particulares (múltiples ingresos, regímenes especiales, retroactivos) consulta a tu contador o directamente con la <a href="https://dgii.gov.do" target="_blank" style="color:var(--rd-blue-2)">DGII</a>. Ranger Nómina automatiza estos cálculos para toda tu nómina: <b style="color:var(--text)">DM "DEMO" en @ranger.nomina</b> para agendar una demostración.
+</div>
+
+<footer>
+  <p>Hecho con ❤️ por <b style="color:var(--text)">Ranger Nómina</b> · Sistema de nómina para República Dominicana</p>
+  <p style="margin-top:8px">@ranger.nomina · Facebook: Ranger Nómina · YouTube: Ranger Nómina RD</p>
+</footer>
+
+<script>
+  /* TRAMOS ISR 2026 RD - VERIFICAR CON DGII */
+  const TRAMOS = [
+    {desde:0,       hasta:416220,    pct:0,    base:0,        desc:'Exento'},
+    {desde:416220,  hasta:624329,    pct:15,   base:0,        desc:'15% del excedente sobre RD$416,220'},
+    {desde:624329,  hasta:867123,    pct:20,   base:31216.20, desc:'RD$31,216.20 + 20% del excedente sobre RD$624,329'},
+    {desde:867123,  hasta:Infinity,  pct:25,   base:79776.00, desc:'RD$79,776 + 25% del excedente sobre RD$867,123'},
+  ];
+
+  const AFP_PCT = 2.87;
+  const ARS_PCT = 3.04;
+  const SMN = 17610;           /* salario minimo nacional aproximado - ajustar */
+  const TOPE_AFP = SMN * 20;   /* tope cotizable AFP */
+  const TOPE_ARS = SMN * 10;   /* tope cotizable ARS */
+
+  let tipoEmp = 'privado';
+
+  /* TOGGLES */
+  document.querySelectorAll('.toggle').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('.toggle').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      tipoEmp = b.dataset.tipo;
+    };
+  });
+
+  /* FORMAT */
+  const fmt = n => n.toLocaleString('es-DO',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+  /* CALC */
+  function calcular(){
+    const salarioMensual = parseFloat(document.getElementById('salario').value) || 0;
+    const otrosIngresos  = parseFloat(document.getElementById('otros').value) || 0;
+    const total = salarioMensual + otrosIngresos;
+
+    if(total <= 0){
+      document.getElementById('results').innerHTML = `
+        <div class="empty-state">
+          <div class="ico">⚠️</div>
+          <p>Ingresa un salario válido<br>para ver el cálculo.</p>
+        </div>`;
+      return;
+    }
+
+    /* Deducciones de ley (privado) */
+    const baseAFP = Math.min(total, TOPE_AFP);
+    const baseARS = Math.min(total, TOPE_ARS);
+    const afp = tipoEmp === 'privado' ? baseAFP * AFP_PCT/100 : 0;
+    const ars = tipoEmp === 'privado' ? baseARS * ARS_PCT/100 : 0;
+
+    /* Salario gravable */
+    const gravableMensual = total - afp - ars;
+    const gravableAnual = gravableMensual * 12;
+
+    /* ISR anual por tramos */
+    let isrAnual = 0;
+    let tramoAplicado = -1;
+    for(let i=0;i<TRAMOS.length;i++){
+      const t = TRAMOS[i];
+      if(gravableAnual > t.desde){
+        if(gravableAnual <= t.hasta){
+          isrAnual = t.base + (gravableAnual - t.desde) * t.pct/100;
+          tramoAplicado = i;
+          break;
+        }
+      }
+    }
+    if(tramoAplicado === -1 && gravableAnual >= TRAMOS[TRAMOS.length-1].desde){
+      const t = TRAMOS[TRAMOS.length-1];
+      isrAnual = t.base + (gravableAnual - t.desde) * t.pct/100;
+      tramoAplicado = TRAMOS.length-1;
+    }
+    const isrMensual = isrAnual / 12;
+    const neto = total - afp - ars - isrMensual;
+
+    /* RENDER */
+    const tramosHTML = TRAMOS.map((t,i)=>{
+      const cls = i === tramoAplicado ? 'tramo applied' : 'tramo';
+      const tope = t.hasta === Infinity ? 'En adelante' : `RD$${t.hasta.toLocaleString('es-DO')}`;
+      return `<div class="${cls}">
+        <span>${i === tramoAplicado ? '→ ' : ''}${t.desc}</span>
+        <span class="rng">${t.desde === 0 ? 'desde 0' : `desde RD$${t.desde.toLocaleString('es-DO')}`} · ${tope}</span>
+      </div>`;
+    }).join('');
+
+    document.getElementById('results').innerHTML = `
+      <div class="summary">
+        <div class="summary-label">Salario neto mensual</div>
+        <div class="summary-amount">RD$${fmt(neto)}</div>
+        <div class="summary-sub">de RD$${fmt(total)} bruto · ${((neto/total)*100).toFixed(1)}% retenido</div>
+      </div>
+
+      <div class="breakdown">
+        <div class="row-item">
+          <span class="lbl">Salario bruto mensual</span>
+          <span class="val">RD$${fmt(total)}</span>
+        </div>
+        ${tipoEmp === 'privado' ? `
+        <div class="row-item deduction">
+          <span class="lbl">AFP (${AFP_PCT}%)</span>
+          <span class="val">−RD$${fmt(afp)}</span>
+        </div>
+        <div class="row-item deduction">
+          <span class="lbl">ARS / SFS (${ARS_PCT}%)</span>
+          <span class="val">−RD$${fmt(ars)}</span>
+        </div>
+        ` : ''}
+        <div class="row-item">
+          <span class="lbl">Salario gravable mensual</span>
+          <span class="val">RD$${fmt(gravableMensual)}</span>
+        </div>
+        <div class="row-item">
+          <span class="lbl">Salario gravable anual</span>
+          <span class="val">RD$${fmt(gravableAnual)}</span>
+        </div>
+        <div class="row-item deduction">
+          <span class="lbl">ISR mensual</span>
+          <span class="val">−RD$${fmt(isrMensual)}</span>
+        </div>
+        <div class="row-item">
+          <span class="lbl">ISR anual estimado</span>
+          <span class="val">RD$${fmt(isrAnual)}</span>
+        </div>
+        <div class="row-item highlight">
+          <span class="lbl">✓ Te queda neto</span>
+          <span class="val">RD$${fmt(neto)}</span>
+        </div>
+      </div>
+
+      <div class="tramos">
+        <h4>Tramos ISR 2026 oficiales · DGII</h4>
+        ${tramosHTML}
+      </div>
+    `;
+  }
+
+  document.getElementById('calc').onclick = calcular;
+  document.getElementById('salario').addEventListener('keydown',e=>{if(e.key==='Enter')calcular()});
+  document.getElementById('otros').addEventListener('keydown',e=>{if(e.key==='Enter')calcular()});
+  document.getElementById('salario').addEventListener('input',()=>{
+    if(document.getElementById('salario').value) calcular();
+  });
+
+  document.getElementById('reset').onclick = ()=>{
+    document.getElementById('salario').value = '';
+    document.getElementById('otros').value = '';
+    document.getElementById('results').innerHTML = `
+      <div class="empty-state">
+        <div class="ico">🧮</div>
+        <p>Ingresa tu salario mensual<br>y dale click a "Calcular ISR".</p>
+      </div>`;
+  };
+
+  /* EMAIL CAPTURE (mock - solo guarda en localStorage para demo) */
+  document.getElementById('send').onclick = ()=>{
+    const email = document.getElementById('email').value.trim();
+    if(!email || !email.includes('@')){
+      alert('Ingresa un correo válido.');
+      return;
+    }
+    const leads = JSON.parse(localStorage.getItem('ranger_leads')||'[]');
+    leads.push({email, fecha:new Date().toISOString()});
+    localStorage.setItem('ranger_leads', JSON.stringify(leads));
+    document.getElementById('ok-msg').classList.add('show');
+    document.getElementById('email').value = '';
+    setTimeout(()=>document.getElementById('ok-msg').classList.remove('show'), 5000);
+  };
+</script>
+
+</body>
+</html>

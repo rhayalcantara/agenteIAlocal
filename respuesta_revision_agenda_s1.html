@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Revisión Semana 1 + Qué Sigue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=Onest:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f5f0e6;
+  --paper-2: #ebe3d3;
+  --ink: #2d1f1a;
+  --ink-2: #5c4a40;
+  --mute: #8a7869;
+  --rule: #c4b9a5;
+  --bermellon: #c43a1f;
+  --olivo: #5e6a2e;
+  --azul-pluma: #3a4d6e;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--paper); }
+body {
+  font-family: "Onest", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--paper);
+  min-height: 100vh;
+}
+.wrap { max-width: 920px; margin: 0 auto; padding: 56px 32px 100px; }
+
+/* CABECERA tipo revista */
+.masthead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 12px;
+  margin-bottom: 32px;
+}
+.masthead .left {
+  font-family: "Cormorant Garamond", serif;
+  font-style: italic;
+  font-size: 22px;
+  color: var(--ink);
+}
+.masthead .left::before { content: "❦  "; color: var(--bermellon); }
+.masthead .right {
+  font-family: "Geist Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+h1 {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 500;
+  font-size: clamp(56px, 9vw, 92px);
+  line-height: 0.98;
+  letter-spacing: -0.025em;
+  margin-bottom: 8px;
+}
+h1 em {
+  font-weight: 400;
+  font-style: italic;
+  color: var(--bermellon);
+}
+.deck {
+  font-family: "Cormorant Garamond", serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1.4;
+  color: var(--ink-2);
+  max-width: 660px;
+  margin-bottom: 52px;
+  padding-left: 18px;
+  border-left: 3px solid var(--bermellon);
+}
+
+section { margin-bottom: 64px; }
+
+h2 {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 500;
+  font-size: 38px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+}
+h2 .num {
+  font-family: "Geist Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--mute);
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.section-rule {
+  border-top: 1px solid var(--rule);
+  margin-top: 18px;
+  padding-top: 22px;
+}
+
+/* TABLA agenda */
+.agenda {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.agenda th {
+  text-align: left;
+  font-family: "Geist Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mute);
+  font-weight: 500;
+  border-bottom: 2px solid var(--ink);
+  padding: 8px 12px;
+}
+.agenda td {
+  padding: 14px 12px;
+  border-bottom: 1px dotted var(--rule);
+  vertical-align: top;
+}
+.agenda .day {
+  font-family: "Geist Mono", monospace;
+  font-size: 11px;
+  color: var(--mute);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.agenda .topic {
+  font-family: "Cormorant Garamond", serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 19px;
+  line-height: 1.3;
+  color: var(--ink);
+}
+.agenda .topic.struck { text-decoration: line-through; text-decoration-color: var(--olivo); text-decoration-thickness: 1.5px; color: var(--ink-2); }
+.agenda .status {
+  font-family: "Geist Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  display: inline-block;
+  white-space: nowrap;
+}
+.agenda .status.done { background: var(--olivo); color: var(--paper); }
+.agenda .status.swap { background: var(--azul-pluma); color: var(--paper); }
+.agenda .status.skip { background: var(--mute); color: var(--paper); }
+.agenda .status.pending { background: var(--paper-2); color: var(--ink); border: 1px solid var(--rule); }
+
+/* CALLOUT */
+.callout {
+  background: var(--paper-2);
+  padding: 22px 28px;
+  border-left: 4px solid var(--bermellon);
+  margin: 24px 0;
+  font-family: "Cormorant Garamond", serif;
+  font-style: italic;
+  font-size: 19px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.callout strong {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--bermellon);
+}
+
+/* GRID semana próxima */
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 22px;
+}
+@media (max-width: 720px) { .grid-3 { grid-template-columns: 1fr; } }
+.cell {
+  background: var(--paper-2);
+  padding: 22px 22px 24px;
+  position: relative;
+  border-top: 3px solid var(--azul-pluma);
+}
+.cell .date {
+  font-family: "Geist Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.cell h4 {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.2;
+  margin-top: 6px;
+  margin-bottom: 10px;
+}
+.cell p {
+  font-size: 14px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.cell .pill {
+  font-family: "Geist Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 2px 8px;
+  display: inline-block;
+  margin-top: 12px;
+}
+
+/* PROPUESTA cerrar el día */
+.close {
+  margin-top: 64px;
+  padding: 32px;
+  background: var(--ink);
+  color: var(--paper);
+  position: relative;
+}
+.close h3 {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 500;
+  font-style: italic;
+  font-size: 32px;
+  line-height: 1.15;
+  margin-bottom: 12px;
+}
+.close h3 em { color: #f7c8b0; }
+.close p {
+  font-size: 16px;
+  line-height: 1.55;
+  color: #e2d8c8;
+  max-width: 600px;
+  margin-bottom: 14px;
+}
+.close ol {
+  padding-left: 22px;
+  font-size: 15px;
+  color: #e2d8c8;
+}
+.close ol li { margin: 6px 0; }
+.close ol li strong { color: var(--paper); }
+
+.foot {
+  margin-top: 48px;
+  display: flex;
+  justify-content: space-between;
+  font-family: "Geist Mono", monospace;
+  font-size: 10px;
+  color: var(--mute);
+  letter-spacing: 0.14em;
+}
+
+.reveal { opacity: 0; transform: translateY(10px); transition: opacity .6s ease, transform .6s ease; }
+.reveal.in { opacity: 1; transform: translateY(0); }
+[data-d="1"] { transition-delay: .05s; }
+[data-d="2"] { transition-delay: .12s; }
+[data-d="3"] { transition-delay: .2s; }
+[data-d="4"] { transition-delay: .28s; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead reveal">
+    <div class="left">Boletín de Agenda · vol. 1 nº 1</div>
+    <div class="right">14·V·2026 · jueves</div>
+  </div>
+
+  <h1 class="reveal" data-d="1">Semana cerrada,<br><em>pieza importante</em> en su sitio.</h1>
+  <p class="deck reveal" data-d="2">El plan original ponía hoy "Monitor Hub Fase 1: hub central + integración". En su lugar resolvimos un diferido más grande: el bridge Claude-local ↔ Claude-Ranger. Buen intercambio.</p>
+
+  <section class="reveal">
+    <h2><span class="num">Sem. 01 · revisión</span>Lo que tocaba y lo que pasó</h2>
+    <div class="section-rule">
+      <table class="agenda">
+        <thead>
+          <tr><th>Día</th><th>Lo agendado</th><th>Realidad</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="day">LUN 11·V</td>
+            <td class="topic struck">Bug <code style="font-family:'Geist Mono',monospace;font-size:.8em;background:var(--paper);padding:1px 6px;">KeyError 'operacion'</code> en agenda + lectura diseño Monitor Hub</td>
+            <td><span class="status done">✓ Hecho</span><br><span style="font-size:12px;color:var(--mute);">commit <code style="font-family:'Geist Mono',monospace;background:var(--paper);padding:1px 5px;font-size:.85em;">cd674c8</code> "fix(agenda): inferencia robusta de operacion + filtrado de args"</span></td>
+          </tr>
+          <tr>
+            <td class="day">MIÉ 13·V</td>
+            <td class="topic">Monitor Hub Fase 1: refactor monitor → plugin</td>
+            <td><span class="status pending">? Por verificar</span><br><span style="font-size:12px;color:var(--mute);">Existe <code style="font-family:'Geist Mono',monospace;background:var(--paper);padding:1px 5px;font-size:.85em;">agente_core/monitor_hub/</code> con hub.py, plugins/, dashboard/ — falta auditar si quedó completo</span></td>
+          </tr>
+          <tr>
+            <td class="day">JUE 14·V<br>(hoy)</td>
+            <td class="topic struck">Monitor Hub Fase 1: hub central + integración</td>
+            <td><span class="status swap">↔ Swap</span><br><span style="font-size:12px;color:var(--mute);">en su lugar: Claude-Ranger bridge (uno de los diferidos) terminado completo</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="reveal">
+    <h2><span class="num">Bonus · diferido cerrado</span>Lo que ganamos hoy</h2>
+    <div class="section-rule">
+      <div class="callout">
+        El bridge Claude-Ranger estaba en la lista de <strong>diferidos</strong> ("coordinar con Ranger primero"). Hoy se cerró completo: Tailscale en ambos lados, FastAPI mini-bridge, persistencia <strong>LaunchAgent</strong> en Mac, <strong>NSSM</strong> en Windows, ambos kill-survive verificados, código pusheado a GitHub.
+      </div>
+      <p style="color: var(--ink-2); font-size: 15px; line-height: 1.6;">Es una pieza de infra reutilizable: cualquier sesión futura que necesite comunicarse con la instancia del cliente ya no requiere a Rhay como mensajero. Telegram queda libre para Rhay ↔ Claude-local, y el canal técnico Claude ↔ Claude va por su propio carril privado en Tailscale.</p>
+    </div>
+  </section>
+
+  <section class="reveal">
+    <h2><span class="num">Sem. 02 · próxima</span>Job Manager parte 1</h2>
+    <div class="section-rule">
+      <p style="color: var(--ink-2); font-size: 15px; margin-bottom: 18px;">Tres días remotos. Cada bloque 1h45min, post-caminata.</p>
+
+      <div class="grid-3">
+        <div class="cell">
+          <div class="date">LUN 18·V</div>
+          <h4>Estructura <code style="font-family:'Geist Mono',monospace;font-size:.65em;background:var(--paper);padding:1px 6px;color:var(--bermellon);">job_manager/</code></h4>
+          <p>SQLite schema (jobs, deps, history). Definir tablas, índices, migraciones inicial.</p>
+          <span class="pill">DB · DESIGN</span>
+        </div>
+        <div class="cell">
+          <div class="date">MIÉ 20·V</div>
+          <h4><code style="font-family:'Geist Mono',monospace;font-size:.65em;background:var(--paper);padding:1px 6px;color:var(--bermellon);">server.py</code> FastAPI</h4>
+          <p>Puerto 8090. Endpoints básicos: submit, status, cancel, list. Auth simétrico al bridge si aplica.</p>
+          <span class="pill">API · CRUD</span>
+        </div>
+        <div class="cell">
+          <div class="date">JUE 21·V</div>
+          <h4><code style="font-family:'Geist Mono',monospace;font-size:.65em;background:var(--paper);padding:1px 6px;color:var(--bermellon);">worker.py</code> + spawn</h4>
+          <p>Subprocess pool, SIGTERM/SIGKILL, logs por job. Cleanup al exit.</p>
+          <span class="pill">RUNTIME</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="close reveal">
+    <h3>¿Qué hacemos ahora <em>en concreto</em>?</h3>
+    <p>Tres opciones para cerrar el día (asumiendo que ya pasamos la caminata o que vamos a ella):</p>
+    <ol>
+      <li><strong>Auditar Monitor Hub Fase 1</strong> — verificar si lo de Mié quedó completo (10 min). Si sí: agenda Sem 1 100% verde. Si no: agendarlo para próxima ventana libre.</li>
+      <li><strong>Cerrar día</strong> — bridge ya es ganancia suficiente, retomamos Lunes 18 con Job Manager schema. Trampolín limpio.</li>
+      <li><strong>Empezar early Job Manager</strong> — si tienes pila, abrir <code style="font-family:'Geist Mono',monospace;font-size:.85em;background:rgba(245,240,230,.18);padding:1px 6px;">job_manager/</code> ya. Pero hoy fue cargado en infra, mejor descansar.</li>
+    </ol>
+  </div>
+
+  <div class="foot">
+    <span>BOLETÍN · AGENDA 6 SEMANAS</span>
+    <span>OPUS 4.7 · 1M</span>
+  </div>
+
+</div>
+
+<script>
+const io = new IntersectionObserver((es) => {
+  es.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.05 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

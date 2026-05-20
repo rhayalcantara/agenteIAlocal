@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logos Ranger Nómina · 3 variantes</title>
+<style>
+  body{
+    background:#0a0e1a;color:#e8eef7;
+    font-family:'Inter','Segoe UI',system-ui,sans-serif;
+    padding:40px 20px;margin:0;
+  }
+  h1{text-align:center;margin-bottom:8px}
+  .sub{text-align:center;color:#8a96b0;margin-bottom:40px;font-size:.95rem}
+  .grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:24px;max-width:1100px;margin:0 auto;
+  }
+  .logo-card{
+    background:#141a2b;border:1px solid #1f2740;
+    border-radius:14px;padding:24px;
+  }
+  .logo-card h3{font-size:.9rem;margin-bottom:16px;color:#1768d4;text-transform:uppercase;letter-spacing:1px}
+  .preview{
+    background:#fff;border-radius:10px;padding:30px;
+    display:flex;align-items:center;justify-content:center;
+    min-height:160px;margin-bottom:8px;
+  }
+  .preview.dark{background:#0f1422}
+  .actions{display:flex;gap:8px;margin-top:14px}
+  button{
+    flex:1;background:#1a2138;border:1px solid #1f2740;
+    color:#e8eef7;padding:9px;border-radius:8px;
+    cursor:pointer;font-size:.85rem;font-family:inherit;
+    transition:.2s;
+  }
+  button:hover{background:#1768d4;border-color:#1768d4}
+  .footer{text-align:center;margin-top:40px;color:#8a96b0;font-size:.85rem}
+</style>
+</head>
+<body>
+
+<h1>Logos Ranger Nómina</h1>
+<p class="sub">3 variantes · escoge la que más te guste y descárgala en PNG</p>
+
+<div class="grid">
+
+  <!-- VARIANTE A: WORDMARK CON CHECK -->
+  <div class="logo-card">
+    <h3>Variante A — Wordmark con ✓</h3>
+    <div class="preview" id="prev-a">
+      <svg id="logo-a" viewBox="0 0 320 100" width="280" xmlns="http://www.w3.org/2000/svg">
+        <rect x="6" y="22" width="56" height="56" rx="12" fill="#ce1126"/>
+        <path d="M22 50 L32 60 L48 40" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="78" y="58" font-family="Inter,sans-serif" font-size="32" font-weight="800" fill="#0f1422">Ranger</text>
+        <text x="78" y="80" font-family="Inter,sans-serif" font-size="13" font-weight="600" fill="#0049a4" letter-spacing="2">NÓMINA · RD</text>
+      </svg>
+    </div>
+    <p style="font-size:.8rem;color:#8a96b0">Profesional. El check sugiere auditoría / cumplimiento. Ideal para feed.</p>
+    <div class="actions">
+      <button onclick="downloadSVG('logo-a','ranger-A')">Descargar SVG</button>
+      <button onclick="downloadPNG('logo-a','ranger-A')">Descargar PNG</button>
+    </div>
+  </div>
+
+  <!-- VARIANTE B: MONOGRAMA RN -->
+  <div class="logo-card">
+    <h3>Variante B — Monograma RN</h3>
+    <div class="preview" id="prev-b">
+      <svg id="logo-b" viewBox="0 0 320 100" width="280" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="grad-b" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ce1126"/>
+            <stop offset="100%" stop-color="#0049a4"/>
+          </linearGradient>
+        </defs>
+        <circle cx="42" cy="50" r="36" fill="url(#grad-b)"/>
+        <text x="42" y="62" font-family="Inter,sans-serif" font-size="32" font-weight="900" fill="#fff" text-anchor="middle">RN</text>
+        <text x="92" y="50" font-family="Inter,sans-serif" font-size="26" font-weight="800" fill="#0f1422">Ranger</text>
+        <text x="92" y="74" font-family="Inter,sans-serif" font-size="14" font-weight="600" fill="#8a96b0">Nómina · República Dominicana</text>
+      </svg>
+    </div>
+    <p style="font-size:.8rem;color:#8a96b0">Versátil. El monograma circular funciona como ícono de perfil aislado.</p>
+    <div class="actions">
+      <button onclick="downloadSVG('logo-b','ranger-B')">Descargar SVG</button>
+      <button onclick="downloadPNG('logo-b','ranger-B')">Descargar PNG</button>
+    </div>
+  </div>
+
+  <!-- VARIANTE C: BANDERA -->
+  <div class="logo-card">
+    <h3>Variante C — Acento bandera RD</h3>
+    <div class="preview" id="prev-c">
+      <svg id="logo-c" viewBox="0 0 320 100" width="280" xmlns="http://www.w3.org/2000/svg">
+        <text x="20" y="62" font-family="Inter,sans-serif" font-size="42" font-weight="900" fill="#0f1422">Ranger</text>
+        <rect x="20" y="74" width="60" height="6" fill="#0049a4"/>
+        <rect x="80" y="74" width="60" height="6" fill="#fff" stroke="#ddd" stroke-width="1"/>
+        <rect x="140" y="74" width="60" height="6" fill="#ce1126"/>
+        <text x="210" y="62" font-family="Inter,sans-serif" font-size="14" font-weight="700" fill="#0049a4">NÓMINA</text>
+        <text x="210" y="78" font-family="Inter,sans-serif" font-size="10" font-weight="600" fill="#8a96b0" letter-spacing="2">REPÚBLICA DOMINICANA</text>
+      </svg>
+    </div>
+    <p style="font-size:.8rem;color:#8a96b0">Patriota directo. Los tres colores de la bandera como acento. Memorable.</p>
+    <div class="actions">
+      <button onclick="downloadSVG('logo-c','ranger-C')">Descargar SVG</button>
+      <button onclick="downloadPNG('logo-c','ranger-C')">Descargar PNG</button>
+    </div>
+  </div>
+
+  <!-- VARIANTE A DARK -->
+  <div class="logo-card">
+    <h3>Variante A — modo oscuro</h3>
+    <div class="preview dark" id="prev-ad">
+      <svg id="logo-ad" viewBox="0 0 320 100" width="280" xmlns="http://www.w3.org/2000/svg">
+        <rect x="6" y="22" width="56" height="56" rx="12" fill="#ce1126"/>
+        <path d="M22 50 L32 60 L48 40" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="78" y="58" font-family="Inter,sans-serif" font-size="32" font-weight="800" fill="#fff">Ranger</text>
+        <text x="78" y="80" font-family="Inter,sans-serif" font-size="13" font-weight="600" fill="#1768d4" letter-spacing="2">NÓMINA · RD</text>
+      </svg>
+    </div>
+    <p style="font-size:.8rem;color:#8a96b0">Versión oscura para fondos negros (perfecta para reels y bio IG).</p>
+    <div class="actions">
+      <button onclick="downloadSVG('logo-ad','ranger-A-dark')">Descargar SVG</button>
+      <button onclick="downloadPNG('logo-ad','ranger-A-dark','#0f1422')">Descargar PNG</button>
+    </div>
+  </div>
+
+  <!-- ICONO CIRCULAR (PROFILE PIC) -->
+  <div class="logo-card">
+    <h3>Foto de perfil (cuadrado)</h3>
+    <div class="preview" id="prev-icon">
+      <svg id="logo-icon" viewBox="0 0 200 200" width="160" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="grad-icon" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ce1126"/>
+            <stop offset="100%" stop-color="#0049a4"/>
+          </linearGradient>
+        </defs>
+        <rect width="200" height="200" rx="40" fill="url(#grad-icon)"/>
+        <path d="M55 100 L85 130 L145 70" stroke="#fff" stroke-width="14" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <p style="font-size:.8rem;color:#8a96b0">Cuadrado simple para foto de perfil IG/FB. Solo el check sobre gradiente RD.</p>
+    <div class="actions">
+      <button onclick="downloadSVG('logo-icon','ranger-icon')">Descargar SVG</button>
+      <button onclick="downloadPNG('logo-icon','ranger-icon')">Descargar PNG</button>
+    </div>
+  </div>
+
+  <!-- BANNER COVER FB -->
+  <div class="logo-card">
+    <h3>Portada Facebook (1640×624)</h3>
+    <div class="preview dark" id="prev-cover" style="padding:0;overflow:hidden">
+      <svg id="logo-cover" viewBox="0 0 1640 624" width="100%" xmlns="http://www.w3.org/2000/svg" style="display:block">
+        <defs>
+          <radialGradient id="grad-cover" cx="20%" cy="30%">
+            <stop offset="0%" stop-color="rgba(206,17,38,.25)"/>
+            <stop offset="100%" stop-color="rgba(0,73,164,.05)"/>
+          </radialGradient>
+        </defs>
+        <rect width="1640" height="624" fill="#0a0e1a"/>
+        <rect width="1640" height="624" fill="url(#grad-cover)"/>
+        <rect x="80" y="280" width="80" height="80" rx="16" fill="#ce1126"/>
+        <path d="M104 320 L120 336 L144 308" stroke="#fff" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="180" y="345" font-family="Inter,sans-serif" font-size="64" font-weight="800" fill="#fff">Ranger Nómina</text>
+        <text x="180" y="395" font-family="Inter,sans-serif" font-size="26" font-weight="500" fill="#a8c1ee">El sistema de nómina que sí entiende República Dominicana</text>
+        <text x="180" y="445" font-family="Inter,sans-serif" font-size="20" font-weight="600" fill="#00c896" letter-spacing="3">ISR · AFP · ARS · REGALÍA · CIERRES AUDITADOS</text>
+      </svg>
+    </div>
+    <p style="font-size:.8rem;color:#8a96b0">Banner de portada listo para Facebook. Mismo concepto en variante A.</p>
+    <div class="actions">
+      <button onclick="downloadSVG('logo-cover','ranger-cover-fb')">Descargar SVG</button>
+      <button onclick="downloadPNG('logo-cover','ranger-cover-fb','#0a0e1a',1640,624)">Descargar PNG</button>
+    </div>
+  </div>
+
+</div>
+
+<p class="footer">Tip: descarga ambos formatos. SVG para edición en Canva/Figma. PNG listo para subir.</p>
+
+<script>
+  function downloadSVG(id, name){
+    const svg = document.getElementById(id);
+    const data = new XMLSerializer().serializeToString(svg);
+    const blob = new Blob([data], {type:'image/svg+xml'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name + '.svg';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadPNG(id, name, bg='#ffffff', w=null, h=null){
+    const svg = document.getElementById(id);
+    const data = new XMLSerializer().serializeToString(svg);
+    const vb = svg.viewBox.baseVal;
+    const width = w || vb.width * 3;
+    const height = h || vb.height * 3;
+    const canvas = document.createElement('canvas');
+    canvas.width = width; canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = bg; ctx.fillRect(0,0,width,height);
+    const img = new Image();
+    const blob = new Blob([data],{type:'image/svg+xml'});
+    const url = URL.createObjectURL(blob);
+    img.onload = function(){
+      ctx.drawImage(img,0,0,width,height);
+      canvas.toBlob(b=>{
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(b); a.download = name + '.png';
+        document.body.appendChild(a); a.click(); a.remove();
+      });
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  }
+</script>
+</body>
+</html>
