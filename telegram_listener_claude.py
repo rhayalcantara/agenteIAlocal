@@ -15,11 +15,11 @@ from logger import get_logger
 
 logger = get_logger("telegram_listener")
 
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "") or os.getenv("TELEGRAM_TOKEN", "")
+TELEGRAM_TOKEN =  os.getenv("TELEGRAM_TOKEN", "")
 POLL_TIMEOUT = int(os.getenv("TELEGRAM_POLL_TIMEOUT", "30"))
 API_BASE = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}"
 FILE_BASE = f"https://api.telegram.org/file/bot{TELEGRAM_TOKEN}"
-OFFSET_FILE = os.path.join(os.path.dirname(__file__), ".telegram_offset_agente.json")
+OFFSET_FILE = os.path.join(os.path.dirname(__file__), ".telegram_offset_mcp.json")
 
 
 def _get(endpoint: str, params: dict = None, retries: int = 3) -> dict | None:

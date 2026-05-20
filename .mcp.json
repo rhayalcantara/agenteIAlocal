@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "telegram": {
+      "command": "python",
+      "args": ["C:/proyectos/agenteIAlocal/mcp_telegram.py"],
+      "type": "stdio"
+    }
+  }
+}

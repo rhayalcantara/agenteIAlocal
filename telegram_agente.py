@@ -200,16 +200,34 @@ def _worker(cola: queue.Queue, notifier: TelegramNotifier):
             # Confirmar al usuario lo que se entendió
             notifier.enviar(chat_id, f"🗣️ Entendí: _{texto}_")
 
-        # ── Documento: leer contenido e inyectar en el texto ──────────
+        # ── Documento: leer contenido o pasar ruta según tipo ─────────
         if doc_path and os.path.exists(doc_path):
-            try:
-                with open(doc_path, "r", encoding="utf-8", errors="ignore") as _f:
-                    contenido = _f.read(8000)   # máx 8k chars para no saturar el contexto
-                texto = f"{texto}\n\n[Contenido de {doc_name}]:\n{contenido}"
-                logger.info(f"Documento leído: {doc_name} ({len(contenido)} chars)")
-            except Exception as _e:
-                logger.warning(f"No se pudo leer el documento {doc_name}: {_e}")
-                texto = f"{texto}\n\n[Archivo adjunto: {doc_name} — no se pudo leer el contenido]"
+            ext = os.path.splitext(doc_name or doc_path)[1].lower()
+            _BINARY_EXTS = {".pdf", ".xlsx", ".xls", ".docx", ".zip", ".rar",
+                            ".7z", ".png", ".jpg", ".jpeg", ".gif", ".mp3",
+                            ".mp4", ".wav", ".ogg", ".pptx"}
+            if ext in _BINARY_EXTS:
+                # Archivos binarios: pasar la ruta para que el agente los copie/procese
+                texto = (f"{texto}\n\n[Archivo recibido: {doc_name}]\n"
+                         f"Ruta temporal: {doc_path}\n"
+                         f"Tipo: {ext}\n"
+                         f"IMPORTANTE: Este es un archivo binario. NO intentes leerlo como texto. "
+                         f"Para guardarlo usa execute_bash con un comando copy/cp. "
+                         f"Para PDFs puedes usar read_file que soporta lectura de PDFs.")
+                logger.info(f"Documento binario recibido: {doc_name} -> {doc_path}")
+            else:
+                # Archivos de texto: leer contenido e inyectar
+                try:
+                    with open(doc_path, "r", encoding="utf-8", errors="ignore") as _f:
+                        contenido = _f.read(8000)
+                    texto = (f"{texto}\n\n[Contenido de {doc_name}]:\n{contenido}\n\n"
+                             f"Ruta temporal del archivo: {doc_path}")
+                    logger.info(f"Documento texto leído: {doc_name} ({len(contenido)} chars)")
+                except Exception as _e:
+                    logger.warning(f"No se pudo leer el documento {doc_name}: {_e}")
+                    texto = (f"{texto}\n\n[Archivo adjunto: {doc_name}]\n"
+                             f"Ruta temporal: {doc_path}\n"
+                             f"No se pudo leer el contenido: {_e}")
 
         if not texto:
             cola.task_done()

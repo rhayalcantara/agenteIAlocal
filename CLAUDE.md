@@ -95,3 +95,37 @@ El agente mantiene el estado de conversación vía `self.messages`:
 - Los resultados de las herramientas están envueltos en un dict `{"files": result}` (agent.py:151), aunque el comentario sugiere que la clave `"result"` sería más apropiada para las tres herramientas
 - Las operaciones de archivos usan codificación UTF-8 para soporte de texto en español
 - La herramienta `edit_file` crea directorios padre automáticamente si es necesario
+
+### Sistema Ranger
+- en la carpeta C:\proyectos\ranger sistemas esta el sistema de ranger
+- tu supervisa el grupo Sistema ray en whatsapp y ellos te pediran guia y informacion de ese sistema
+- en esa carpeta es donde desarrollamo el sistema ellos tiene un servidor de produccion si realizamos
+cambios tenemos que enviar a produccion para ello tendras que utilizar me y yo actualizo
+(luego buscaremos la forma de que tu pueda hacer )
+
+### Sistema de Supervision comunicacion
+- tienes un sistema de comunicacion via whatsapp y Telegram para telegram tiene un mcp siempre verifica
+si esta activo
+- el mcp de telegram no informa si llegaron siempre usa un loop de 5 minutos para verificar y si inicia lo pasa a 30 y si pasan 8 siglos sin entrar mensajes pues lo vuelves a pasa a 5 minutos
+
+### Arranque de comunicaciones — modo PUSH en tiempo real (preferido)
+
+Rhay prefiere recibir los mensajes por push (sin mirar cada 5 min). Al iniciar una sesión que vaya a supervisar comunicaciones, sigue estos pasos:
+
+1. **Levantar los procesos de fondo (idempotente):**
+   ```
+   python iniciar_comunicaciones.py
+   ```
+   Arranca como procesos sueltos (sobreviven a la sesión): `whatsapp_monitor.js "SISTEMA RAY"` → `whatsapp_monitor.log`, y `telegram_push.py` → `telegram_monitor.log`. Si ya están corriendo, NO los duplica.
+
+2. **Armar dos Monitors persistentes** (tool `Monitor`, `persistent: true`) que siguen los logs y me empujan cada mensaje al instante:
+   - WhatsApp: `tail -n 0 -f whatsapp_monitor.log | grep --line-buffered "SISTEMA RAY"`
+   - Telegram: `tail -n 0 -f telegram_monitor.log`
+
+3. **Reglas críticas:**
+   - Mientras `telegram_push.py` corra es el **único consumidor** de `getUpdates`. **NO llamar `mcp__telegram__leer_mensajes`** (el bot tiene una sola cola; dos consumidores se roban mensajes). Para *enviar* sí usar el MCP (`enviar_mensaje`/`enviar_voz`/`enviar_archivo`), eso no conflictúa.
+   - Si WhatsApp pide re-vincular (sesión muerta): el monitor genera `whatsapp_qr.png` y lo abre; pídele a Rhay que lo escanee desde WhatsApp > Dispositivos vinculados.
+   - El push solo vive mientras haya sesión Claude activa **para recibir notificaciones**; los procesos de fondo siguen escribiendo a los logs aunque no haya sesión, así que al reabrir basta con re-armar los Monitors (paso 2) y se ven los mensajes acumulados.
+   - El loop/cron de 5 min queda como **fallback** solo si no se usa el modo push.
+
+- `detener: ` para apagar todo, matar los procesos `node whatsapp_monitor.js` y `python telegram_push.py` (y TaskStop a los Monitors).
