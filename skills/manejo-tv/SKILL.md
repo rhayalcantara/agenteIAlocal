@@ -40,6 +40,21 @@ google_tv(operacion="app", nombre="TV Sala", aplicacion="hbo")
 ```
 Apps disponibles: youtube, netflix, disney+, prime, hbo, max, spotify, plex, twitch, chrome, kodi, vlc, configuracion, play store
 
+### Poner noticias / contenido de YouTube (operacion "youtube")
+`app` solo abre YouTube en home. Para REPRODUCIR algo concreto usa `youtube`:
+```
+# Canal de noticias en vivo (presets):
+google_tv(operacion="youtube", nombre="principal", canal="dw")
+google_tv(operacion="youtube", nombre="principal", canal="cdn")
+# Cualquier URL de YouTube (canal/live, watch, etc.):
+google_tv(operacion="youtube", nombre="principal", url="https://www.youtube.com/watch?v=XXXX")
+# Por ID de video:
+google_tv(operacion="youtube", nombre="principal", video="dQw4w9WgXcQ")
+# Busqueda (abre resultados):
+google_tv(operacion="youtube", nombre="principal", buscar="noticias republica dominicana hoy")
+```
+Presets de canales de noticias en vivo: **dw** (DW Espanol), **cdn** (CDN 37 RD), **noticias sin**, **color vision**, **listin**. (La operacion despierta la pantalla automaticamente antes de abrir.)
+
 ### Navegacion y control
 ```
 google_tv(operacion="control", nombre="TV Sala", comando="arriba")
@@ -83,10 +98,26 @@ google_tv(operacion="escanear")
 ## Notas importantes
 
 - Los TVs deben tener **Depuracion USB activada** (Opciones de desarrollador)
-- El nombre del TV se busca parcial: "sala" encuentra "TV Sala", "bernar" encuentra "TV Cuarto Bernar"
+- El nombre del TV se busca parcial: "sala" encuentra "TV Sala", "bernar" encuentra "TV Cuarto Bernar", "principal" encuentra "TV Habitacion Principal"
 - La TV Sala es un Fire TV Stick conectado a un TecnoMaster — apagar solo apaga el Stick, no el TV fisico (no tiene CEC)
 - Si un TV no responde, puede haberse desconectado del WiFi o cambiado de IP
 - ADB esta instalado en: C:\Users\rhay_\platform-tools\adb.exe
+
+### Si ADB sale "unauthorized" (no ejecuta comandos)
+La autorizacion se pierde a veces. `encender`/`youtube`/etc. devolveran un aviso. Para arreglar:
+1. Con la TV ENCENDIDA, en la TV: Ajustes → Opciones de desarrollador → "Revocar autorizaciones de depuracion USB", dejar Depuracion ON.
+2. `adb kill-server && adb connect <ip>:5555` y aceptar el aviso en la TV ("Siempre permitir").
+Si la TV esta apagada y `encender` no responde por estar unauthorized, se puede **encender por Wake-on-LAN** (magic packet al MAC de la TV, broadcast puertos 9/7) — eso la prende, pero apagar/controlar sigue exigiendo ADB autorizado.
+
+### Verificar que se ve en pantalla (screenshot)
+```
+adb -s <ip>:5555 shell screencap -p /sdcard/x.png
+adb -s <ip>:5555 pull /sdcard/x.png <ruta-local>
+```
+En git-bash usar `MSYS_NO_PATHCONV=1` para que no mangle `/sdcard/...`, y dar el destino en ruta Windows (`C:/...`). NO usar `adb exec-out screencap > file` en git-bash (corrompe el binario).
+
+### Panel de datos en la TV (relacionado)
+`tv_panel_server.py` (raiz) sirve un dashboard (`/` stats de PC, `/pendientes` lee la agenda del agente) que se abre en la TV con la operacion `youtube` url=... o un VIEW intent. Util para dejar la TV como panel de informacion.
 
 ## Ejemplos de uso natural
 
@@ -97,3 +128,7 @@ El usuario dice → lo que haces:
 - "Que esta puesto en la tele de Bernar?" → `google_tv(operacion="estado", nombre="TV Cuarto Bernar")`
 - "Cambia a HDMI 2 en la tele de Bernar" → `google_tv(operacion="control", nombre="TV Cuarto Bernar", comando="KEYCODE_TV_INPUT_HDMI_2")`
 - "Busca peliculas de Marvel en YouTube" → `google_tv(operacion="app", ...)` + `google_tv(operacion="escribir", ...)`
+- "Pon noticias en la habitacion principal" → `google_tv(operacion="youtube", nombre="principal", canal="cdn")` (o el canal que prefiera)
+- "Pon DW en la tele" → `google_tv(operacion="youtube", nombre="principal", canal="dw")`
+- "Enciende la tele del cuarto principal" → `google_tv(operacion="encender", nombre="principal")` (si esta unauthorized o no responde, usar Wake-on-LAN)
+- "Pon este video de YouTube en la sala" → `google_tv(operacion="youtube", nombre="TV Sala", url="<url>")`

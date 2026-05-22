@@ -57,6 +57,19 @@ _APP_URLS = {
     "youtube": "https://www.youtube.com",
 }
 
+# Canales de noticias en vivo en YouTube (presets verificados). Las URLs /live
+# resuelven al stream en curso del canal.
+_CANALES_YT = {
+    "dw": "https://www.youtube.com/@dwespanol/live",
+    "dw espanol": "https://www.youtube.com/@dwespanol/live",
+    "cdn": "https://www.youtube.com/channel/UCpFfLf9o4wJr-yr7dG8gYug/live",
+    "cdn37": "https://www.youtube.com/channel/UCpFfLf9o4wJr-yr7dG8gYug/live",
+    "noticias sin": "https://www.youtube.com/channel/UCbBIwG4LJfQyM4ZdoiujBxg/live",
+    "sin": "https://www.youtube.com/channel/UCbBIwG4LJfQyM4ZdoiujBxg/live",
+    "color vision": "https://www.youtube.com/channel/UCiDATmLMS6XfkB7mh8pmeHg/live",
+    "listin": "https://www.youtube.com/@nlistindiario/live",
+}
+
 # Comandos en español a keycodes Android
 _CONTROLES = {
     "arriba": "KEYCODE_DPAD_UP",
@@ -146,13 +159,26 @@ def _buscar_tv(nombre: str) -> tuple[str, dict] | None:
     return None
 
 
+def _estado_adb(ip: str) -> str:
+    """Devuelve el estado real del device en `adb devices` (device/unauthorized/offline/'')."""
+    for line in _adb("devices").splitlines():
+        line = line.strip()
+        if line.startswith(f"{ip}:5555"):
+            parts = line.split()
+            return parts[-1] if parts else ""
+    return ""
+
+
 def _asegurar_conexion(ip: str) -> bool:
-    """Verifica/reestablece conexión ADB."""
-    devices = _adb("devices")
-    if f"{ip}:5555" in devices and "device" in devices:
+    """Verifica/reestablece conexión ADB. Solo True si el device está autorizado ('device').
+
+    Nota: NO basta con que aparezca el ip en la salida — el header 'List of devices'
+    contiene la palabra 'device'. Hay que validar el estado real de la línea del device.
+    """
+    if _estado_adb(ip) == "device":
         return True
-    result = _adb(f"connect {ip}:5555")
-    return "connected" in result.lower()
+    _adb(f"connect {ip}:5555")
+    return _estado_adb(ip) == "device"
 
 
 # ── Operaciones ──────────────────────────────────────────────────────────────
@@ -344,6 +370,52 @@ def app(nombre: str, aplicacion: str) -> str:
     return f"'{nombre}': Abriendo {aplicacion}"
 
 
+def youtube(nombre: str, canal: str = None, url: str = None,
+            buscar: str = None, video: str = None) -> str:
+    """Reproduce contenido de YouTube en el TV.
+
+    Opciones (en orden de prioridad):
+      canal  — preset de noticias en vivo (dw, cdn, noticias sin, color vision, listin)
+      url    — cualquier URL de YouTube (canal/live, watch?v=, etc.)
+      video  — ID de video de YouTube
+      buscar — texto de búsqueda (abre resultados)
+    Si no se pasa nada, abre YouTube en home.
+    """
+    result = _buscar_tv(nombre)
+    if not result:
+        return f"TV '{nombre}' no encontrado."
+    nombre, data = result
+    ip = data["ip"]
+
+    if not _asegurar_conexion(ip):
+        return (f"No se pudo conectar a '{nombre}' (estado ADB: {_estado_adb(ip) or 'sin device'}). "
+                f"Si dice 'unauthorized', acepta la depuración USB en la TV.")
+
+    if canal:
+        destino = _CANALES_YT.get(canal.lower().strip())
+        if not destino:
+            disp = ", ".join(sorted(set(_CANALES_YT.keys())))
+            return f"Canal '{canal}' no está en presets. Disponibles: {disp}. O usa url=/buscar=/video=."
+        etiqueta = f"canal '{canal}' en vivo"
+    elif url:
+        destino = url
+        etiqueta = url
+    elif video:
+        destino = f"https://www.youtube.com/watch?v={video}"
+        etiqueta = f"video {video}"
+    elif buscar:
+        from urllib.parse import quote_plus
+        destino = f"https://www.youtube.com/results?search_query={quote_plus(buscar)}"
+        etiqueta = f"búsqueda '{buscar}'"
+    else:
+        destino = "https://www.youtube.com"
+        etiqueta = "YouTube (home)"
+
+    _adb_shell("input keyevent KEYCODE_WAKEUP", ip)  # asegurar pantalla encendida
+    _adb_shell(f"am start -a android.intent.action.VIEW -d {destino}", ip)
+    return f"'{nombre}': reproduciendo {etiqueta} en YouTube"
+
+
 def control(nombre: str, comando: str) -> str:
     """Envía un comando de navegación al TV."""
     result = _buscar_tv(nombre)
@@ -456,6 +528,7 @@ _OPERACIONES = {
     "apagar": apagar,
     "volumen": volumen,
     "app": app,
+    "youtube": youtube,
     "control": control,
     "escribir": escribir,
     "apagar_todos": apagar_todos,
