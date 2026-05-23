@@ -81,7 +81,9 @@ def grabar(segundos: int = None) -> str | None:
         import numpy as np
         import soundfile as sf
         audio = np.concatenate(grabados, axis=0)
-        wav_path = tempfile.mktemp(suffix="_mic.wav", dir="/tmp")
+        # Antes usaba dir="/tmp" — eso no existe en Windows y la grabación
+        # cascaba silenciosamente al guardar (percibido como "no detecta micro").
+        wav_path = tempfile.mktemp(suffix="_mic.wav", dir=tempfile.gettempdir())
         sf.write(wav_path, audio, SAMPLE_RATE)
         duracion = round(len(audio) / SAMPLE_RATE, 1)
         logger.info(f"Audio grabado: {wav_path} ({duracion}s)")

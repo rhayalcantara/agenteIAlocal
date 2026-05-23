@@ -21,7 +21,7 @@ TOOL_CATALOG = {
     "execute_command": {"cat": "sistema", "kw": ["ejecutar", "comando"]},
 
     # Web y busqueda
-    "buscar_en_internet": {"cat": "web", "kw": ["buscar", "internet", "google", "web", "investigar", "manual", "manuales", "informacion", "averiguar", "encontrar"]},
+    "buscar_en_internet": {"cat": "web", "kw": ["buscar", "busca", "buscame", "busqueda", "internet", "google", "web", "investigar", "investiga", "manual", "manuales", "informacion", "info", "averiguar", "averigua", "encontrar", "encuentra", "como", "explica", "explicame", "dime como", "muestrame"]},
     "scrape_url": {"cat": "web", "kw": ["scrape", "pagina", "url", "extraer", "web"]},
 
     # Browser
@@ -75,14 +75,28 @@ TOOL_CATALOG = {
 }
 
 
+def _normalizar(s: str) -> str:
+    """Quita acentos y baja a minusculas para matching robusto.
+
+    'informacion' debe matchear 'información', 'como' debe matchear 'cómo', etc.
+    Sin esto, las queries del usuario con acentos no matchean keywords sin acentos.
+    """
+    import unicodedata
+    s = unicodedata.normalize("NFKD", s.lower())
+    return "".join(c for c in s if not unicodedata.combining(c))
+
+
 def _match_keywords(mensaje: str, tools_catalog: dict, max_tools: int = 5) -> list[str]:
-    """Matching rapido por keywords sin LLM. Fallback si el router LLM no esta disponible."""
-    msg_lower = mensaje.lower()
+    """Matching rapido por keywords sin LLM. Fallback si el router LLM no esta disponible.
+
+    Normaliza acentos en ambos lados para robustez en queries en espanol con tildes.
+    """
+    msg_norm = _normalizar(mensaje)
     scores = {}
     for tool_name, info in tools_catalog.items():
         score = 0
         for kw in info["kw"]:
-            if kw in msg_lower:
+            if _normalizar(kw) in msg_norm:
                 score += 1
         if score > 0:
             scores[tool_name] = score
