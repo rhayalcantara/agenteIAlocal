@@ -55,7 +55,7 @@ class Agent:
             "list_files_in_dir", "read_file", "edit_file",
             "execute_bash", "execute_long", "job_status", "job_list", "job_cancel",
             "qa_ask", "qa_check",
-            "guardar_memoria",
+            "guardar_memoria", "buscar_memoria",
             "buscar_en_internet", "listar_skills", "activar_skill", "crear_skill",
             "leer_wiki", "buscar_wiki",
             "enviar_archivo_telegram", "lista_compras", "distribucion_casa",
@@ -443,6 +443,20 @@ class Agent:
              "parameters": {"type": "object", "properties": {
                  "categoria": {"type": "string", "enum": ["preferencia", "proyecto", "hecho", "instruccion"]},
              }, "required": []}},
+            {"type": "function", "name": "buscar_memoria",
+             "description": ("Busca SEMÁNTICAMENTE en el historial completo de la conversación, "
+                             "más allá de la ventana visible y de los tramos ya compactados. "
+                             "Úsala cuando el usuario referencia algo de hace tiempo: "
+                             "'¿qué dije sobre…?', '¿recuerdas cuando hablamos de…?', "
+                             "modelos/nombres/fechas que probablemente ya no están en los últimos turnos. "
+                             "NO la uses si el dato está claramente en los mensajes visibles. "
+                             "Retorna JSON con [{id, rol, ts, texto, score}] ordenado por relevancia."),
+             "parameters": {"type": "object", "properties": {
+                 "query": {"type": "string", "description": "Pregunta o tema en lenguaje natural."},
+                 "k": {"type": "number", "description": "Cuántos resultados (default 5, máx 20)."},
+                 "rol": {"type": "string", "enum": ["user", "assistant"], "description": "Filtrar por rol (opcional)."},
+                 "dias_max": {"type": "number", "description": "Limitar a los últimos N días (opcional)."},
+             }, "required": ["query"]}},
             {"type": "function", "name": "buscar_en_internet",
              "description": "Busca en internet con DuckDuckGo",
              "parameters": {"type": "object", "properties": {
@@ -1017,6 +1031,31 @@ class Agent:
                 pass
         return None, f"No se pudieron parsear args: {raw[:200]}"
 
+    # ── Memoria con recuperación (ingestión no bloqueante) ───────────────────
+
+    def _ingestar_retrieval(self, rol: str, texto: str):
+        """Indexa un mensaje en `memoria_retrieval_tool` en background.
+
+        Tolerante a fallo: si sentence-transformers no está, si el embed peta,
+        o si la DB falla, solo se loggea — NUNCA debe romper el turno del agente.
+        """
+        if not texto or not str(texto).strip():
+            return
+        try:
+            from memoria_retrieval_tool import ejecutar as _mr_ejecutar
+            threading.Thread(
+                target=_mr_ejecutar,
+                args=("ingestar",),
+                kwargs={
+                    "rol": rol,
+                    "texto": str(texto)[:8000],
+                    "session_id": str(getattr(self, "_current_chat_id", 0) or "global"),
+                },
+                daemon=True,
+            ).start()
+        except Exception as e:
+            logger.warning(f"retrieval ingest fallo (ignorado): {e}")
+
     # ── Ejecución de una herramienta ─────────────────────────────────────────
 
     def _ejecutar_tool(self, fn_name: str, args: dict) -> str:
@@ -1078,6 +1117,10 @@ class Agent:
         elif fn_name == "consultar_memoria":
             hechos = self.memoria.listar_hechos(**args)
             result = json.dumps(hechos, ensure_ascii=False) if hechos else "Sin hechos"
+        elif fn_name == "buscar_memoria":
+            from memoria_retrieval_tool import ejecutar as _mr_ejecutar
+            args.setdefault("k", 5)
+            result = _mr_ejecutar("buscar", **args)
         elif fn_name == "buscar_en_internet":
             result = iatools.web_search(**args)
         elif fn_name == "leer_pagina_web":
@@ -1492,6 +1535,11 @@ class Agent:
         else:
             self.messages.append({"role": "user", "content": mensaje_llm})
 
+        # Indexar mensaje del usuario en memoria con recuperación (no bloquea).
+        # Usamos `mensaje` (texto crudo), NO `mensaje_llm` (que puede traer
+        # prefijos tipo "[Contexto: ...]" que contaminarían el retrieval).
+        self._ingestar_retrieval(rol="user", texto=mensaje)
+
         # Esperar compactación anterior si aún está en progreso
         if self._compaction_thread and self._compaction_thread.is_alive():
             print("⏳ Finalizando compactación...", flush=True)
@@ -1544,6 +1592,11 @@ class Agent:
             )
             if not hubo_tool:
                 break
+
+        # Indexar la respuesta final del assistant en memoria con recuperación.
+        # Solo el texto entregado al usuario; tool calls intermedios son ruido.
+        if last_reply:
+            self._ingestar_retrieval(rol="assistant", texto=last_reply)
 
         self._ultima_ejecucion = {
             "herramientas_usadas": _herramientas_usadas,
