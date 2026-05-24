@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup · Panel TV · 3 vistas a elegir</title>
+<style>
+  :root{
+    --bg:#0a0e16; --panel:#141a26; --panel2:#1c2230; --line:#232c3a;
+    --txt:#e6edf3; --mut:#9aa7b4; --dim:#5d6878;
+    --ok:#4dd4ac; --warn:#e3b341; --bad:#f0666b; --blue:#58a6ff; --pur:#b388ff;
+    --mono:ui-monospace,"Cascadia Code",Consolas,monospace;
+    --sans:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#02050a;color:var(--txt);font-family:var(--sans);min-height:100vh}
+  .head{padding:18px 28px;background:#0a0e16;border-bottom:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:center}
+  .head h1{font-size:20px;font-weight:700}
+  .head .sub{color:var(--mut);font-size:13px;margin-top:4px}
+  .tabs{display:flex;gap:6px}
+  .tab{padding:10px 22px;background:var(--panel);border:1px solid var(--line);
+    border-radius:8px;cursor:pointer;color:var(--mut);font-family:var(--mono);font-size:13px;
+    transition:all .15s}
+  .tab.active{background:var(--ok);color:#02050a;border-color:var(--ok);font-weight:700}
+  .tab:hover:not(.active){border-color:var(--ok);color:var(--ok)}
+  .tv-frame{margin:24px auto;width:1280px;max-width:calc(100vw - 48px);
+    aspect-ratio:16/9;background:#000;border:14px solid #1a1a1a;border-radius:18px;
+    box-shadow:0 20px 60px rgba(0,0,0,.6);overflow:hidden;position:relative}
+  .tv-label{position:absolute;top:-22px;right:14px;color:var(--dim);font-family:var(--mono);font-size:11px}
+  .vista{display:none;width:100%;height:100%;background:var(--bg)}
+  .vista.show{display:block}
+
+  /* ── VISTA 1: OPERACIONES ─────────────────────────────────── */
+  .v1{padding:34px 44px;height:100%;display:flex;flex-direction:column}
+  .v1 .top{display:flex;justify-content:space-between;align-items:flex-start;
+    border-bottom:1px solid var(--line);padding-bottom:18px}
+  .v1 .clock{font-size:96px;font-weight:800;line-height:.95;letter-spacing:-3px;
+    font-variant-numeric:tabular-nums}
+  .v1 .clock .s{font-size:42px;color:var(--ok);vertical-align:super;margin-left:6px}
+  .v1 .top .right{text-align:right}
+  .v1 .date{font-size:24px;color:var(--mut);text-transform:capitalize}
+  .v1 .host{font-size:18px;color:var(--blue);font-family:var(--mono);margin-top:4px}
+  .v1 .uptime{font-size:14px;color:var(--dim);font-family:var(--mono);margin-top:2px}
+  .v1 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:22px 0;flex:1}
+  .v1 .svc{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:18px 22px;display:flex;flex-direction:column;justify-content:space-between}
+  .v1 .svc .row1{display:flex;justify-content:space-between;align-items:center}
+  .v1 .svc .name{font-size:20px;font-weight:700}
+  .v1 .svc .dot{width:14px;height:14px;border-radius:50%;flex:0 0 auto}
+  .v1 .svc .dot.ok{background:var(--ok);box-shadow:0 0 12px var(--ok)}
+  .v1 .svc .dot.warn{background:var(--warn)}
+  .v1 .svc .dot.bad{background:var(--bad);animation:pulse 1s infinite}
+  @keyframes pulse{50%{opacity:.4}}
+  .v1 .svc .meta{font-size:13px;color:var(--mut);font-family:var(--mono);margin-top:8px}
+  .v1 .svc .stat{font-size:11px;color:var(--dim);font-family:var(--mono);margin-top:4px}
+  .v1 .foot{background:var(--panel2);border:1px solid var(--line);border-radius:10px;
+    padding:14px 20px;display:flex;align-items:center;gap:14px}
+  .v1 .foot .tag{font-size:11px;color:var(--mut);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em}
+  .v1 .foot .msg{font-size:17px;color:var(--txt);flex:1}
+  .v1 .foot .ts{font-size:13px;color:var(--dim);font-family:var(--mono)}
+
+  /* ── VISTA 2: AGENTE / AGENDA ─────────────────────────────── */
+  .v2{padding:30px 40px;height:100%;display:flex;flex-direction:column}
+  .v2 .top{display:flex;justify-content:space-between;align-items:baseline;
+    border-bottom:2px solid var(--line);padding-bottom:14px}
+  .v2 h2{font-size:34px;font-weight:800}
+  .v2 h2 .ico{color:var(--ok)}
+  .v2 .clk{font-size:26px;color:var(--mut);font-variant-numeric:tabular-nums}
+  .v2 .list{flex:1;margin-top:10px;overflow:hidden}
+  .v2 .row{display:flex;align-items:center;gap:18px;padding:12px 6px;border-bottom:1px solid #161c28}
+  .v2 .dot2{width:12px;height:12px;border-radius:50%;flex:0 0 auto}
+  .v2 .dot2.on{background:var(--ok);box-shadow:0 0 10px #4dd4ac88}
+  .v2 .dot2.off{background:#3d4757}
+  .v2 .dot2.err{background:var(--bad)}
+  .v2 .main2{flex:1;min-width:0}
+  .v2 .nm{font-size:20px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .v2 .meta2{font-size:13px;color:var(--mut);margin-top:2px;font-family:var(--mono);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .v2 .meta2 .err{color:var(--bad)}
+  .v2 .bdg{font-size:11px;font-family:var(--mono);padding:3px 10px;border-radius:99px;
+    flex:0 0 auto;background:var(--panel);border:1px solid var(--line);color:var(--mut)}
+  .v2 .bdg.on{color:var(--ok);border-color:var(--ok)}
+  .v2 .stats-row{display:flex;gap:24px;padding:12px 6px;background:var(--panel2);
+    border-radius:10px;margin-top:12px;font-family:var(--mono)}
+  .v2 .stat-i{flex:1;display:flex;flex-direction:column;align-items:center}
+  .v2 .stat-i .l{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em}
+  .v2 .stat-i .v{font-size:22px;font-weight:700;margin-top:2px}
+
+  /* ── VISTA 3: MIX ROTATIVO ────────────────────────────────── */
+  .v3{padding:0;height:100%;position:relative;background:var(--bg)}
+  .v3 .stage{height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;
+    position:relative;padding:24px}
+  .v3 .stage h3{font-size:18px;color:var(--mut);font-family:var(--mono);letter-spacing:.1em;
+    text-transform:uppercase;margin-bottom:14px}
+  .v3 .stage-card{width:90%;max-width:980px;background:var(--panel);
+    border:1px solid var(--line);border-radius:14px;padding:30px;min-height:380px;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+  .v3 .stage-card .big{font-size:46px;font-weight:800;margin-bottom:14px}
+  .v3 .stage-card .desc{color:var(--mut);font-size:16px;line-height:1.6;max-width:80%}
+  .v3 .pager{position:absolute;bottom:18px;left:0;right:0;display:flex;justify-content:center;gap:14px}
+  .v3 .pager .pip{width:60px;height:5px;background:var(--line);border-radius:99px;overflow:hidden}
+  .v3 .pager .pip.act{background:var(--ok)}
+  .v3 .pager .pip.act i{display:block;height:100%;background:#fff;width:0;animation:fillpip 20s linear infinite}
+  @keyframes fillpip{from{width:0}to{width:100%}}
+  .v3 .badge3{font-size:11px;color:var(--blue);font-family:var(--mono);letter-spacing:.1em;margin-top:14px}
+
+  /* notas explicativas debajo del TV */
+  .notes{max-width:1280px;margin:0 auto 60px;padding:0 24px}
+  .notes h4{font-size:14px;color:var(--ok);font-family:var(--mono);text-transform:uppercase;
+    letter-spacing:.08em;margin:24px 0 8px}
+  .notes p{color:var(--mut);font-size:14px;line-height:1.6}
+  .notes ul{padding-left:18px;color:var(--mut);font-size:14px;line-height:1.8}
+  .notes ul strong{color:var(--txt)}
+  .pros{color:var(--ok)} .cons{color:var(--warn)}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div>
+    <h1>📺 Mockup — Panel TV definitivo</h1>
+    <div class="sub">3 propuestas de contenido para tu TV de la habitación principal. Click en una tab para verla. Los datos son realistas pero estáticos (mock).</div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="show(1)">A · Operaciones</button>
+    <button class="tab" onclick="show(2)">B · Agente</button>
+    <button class="tab" onclick="show(3)">C · Mix rotativo</button>
+  </div>
+</div>
+
+<div class="tv-frame">
+  <span class="tv-label">TV Habitación Principal · 1920×1080 (preview escalado)</span>
+
+  <!-- ───────── VISTA 1: OPERACIONES ───────── -->
+  <div class="vista show" id="v1">
+    <div class="v1">
+      <div class="top">
+        <div class="clock">10:47<span class="s">23</span></div>
+        <div class="right">
+          <div class="date">Sábado, 24 De Mayo</div>
+          <div class="host">DESKTOP-9FMT9MK</div>
+          <div class="uptime">uptime: 14h 22m</div>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="svc"><div class="row1"><div class="name">telegram_push</div><div class="dot ok"></div></div>
+          <div class="meta">PID 18116 · 14h activo</div><div class="stat">último msg: hace 16m</div></div>
+        <div class="svc"><div class="row1"><div class="name">supervisor</div><div class="dot ok"></div></div>
+          <div class="meta">PID 12548 · modo manual</div><div class="stat">job_manager: PID 20252 ✓</div></div>
+        <div class="svc"><div class="row1"><div class="name">whatsapp_monitor</div><div class="dot ok"></div></div>
+          <div class="meta">node PID 12588 · 18h activo</div><div class="stat">SISTEMA RAY · 3 msgs hoy</div></div>
+        <div class="svc"><div class="row1"><div class="name">bridge ranger</div><div class="dot ok"></div></div>
+          <div class="meta">tailnet 100.91.126.66</div><div class="stat">health: ok · pending 0</div></div>
+        <div class="svc"><div class="row1"><div class="name">mysql local</div><div class="dot ok"></div></div>
+          <div class="meta">MySQL84 8.4.8</div><div class="stat">db_aae4a2_ranger · 58 tablas</div></div>
+        <div class="svc"><div class="row1"><div class="name">agente local</div><div class="dot warn"></div></div>
+          <div class="meta">consola activa (1 sesión)</div><div class="stat">whisper: cargado · voz: on</div></div>
+      </div>
+      <div class="foot">
+        <span class="tag">último Telegram</span>
+        <span class="msg">[voz] Sigue con el pendiente del panel TV definitivo</span>
+        <span class="ts">10:46:08</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── VISTA 2: AGENTE / AGENDA ───────── -->
+  <div class="vista" id="v2">
+    <div class="v2">
+      <div class="top">
+        <h2><span class="ico">▣</span> Agente · 7 acciones</h2>
+        <div class="clk">10:47</div>
+      </div>
+      <div class="list">
+        <div class="row"><div class="dot2 on"></div><div class="main2">
+          <div class="nm">Resumen de correos cada 2 horas</div>
+          <div class="meta2">recurrente_ventana · última 10:01 · "No hay correos nuevos"</div></div>
+          <div class="bdg on">ACTIVA</div></div>
+        <div class="row"><div class="dot2 on"></div><div class="main2">
+          <div class="nm">Buscar noticias diarias</div>
+          <div class="meta2">diaria · última 08:02 · 10 titulares de Diario Libre</div></div>
+          <div class="bdg on">ACTIVA</div></div>
+        <div class="row"><div class="dot2 on"></div><div class="main2">
+          <div class="nm">Enviar resumen de noticias por la noche</div>
+          <div class="meta2">diaria · última 20:02 (ayer) · Gerald R. Ford regresa…</div></div>
+          <div class="bdg on">ACTIVA</div></div>
+        <div class="row"><div class="dot2 off"></div><div class="main2">
+          <div class="nm">Monitoreo Amazon Ninja CREAMi</div>
+          <div class="meta2">recurrente · última 30-abr · entregado · monitoreo cerrado</div></div>
+          <div class="bdg">pausada</div></div>
+        <div class="row"><div class="dot2 on"></div><div class="main2">
+          <div class="nm">Monitoreo Amazon #9275461</div>
+          <div class="meta2">recurrente · última 09:45 · sin novedades</div></div>
+          <div class="bdg on">ACTIVA</div></div>
+        <div class="row"><div class="dot2 on"></div><div class="main2">
+          <div class="nm">Monitoreo transacción Promerica #9</div>
+          <div class="meta2">recurrente_ventana · última 10:02 · sin correos nuevos</div></div>
+          <div class="bdg on">ACTIVA</div></div>
+        <div class="row"><div class="dot2 err"></div><div class="main2">
+          <div class="nm">Verificar con María delrag sixtante</div>
+          <div class="meta2"><span class="err">⚠ TypeError: listar_hechos contexto</span> · última 11-may</div></div>
+          <div class="bdg on">ACTIVA</div></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-i"><div class="l">CPU</div><div class="v">12%</div></div>
+        <div class="stat-i"><div class="l">RAM</div><div class="v">49%</div></div>
+        <div class="stat-i"><div class="l">Disco</div><div class="v">57%</div></div>
+        <div class="stat-i"><div class="l">Tokens hoy</div><div class="v">142k</div></div>
+        <div class="stat-i"><div class="l">Whisper</div><div class="v">on</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── VISTA 3: MIX ROTATIVO ───────── -->
+  <div class="vista" id="v3">
+    <div class="v3">
+      <div class="stage">
+        <h3>Vista 1 de 3 · Operaciones</h3>
+        <div class="stage-card">
+          <div class="big">Todos los servicios OK</div>
+          <div class="desc">5 ✓ verdes · 1 ⚠ advertencia · 0 ✗ caídos<br>Último Telegram: 10:46:08 · "Sigue con el pendiente del panel TV…"</div>
+        </div>
+        <div class="badge3">próxima vista en 14s — agenda agente</div>
+        <div class="pager">
+          <div class="pip act"><i></i></div>
+          <div class="pip"></div>
+          <div class="pip"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="notes">
+  <h4>📋 Comparación rápida</h4>
+  <ul>
+    <li><strong>A · Operaciones:</strong> <span class="pros">una mirada y sabes si TODO está OK.</span> <span class="cons">Datos del agente no se ven.</span></li>
+    <li><strong>B · Agente:</strong> <span class="pros">contexto de qué está haciendo el agente.</span> <span class="cons">Si se cae un servicio, no es evidente desde aquí.</span></li>
+    <li><strong>C · Mix:</strong> <span class="pros">lo mejor de ambas.</span> <span class="cons">tienes que esperar 20s para ver lo que quieres; depende de en qué vista esté en ese momento.</span></li>
+  </ul>
+  <h4>💡 Mi recomendación</h4>
+  <p><strong>A (Operaciones)</strong> como base. Es lo que más justifica una TV "siempre encendida" — un tablero de vuelo. Si te interesa la agenda, tenemos un atajo: el panel del POC actual (<code>/pendientes</code>) sigue accesible cuando quieras esa vista específica desde el control del TV.</p>
+  <p>Otra opción: empezar con A y, si después echas de menos la info del agente, sumamos vista B (paginación o tab) en una iteración v2.</p>
+  <h4>⏰ Auto-arranque (ya decidido: nivel máximo)</h4>
+  <ul>
+    <li>Servidor <code>tv_panel_server.py</code> detached vía <code>iniciar_comunicaciones.py</code> (sobrevive sesión y reinicio PC… si el launcher se ejecuta al boot, ver punto siguiente).</li>
+    <li>Script <code>panel_tv.py prender</code> que ADB-wakes la TV y abre el panel en su navegador.</li>
+    <li>Cron diario (hora a definir) que llama a <code>panel_tv.py prender</code> automáticamente.</li>
+  </ul>
+  <p style="margin-top:24px;color:var(--txt)"><strong>👉 Dime qué vista eliges (A / B / C) y la hora del cron diario (ej. 7:30 am).</strong></p>
+</div>
+
+<script>
+function show(n){
+  document.querySelectorAll('.vista').forEach(v=>v.classList.remove('show'));
+  document.getElementById('v'+n).classList.add('show');
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active', i===n-1));
+}
+</script>
+</body>
+</html>

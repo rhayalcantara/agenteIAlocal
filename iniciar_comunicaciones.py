@@ -84,6 +84,16 @@ def main() -> None:
             "telegram_push.stdout.log",
         )
 
+    # --- TV Panel Server (sirve http://<lan-ip>:8095 para la TV) ---
+    if _esta_corriendo("tv_panel_server.py", "python.exe"):
+        print("[skip] tv_panel_server.py ya está corriendo")
+    else:
+        _arrancar(
+            "TV panel server",
+            [sys.executable, "tv_panel_server.py"],
+            "tv_panel_server.stdout.log",
+        )
+
     print()
     print("LISTO. Si arrancó WhatsApp por primera vez tras logout, revisa whatsapp_qr.png para re-vincular.")
     print("Ahora arma los Monitors (tail de whatsapp_monitor.log y telegram_monitor.log) y NO llames leer_mensajes.")
