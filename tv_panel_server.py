@@ -35,21 +35,26 @@ HTML = """<!DOCTYPE html>
     font-family:-apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden}
   .wrap{height:100vh;padding:36px 48px;display:flex;flex-direction:column}
   header{display:flex;justify-content:space-between;align-items:baseline;
-    border-bottom:2px solid #232c3a;padding-bottom:18px;margin-bottom:14px}
-  h1{font-size:48px;font-weight:800;letter-spacing:-1px}
+    border-bottom:2px solid #232c3a;padding-bottom:14px;margin-bottom:10px}
+  h1{font-size:42px;font-weight:800;letter-spacing:-1px}
   h1 .ico{color:#4dd4ac;margin-right:6px}
-  .clk{font-size:42px;color:#9aa7b4;font-variant-numeric:tabular-nums;font-weight:600}
-  .clk .s{color:#4dd4ac;font-size:30px;vertical-align:super;margin-left:4px}
-  .list{flex:1;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between}
-  .row{display:flex;align-items:center;gap:22px;padding:14px 6px;border-bottom:1px solid #161c28}
-  .dot{width:16px;height:16px;border-radius:50%;flex:0 0 auto}
+  .right{text-align:right}
+  .clk{font-size:38px;color:#9aa7b4;font-variant-numeric:tabular-nums;font-weight:600}
+  .clk .s{color:#4dd4ac;font-size:26px;vertical-align:super;margin-left:4px}
+  .pag{font-size:14px;color:#5d6878;font-family:ui-monospace,monospace;margin-top:4px;letter-spacing:.05em}
+  .pbar{height:3px;background:#161c28;border-radius:99px;margin:6px 0 12px;overflow:hidden}
+  .pbar i{display:block;height:100%;background:linear-gradient(90deg,#4dd4ac,#58a6ff);
+    width:0;transition:width .25s linear}
+  .list{flex:1;overflow:hidden;display:flex;flex-direction:column}
+  .row{display:flex;align-items:center;gap:20px;padding:11px 6px;border-bottom:1px solid #161c28}
+  .dot{width:14px;height:14px;border-radius:50%;flex:0 0 auto}
   .on{background:#4dd4ac;box-shadow:0 0 12px #4dd4ac88}
   .off{background:#3d4757}
   .err{background:#f0666b;box-shadow:0 0 14px #f0666b88;animation:pulse 1.4s infinite}
   @keyframes pulse{50%{opacity:.5}}
   .main{flex:1;min-width:0}
-  .nm{font-size:26px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
-  .meta{font-size:17px;color:#9aa7b4;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:ui-monospace,monospace}
+  .nm{font-size:22px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+  .meta{font-size:15px;color:#9aa7b4;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:ui-monospace,monospace}
   .meta .e{color:#f0666b}
   .meta .tipo{color:#58a6ff}
   .badge{font-size:13px;font-family:ui-monospace,monospace;padding:5px 12px;border-radius:99px;
@@ -69,8 +74,12 @@ HTML = """<!DOCTYPE html>
 <div class="wrap">
   <header>
     <h1><span class="ico">▣</span> Agente · Pendientes</h1>
-    <div class="clk"><span id="hm">--:--</span><span class="s" id="ss">00</span></div>
+    <div class="right">
+      <div class="clk"><span id="hm">--:--</span><span class="s" id="ss">00</span></div>
+      <div class="pag" id="pag">Pág –/–</div>
+    </div>
   </header>
+  <div class="pbar"><i id="pbar"></i></div>
   <div class="list" id="list"><div class="empty">cargando…</div></div>
   <div class="stats">
     <div class="stat"><div class="l">CPU</div><div class="v" id="cpu">–</div></div>
@@ -97,19 +106,39 @@ function fecha(s){if(!s)return 'nunca';try{var d=new Date(s);
 }catch(e){return s;}}
 function setStat(id,v,hi,crit){var e=document.getElementById(id);e.textContent=v;
   e.classList.toggle('hi',v>=(hi||70));e.classList.toggle('crit',v>=(crit||90));}
-async function loadAg(){try{var r=await fetch('/pendientes.json',{cache:'no-store'});var j=await r.json();
+// ── Paginación rotativa ─────────────────────────────────────
+var PER_PAGE=3, ROTATE_MS=15000;
+var acciones=[], pageIdx=0, rotateStart=Date.now();
+function renderRow(a){
+  var meta='<span class="tipo">'+(a.tipo||'')+'</span> · última '+fecha(a.ultima);
+  if(a.error){meta+=' · <span class="e">'+(a.error+'').substring(0,60)+'</span>';}
+  else if(a.resultado){meta+=' · '+a.resultado.substring(0,80);}
+  var cls=a.error?'err':(a.activa?'on':'off');
+  return '<div class="row"><div class="dot '+cls+'"></div>'+
+    '<div class="main"><div class="nm">'+a.nombre+'</div><div class="meta">'+meta+'</div></div>'+
+    '<div class="badge '+(a.activa?'on':'')+'">'+(a.activa?'ACTIVA':'pausada')+'</div></div>';
+}
+function renderPage(){
   var L=document.getElementById('list');
-  if(!j.acciones.length){L.innerHTML='<div class="empty">No hay acciones en la agenda.</div>';}
-  else{L.innerHTML=j.acciones.map(function(a){
-    var meta='<span class="tipo">'+(a.tipo||'')+'</span> · última '+fecha(a.ultima);
-    if(a.error){meta+=' · <span class="e">'+(a.error+'').substring(0,60)+'</span>';}
-    else if(a.resultado){meta+=' · '+a.resultado.substring(0,80);}
-    var cls=a.error?'err':(a.activa?'on':'off');
-    return '<div class="row"><div class="dot '+cls+'"></div>'+
-      '<div class="main"><div class="nm">'+a.nombre+'</div><div class="meta">'+meta+'</div></div>'+
-      '<div class="badge '+(a.activa?'on':'')+'">'+(a.activa?'ACTIVA':'pausada')+'</div></div>';
-  }).join('');}
+  if(!acciones.length){L.innerHTML='<div class="empty">No hay acciones en la agenda.</div>';
+    document.getElementById('pag').textContent='Pág –/–';return;}
+  var total=Math.max(1,Math.ceil(acciones.length/PER_PAGE));
+  if(pageIdx>=total)pageIdx=0;
+  var slice=acciones.slice(pageIdx*PER_PAGE,(pageIdx+1)*PER_PAGE);
+  L.innerHTML=slice.map(renderRow).join('');
+  document.getElementById('pag').textContent='Pág '+(pageIdx+1)+'/'+total;
+  rotateStart=Date.now();
+}
+function nextPage(){pageIdx++;renderPage();}
+function tickProgress(){
+  var elapsed=Date.now()-rotateStart;
+  var pct=Math.min(100,(elapsed/ROTATE_MS)*100);
+  document.getElementById('pbar').style.width=pct+'%';
+}
+async function loadAg(){try{var r=await fetch('/pendientes.json',{cache:'no-store'});var j=await r.json();
+  acciones=j.acciones||[];
   document.getElementById('nacc').textContent=j.total;
+  renderPage();
 }catch(e){}}
 async function loadStats(){try{var r=await fetch('/data.json',{cache:'no-store'});var j=await r.json();
   setStat('cpu',j.cpu,70,90);setStat('ram',j.ram,70,90);setStat('disk',j.disk,80,95);
@@ -117,7 +146,11 @@ async function loadStats(){try{var r=await fetch('/data.json',{cache:'no-store'}
   document.getElementById('upd').textContent='actualizado '+new Date().toLocaleTimeString('es-DO');
 }catch(e){document.getElementById('upd').textContent='sin conexión con la PC';}}
 clk();loadAg();loadStats();
-setInterval(clk,1000);setInterval(loadAg,5000);setInterval(loadStats,3000);
+setInterval(clk,1000);
+setInterval(loadAg,5000);     // refresca datos sin cambiar de página
+setInterval(loadStats,3000);
+setInterval(nextPage,ROTATE_MS); // rota página cada 15s
+setInterval(tickProgress,200);   // barra de progreso fluida
 </script></body></html>"""
 
 
