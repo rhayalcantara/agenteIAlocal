@@ -21,6 +21,50 @@ from telegram_listener_claude import TelegramListener
 
 MONITOR_LOG = os.path.join(os.path.dirname(__file__), "telegram_monitor.log")
 
+# ── Whisper lazy para transcribir voces ──────────────────────────────────────
+_whisper_model = None
+
+def _get_whisper():
+    """Carga Whisper la primera vez que llega una voz. Cachea singleton.
+    Si falla (whisper no instalado, modelo no descargable), retorna None."""
+    global _whisper_model
+    if _whisper_model is not None:
+        return _whisper_model
+    try:
+        import whisper
+        size = os.getenv("WHISPER_MODEL", "base")
+        print(f"TG_INFO|cargando_whisper_{size}", flush=True)
+        _whisper_model = whisper.load_model(size)
+        return _whisper_model
+    except Exception as e:
+        print(f"TG_ERR|whisper_load_fallo: {type(e).__name__}: {e}", flush=True)
+        return None
+
+
+def _transcribir(audio_path: str) -> str:
+    """Transcribe un .ogg con Whisper. Retorna '' si falla (no debe romper el poller)."""
+    if not audio_path or not os.path.exists(audio_path):
+        return ""
+    model = _get_whisper()
+    if model is None:
+        return ""
+    try:
+        result = model.transcribe(audio_path, language="es", fp16=False)
+        return (result.get("text") or "").strip()
+    except Exception as e:
+        print(f"TG_ERR|transcribir_fallo: {type(e).__name__}: {e}", flush=True)
+        return ""
+
+
+def _limpiar_audio(audio_path: str) -> None:
+    """Borra el .ogg temporal tras transcribir. No falla si no existe."""
+    if audio_path and os.path.exists(audio_path):
+        try:
+            os.remove(audio_path)
+        except Exception:
+            pass
+
+
 listener = TelegramListener()
 print("TELEGRAM_PUSH_READY", flush=True)
 
@@ -32,7 +76,13 @@ while True:
             chat_id = m.get("chat_id", "")
             text = m.get("text", "") or ""
             if m.get("es_voz"):
-                text = text or "[voz]"
+                audio_path = m.get("audio_path")
+                transcripcion = _transcribir(audio_path)
+                if transcripcion:
+                    text = f"[voz] {transcripcion}"
+                else:
+                    text = text or "[voz]"
+                _limpiar_audio(audio_path)
             elif m.get("image_path"):
                 text = text or "[foto]"
             elif m.get("doc_path"):
