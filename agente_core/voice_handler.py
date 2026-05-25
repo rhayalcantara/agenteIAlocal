@@ -7,10 +7,12 @@ TTS: sintetizar(texto, lang) → ruta_ogg o None
 El modelo Whisper se carga una vez y se cachea para no relentizar
 cada mensaje de voz.
 """
+import io
 import os
 import re
 import subprocess
 import tempfile
+import wave
 from logger import get_logger
 
 logger = get_logger("voice_handler")
@@ -18,6 +20,39 @@ logger = get_logger("voice_handler")
 # Cache del modelo Whisper (se carga al primer uso)
 _whisper_model = None
 _WHISPER_MODEL_SIZE = os.getenv("WHISPER_MODEL", "base")
+
+# ── Piper TTS (voz local más natural) ─────────────────────────────────────
+_piper_voice = None
+# Voz default: daniela-high (femenino argentino, alta calidad) — elegida por
+# Rhay el 25-may tras comparar con davefx (masculino ES) y ald (MX medium).
+# Override con env PIPER_VOICE_MODEL=ruta-al-.onnx.
+_PIPER_VOICES_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "claude_server", "piper_voices",
+)
+_PIPER_MODEL = os.getenv(
+    "PIPER_VOICE_MODEL",
+    os.path.join(_PIPER_VOICES_DIR, "es_AR-daniela-high.onnx"),
+)
+_TTS_ENGINE = os.getenv("TTS_ENGINE", "piper")  # 'piper' (default) | 'gtts'
+
+
+def _get_piper():
+    """Singleton lazy de la voz piper. Retorna None si no se puede cargar."""
+    global _piper_voice
+    if _piper_voice is not None:
+        return _piper_voice
+    if not os.path.exists(_PIPER_MODEL):
+        logger.warning(f"piper model no encontrado en {_PIPER_MODEL}")
+        return None
+    try:
+        from piper import PiperVoice  # import lazy — onnxruntime es pesado
+        logger.info(f"Cargando piper voice: {os.path.basename(_PIPER_MODEL)}")
+        _piper_voice = PiperVoice.load(_PIPER_MODEL)
+        return _piper_voice
+    except Exception as e:
+        logger.warning(f"piper no disponible: {type(e).__name__}: {e}")
+        return None
 
 
 def _get_whisper():
@@ -119,23 +154,79 @@ def _limpiar_texto_tts(texto: str) -> str:
     return texto.strip()
 
 
-def sintetizar(texto: str, lang: str = "es", speed: float = 1.0) -> str | None:
+def _sintetizar_piper(texto: str) -> str | None:
+    """Sintetiza con piper (local, neural, voz natural) → OGG/Opus.
+
+    Returns: ruta al .ogg, o None si piper no está disponible / falla.
+    Fallback a WAV si ffmpeg no convierte (poco común, ffmpeg ya está en este repo).
+    """
+    voice = _get_piper()
+    if voice is None:
+        return None
+    try:
+        # 1. Sintetizar a WAV en memoria.
+        wav_buf = io.BytesIO()
+        with wave.open(wav_buf, "wb") as wf:
+            voice.synthesize_wav(texto, wf)
+        # 2. Convertir a OGG/Opus con ffmpeg (sendVoice de Telegram quiere ogg/opus).
+        ogg_path = tempfile.mktemp(suffix="_tts_piper.ogg", dir=tempfile.gettempdir())
+        proc = subprocess.run(
+            ["ffmpeg", "-y", "-loglevel", "error",
+             "-f", "wav", "-i", "pipe:0",
+             "-c:a", "libopus", "-b:a", "32k",
+             "-f", "ogg", ogg_path],
+            input=wav_buf.getvalue(),
+            capture_output=True,
+            timeout=30,
+        )
+        if proc.returncode == 0 and os.path.exists(ogg_path) and os.path.getsize(ogg_path) > 0:
+            logger.info(f"piper TTS OK: {ogg_path}")
+            return ogg_path
+        # ffmpeg falló → wav directo
+        logger.warning(f"ffmpeg falló ({proc.returncode}), devolviendo WAV: {proc.stderr.decode(errors='replace')[:200]}")
+        wav_path = ogg_path.replace(".ogg", ".wav")
+        with open(wav_path, "wb") as f:
+            f.write(wav_buf.getvalue())
+        return wav_path
+    except Exception as e:
+        logger.error(f"piper synth falló: {type(e).__name__}: {e}")
+        return None
+
+
+def sintetizar(texto: str, lang: str = "es", speed: float = 1.0,
+               engine: str = None) -> str | None:
     """Convierte texto a voz y retorna la ruta al archivo de audio.
 
-    Genera MP3 con gTTS y lo convierte a OGG/Opus con ffmpeg
-    (formato requerido por sendVoice de Telegram).
-    Si la conversión falla, retorna el MP3 directamente.
+    Por defecto usa piper (TTS local neural — voz más natural). Si piper
+    no está disponible o falla, cae a gTTS (requiere internet, voz robótica).
+    Override con env TTS_ENGINE='gtts' o param engine='gtts'.
 
     Args:
         texto: texto a sintetizar
-        lang: código de idioma ('es', 'en', etc.)
-        speed: velocidad (1.0 = normal; gTTS solo soporta normal/slow)
+        lang: código de idioma ('es', 'en', etc.) — solo aplica a gTTS;
+              piper usa el idioma del modelo cargado.
+        speed: velocidad (gTTS solo soporta normal/slow; piper ignora).
+        engine: 'piper' | 'gtts' | None (auto, según env TTS_ENGINE).
 
     Returns:
-        Ruta al archivo .ogg (o .mp3 como fallback), o None si falla.
+        Ruta a .ogg (o .mp3/.wav como fallback), o None si todo falla.
     """
     if not texto or not texto.strip():
         return None
+
+    # Limpiar caracteres especiales antes de sintetizar (común a ambos motores)
+    texto_limpio = _limpiar_texto_tts(texto)
+    if not texto_limpio:
+        return None
+
+    motor = (engine or _TTS_ENGINE).lower()
+    if motor == "piper" and lang == "es":  # piper-es solo aplica si lang es español
+        ruta = _sintetizar_piper(texto_limpio)
+        if ruta:
+            return ruta
+        logger.info("piper no disponible o falló — fallback a gTTS")
+
+    # Camino gTTS (fallback o explícito)
     try:
         from gtts import gTTS
     except ImportError:
@@ -143,10 +234,8 @@ def sintetizar(texto: str, lang: str = "es", speed: float = 1.0) -> str | None:
         return None
 
     try:
-        # Limpiar caracteres especiales antes de sintetizar
-        texto = _limpiar_texto_tts(texto)
-        if not texto:
-            return None
+        # Ya limpiamos texto al inicio de sintetizar(); reusamos texto_limpio.
+        texto = texto_limpio
 
         # Generar MP3 con gTTS (máx 4096 chars por chunk)
         mp3_path = tempfile.mktemp(suffix="_tts.mp3", dir=tempfile.gettempdir())
