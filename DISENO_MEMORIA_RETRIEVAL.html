@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diseño · Memoria con Recuperación para el Agente Local</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2230; --line:#2b3340;
+    --txt:#e6edf3; --mut:#9aa7b4; --accent:#4dd4ac; --blue:#58a6ff;
+    --amber:#e3b341; --red:#f0666b; --code:#0a0e14;
+    --mono:ui-monospace,"Cascadia Code","JetBrains Mono",Consolas,monospace;
+    --sans:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);
+       line-height:1.6;font-size:16px}
+  .wrap{max-width:980px;margin:0 auto;padding:48px 24px 96px}
+  header.hero{border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:36px}
+  .tag{display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:.08em;
+       color:var(--accent);border:1px solid var(--accent);border-radius:99px;
+       padding:3px 12px;margin-bottom:14px;text-transform:uppercase}
+  h1{font-size:30px;line-height:1.2;margin:0 0 8px}
+  h1 .sub{color:var(--mut);font-weight:400;font-size:18px;display:block;margin-top:6px}
+  h2{font-size:21px;margin:44px 0 14px;padding-top:10px;border-top:1px solid var(--line)}
+  h2 .n{color:var(--accent);font-family:var(--mono);font-size:16px;margin-right:8px}
+  h3{font-size:16px;margin:22px 0 8px;color:var(--blue)}
+  p{margin:10px 0;color:#d6dee6}
+  .mut{color:var(--mut)}
+  strong{color:#fff}
+  code{font-family:var(--mono);background:#22272e;padding:1.5px 6px;border-radius:5px;
+       font-size:.88em;color:var(--accent)}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;
+      padding:18px 20px;overflow:auto;font-family:var(--mono);font-size:13.5px;
+      line-height:1.55;color:#cdd9e5}
+  pre .c{color:#6a7785}      /* comentario */
+  pre .k{color:#ff7b72}      /* keyword */
+  pre .s{color:#a5d6ff}      /* string */
+  pre .f{color:#d2a8ff}      /* func */
+  .grid{display:grid;gap:14px}
+  .cards3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:760px){.cards3{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h4{margin:0 0 6px;font-size:15px}
+  .pill{font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:6px}
+  .ok{background:rgba(77,212,172,.14);color:var(--accent)}
+  .warn{background:rgba(227,179,65,.14);color:var(--amber)}
+  .crit{background:rgba(240,102,107,.14);color:var(--red)}
+  /* diagrama */
+  .flow{background:var(--panel2);border:1px solid var(--line);border-radius:12px;
+        padding:24px;margin:18px 0;font-family:var(--mono);font-size:13px}
+  .layer{display:flex;align-items:center;gap:14px;margin:8px 0}
+  .lbl{flex:0 0 150px;text-align:right;color:var(--mut);font-size:12px}
+  .box{flex:1;border:1px solid var(--line);border-radius:8px;padding:10px 14px;background:var(--code)}
+  .box.fix{border-color:var(--blue)} .box.work{border-color:var(--accent)}
+  .box.ret{border-color:var(--amber)} .box.tool{border-color:var(--red)}
+  .arrow{text-align:center;color:var(--mut);margin:2px 0}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--accent);font-family:var(--mono);font-size:12px;
+     letter-spacing:.04em;text-transform:uppercase}
+  td code{font-size:.85em}
+  .verdict{background:linear-gradient(135deg,rgba(77,212,172,.10),rgba(88,166,255,.08));
+           border:1px solid var(--accent);border-radius:12px;padding:20px 22px;margin:30px 0}
+  .verdict h3{color:var(--accent);margin-top:0}
+  ul{margin:8px 0;padding-left:22px} li{margin:5px 0;color:#d6dee6}
+  .foot{margin-top:54px;padding-top:18px;border-top:1px solid var(--line);
+        color:var(--mut);font-size:13px}
+  .q{background:var(--panel);border-left:3px solid var(--blue);border-radius:0 8px 8px 0;
+     padding:12px 16px;margin:10px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="tag">Documento de diseño · v1</span>
+  <h1>Memoria con Recuperación para el Agente Local
+    <span class="sub">No enviar todo el historial: ventana reciente fija + recuperación de lo relacionado + búsqueda agéntica</span>
+  </h1>
+  <p class="mut">Idea de Rhay · estructurado por Claude · 21 may 2026</p>
+</header>
+
+<h2><span class="n">1</span>El problema</h2>
+<p>Enviar <strong>todo</strong> el historial en cada turno no escala: crece el costo por token, se llena la ventana de contexto y el modelo se distrae con ruido viejo. La meta es enviar <strong>solo lo necesario</strong> y dejar que el agente <strong>recupere</strong> el resto bajo demanda desde un almacén persistente (SQLite), no desde la pila en memoria.</p>
+
+<h2><span class="n">2</span>Principios de diseño</h2>
+<div class="grid cards3">
+  <div class="card">
+    <h4>🔒 Inicio fijo</h4>
+    <p class="mut"><code>claude.md</code> / <code>agent.md</code> siempre presentes. Define identidad, reglas y herramientas.</p>
+  </div>
+  <div class="card">
+    <h4>🪟 Ventana reciente</h4>
+    <p class="mut">Los últimos <strong>N turnos</strong> van <strong>siempre</strong>. Es lo que salva la continuidad ("eso", "el de antes", "hazlo igual").</p>
+  </div>
+  <div class="card">
+    <h4>🎯 Recuperado</h4>
+    <p class="mut">Top-K mensajes/​resúmenes <strong>relacionados</strong> con el turno actual, traídos por similitud + recencia + grafo.</p>
+  </div>
+</div>
+<p style="margin-top:14px"><strong>Regla de oro:</strong> el contexto enviado = <em>inicio fijo + ventana reciente + recuperados</em>. Nada más. Si el modelo necesita más, lo <strong>pide con una herramienta</strong>.</p>
+
+<h2><span class="n">3</span>El ciclo, por turno</h2>
+<div class="flow">
+  <div class="layer"><div class="lbl">se envía al LLM →</div>
+    <div class="box fix">① system: claude.md / agent.md <span class="pill ok">fijo</span></div></div>
+  <div class="layer"><div class="lbl"></div>
+    <div class="box work">② últimos N turnos (working memory) <span class="pill ok">siempre</span></div></div>
+  <div class="layer"><div class="lbl"></div>
+    <div class="box ret">③ top-K recuperados de SQLite <span class="pill warn">dinámico</span></div></div>
+  <div class="arrow">↓ &nbsp; LLM genera respuesta &nbsp; ↓</div>
+  <div class="layer"><div class="lbl">si falta info →</div>
+    <div class="box tool">④ tool buscar_memoria(query) → memoria ampliada → preguntar al usuario</div></div>
+  <div class="arrow">↓ &nbsp; se guarda user-msg + respuesta en SQLite (con embedding) &nbsp; ↓</div>
+  <div class="layer"><div class="lbl"></div>
+    <div class="box">⑤ reinicia el ciclo (la ventana avanza, lo viejo se resume)</div></div>
+</div>
+
+<h2><span class="n">4</span>Esquema SQLite</h2>
+<pre><span class="c">-- Mensajes: la fuente de verdad de la conversación</span>
+<span class="k">CREATE TABLE</span> messages (
+  id         <span class="k">INTEGER PRIMARY KEY</span>,
+  session_id <span class="k">TEXT</span>,
+  rol        <span class="k">TEXT</span>,            <span class="c">-- user | assistant | system</span>
+  texto      <span class="k">TEXT</span>,
+  ts         <span class="k">INTEGER</span>,         <span class="c">-- epoch</span>
+  tokens     <span class="k">INTEGER</span>,
+  embedding  <span class="k">BLOB</span>,            <span class="c">-- vector del texto</span>
+  bloque_id  <span class="k">INTEGER</span>           <span class="c">-- bloque resumido al que pertenece</span>
+);
+
+<span class="c">-- Grafo de relaciones (FASE 2, opcional)</span>
+<span class="k">CREATE TABLE</span> relations (
+  from_id <span class="k">INTEGER</span>, to_id <span class="k">INTEGER</span>,
+  tipo    <span class="k">TEXT</span>,               <span class="c">-- responde_a | continua | referencia | tema</span>
+  peso    <span class="k">REAL</span>,
+  <span class="k">PRIMARY KEY</span> (from_id, to_id, tipo)
+);
+
+<span class="c">-- Resúmenes rodantes: comprimen tramos viejos para no recuperar ruido</span>
+<span class="k">CREATE TABLE</span> bloques (
+  id <span class="k">INTEGER PRIMARY KEY</span>, session_id <span class="k">TEXT</span>,
+  desde_ts <span class="k">INTEGER</span>, hasta_ts <span class="k">INTEGER</span>,
+  resumen <span class="k">TEXT</span>, embedding <span class="k">BLOB</span>
+);
+
+<span class="c">-- Búsqueda vectorial nativa con sqlite-vec (local, sin servidor)</span>
+<span class="k">CREATE VIRTUAL TABLE</span> vec_messages <span class="k">USING</span> <span class="f">vec0</span>(embedding <span class="k">float</span>[768]);</pre>
+
+<h2><span class="n">5</span>Pseudocódigo del turno</h2>
+<pre><span class="k">def</span> <span class="f">on_user_message</span>(m):
+    emb = <span class="f">embed</span>(m.texto)                          <span class="c"># modelo de embeddings local</span>
+    <span class="f">save</span>(messages, m, emb)                       <span class="c"># persistir SIEMPRE</span>
+    <span class="f">relate</span>(m, recientes)                         <span class="c"># opcional: actualizar grafo</span>
+
+    ctx  = [<span class="f">system</span>(claude_md)]                   <span class="c"># ① inicio fijo</span>
+    ctx += <span class="f">ultimos_N_turnos</span>()                    <span class="c"># ② working memory (siempre)</span>
+    ctx += <span class="f">retrieval</span>(emb, excluir=ctx, k=<span class="s">8</span>)     <span class="c"># ③ relacionados</span>
+
+    resp = <span class="f">llm</span>(ctx, tools=[buscar_memoria, ...])
+    <span class="k">while</span> resp.tool == <span class="s">"buscar_memoria"</span>:        <span class="c"># ④ recuperación agéntica</span>
+        hits = <span class="f">retrieval</span>(<span class="f">embed</span>(resp.query), k=<span class="s">8</span>)
+        <span class="k">if not</span> hits: hits = <span class="f">memoria_ampliada</span>(resp.query)   <span class="c"># MEMORY.md / memoria.json</span>
+        <span class="k">if not</span> hits: resp = <span class="f">preguntar_al_usuario</span>(resp.query) <span class="c"># escalado final</span>
+        resp = <span class="f">llm</span>(ctx + hits, ...)
+
+    <span class="f">save</span>(messages, resp, <span class="f">embed</span>(resp.texto))
+    <span class="f">maybe_resumir_bloque</span>()                       <span class="c"># ⑤ resúmenes rodantes</span></pre>
+
+<h2><span class="n">6</span>El componente de recuperación (lo que decide qué es "relacionado")</h2>
+<p>Solo grafo no basta; solo similitud tampoco. Score <strong>híbrido</strong>:</p>
+<pre>score(c) = w₁·<span class="f">cos_sim</span>(emb_actual, c.emb)   <span class="c"># de qué habla</span>
+         + w₂·<span class="f">recencia</span>(c.ts)               <span class="c"># qué tan reciente</span>
+         + w₃·<span class="f">grafo_hops</span>(actual, c)        <span class="c"># conexión causal (fase 2)</span>
+
+<span class="c"># top-K por score, con umbral mínimo de similitud para no traer basura</span></pre>
+<table>
+  <tr><th>Señal</th><th>Para qué sirve</th><th>Cómo</th></tr>
+  <tr><td>Similitud (embeddings)</td><td>Traer lo semánticamente afín</td><td><code>nomic-embed</code> / <code>bge</code> local + <code>sqlite-vec</code></td></tr>
+  <tr><td>Recencia</td><td>Sesgar a lo reciente sin botar lo viejo relevante</td><td>decay temporal sobre <code>ts</code></td></tr>
+  <tr><td>Grafo (fase 2)</td><td>Traer el "de dónde vino esto"</td><td>tabla <code>relations</code>, 1–2 saltos</td></tr>
+</table>
+
+<h2><span class="n">7</span>Fases sugeridas</h2>
+<div class="grid cards3">
+  <div class="card" style="border-color:var(--accent)">
+    <h4><span class="pill ok">FASE 1</span> El 80% del valor</h4>
+    <p class="mut">Ventana reciente fija + retrieval por embeddings + tool <code>buscar_memoria</code> + resúmenes rodantes.</p>
+  </div>
+  <div class="card" style="border-color:var(--amber)">
+    <h4><span class="pill warn">FASE 2</span> El grafo</h4>
+    <p class="mut">Tabla <code>relations</code> y score con saltos. Solo si la recuperación pura se queda corta.</p>
+  </div>
+  <div class="card" style="border-color:var(--blue)">
+    <h4><span class="pill" style="background:rgba(88,166,255,.14);color:var(--blue)">OBSERVAR</span> Trazabilidad</h4>
+    <p class="mut">Loggear "qué se recuperó y por qué" en cada turno. Imprescindible para debuggear el agente.</p>
+  </div>
+</div>
+
+<h2><span class="n">8</span>Riesgos a tener en cuenta</h2>
+<ul>
+  <li><span class="pill crit">crítico</span> &nbsp;<strong>Botar los turnos recientes</strong> rompe la coherencia. La ventana fija es innegociable.</li>
+  <li><span class="pill warn">latencia</span> &nbsp;Cada turno hace embedding + búsqueda. Con <code>sqlite-vec</code> local es asumible, pero medir.</li>
+  <li><span class="pill warn">modelo local</span> &nbsp;El retrieval agéntico exige buen <em>tool-calling</em>; modelos pequeños fallan ahí (ver evaluaciones de compatibilidad LLM).</li>
+  <li><span class="pill warn">ruido</span> &nbsp;Sin resúmenes rodantes, recuperas mensajes crudos viejos irrelevantes. Resumir bloques lo arregla.</li>
+</ul>
+
+<div class="verdict">
+  <h3>Veredicto</h3>
+  <p>La dirección es la correcta y es hacia donde van los agentes serios (MemGPT/Letta, mem0, Zep/Graphiti). El <strong>80% del valor</strong> lo da la Fase 1: <em>ventana reciente fija + retrieval por embeddings + tool de búsqueda agéntica + resúmenes rodantes</em>. El grafo de relaciones es un excelente 20% extra — pero déjalo para la Fase 2, cuando ya tengas el ciclo andando y veas qué se queda corto.</p>
+</div>
+
+<h2><span class="n">9</span>Decisiones abiertas (para ti)</h2>
+<div class="q"><strong>Embeddings:</strong> ¿modelo local (nomic-embed/bge vía Ollama o sentence-transformers) o un endpoint? Para tu setup local, local.</div>
+<div class="q"><strong>Tamaño de ventana N:</strong> ¿últimos 6–10 turnos? Se calibra con pruebas.</div>
+<div class="q"><strong>Cuándo resumir:</strong> ¿cada X turnos o cuando un bloque supera Y tokens?</div>
+<div class="q"><strong>Integración:</strong> ¿esto reemplaza el manejo de historial actual del agente, o convive como capa nueva sobre <code>memoria.json</code> / <code>MEMORY.md</code> (que serían la "memoria ampliada")?</div>
+
+<div class="foot">
+  Próximo paso propuesto: montar un <strong>POC mínimo</strong> en SQLite + <code>sqlite-vec</code> + embeddings locales que implemente el ciclo de la sección 5 (sin grafo), para verlo andar con conversaciones reales del agente.
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resumen verificado · Continual Harness (Karten et al., 2026)</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2230; --line:#2b3340;
+    --txt:#e6edf3; --mut:#9aa7b4; --accent:#4dd4ac; --blue:#58a6ff;
+    --amber:#e3b341; --red:#f0666b; --code:#0a0e14;
+    --mono:ui-monospace,"Cascadia Code","JetBrains Mono",Consolas,monospace;
+    --sans:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);line-height:1.6}
+  .wrap{max-width:980px;margin:0 auto;padding:48px 24px 96px}
+  header.hero{border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:32px}
+  .tag{display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:.08em;
+       color:var(--accent);border:1px solid var(--accent);border-radius:99px;
+       padding:3px 12px;margin-bottom:14px;text-transform:uppercase}
+  h1{font-size:30px;line-height:1.2;margin:0 0 8px}
+  h1 .sub{color:var(--mut);font-weight:400;font-size:17px;display:block;margin-top:6px}
+  h2{font-size:21px;margin:42px 0 12px;padding-top:10px;border-top:1px solid var(--line)}
+  h2 .n{color:var(--accent);font-family:var(--mono);font-size:16px;margin-right:8px}
+  h3{font-size:16px;margin:20px 0 6px;color:var(--blue)}
+  p{margin:10px 0;color:#d6dee6}
+  .mut{color:var(--mut)} strong{color:#fff}
+  code{font-family:var(--mono);background:#22272e;padding:1.5px 6px;border-radius:5px;
+       font-size:.88em;color:var(--accent)}
+  .tldr{background:linear-gradient(135deg,rgba(77,212,172,.10),rgba(88,166,255,.08));
+        border:1px solid var(--accent);border-radius:12px;padding:18px 22px;margin:18px 0 8px}
+  .tldr h3{color:var(--accent);margin:0 0 6px;font-size:15px;text-transform:uppercase;letter-spacing:.05em}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14.5px}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--accent);font-family:var(--mono);font-size:12px;
+     letter-spacing:.04em;text-transform:uppercase}
+  td code{font-size:.85em}
+  .pill{font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:6px}
+  .ok{background:rgba(77,212,172,.14);color:var(--accent)}
+  .warn{background:rgba(227,179,65,.14);color:var(--amber)}
+  .crit{background:rgba(240,102,107,.14);color:var(--red)}
+  .info{background:rgba(88,166,255,.14);color:var(--blue)}
+  .grid{display:grid;gap:14px;margin:14px 0}
+  .cards2{grid-template-columns:repeat(2,1fr)}
+  .cards3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:760px){.cards2,.cards3{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h4{margin:0 0 6px;font-size:15px}
+  ul{margin:8px 0;padding-left:22px}
+  li{margin:5px 0;color:#d6dee6}
+  blockquote{margin:14px 0;padding:12px 18px;background:var(--panel);
+             border-left:3px solid var(--blue);border-radius:0 8px 8px 0;color:#cdd9e5;font-style:italic}
+  /* diagrama */
+  .flow{background:var(--panel2);border:1px solid var(--line);border-radius:12px;
+        padding:22px;margin:16px 0;font-family:var(--mono);font-size:13.5px}
+  .layer{display:flex;align-items:center;gap:14px;margin:8px 0}
+  .lbl{flex:0 0 130px;text-align:right;color:var(--mut);font-size:12px}
+  .box{flex:1;border:1px solid var(--line);border-radius:8px;padding:10px 14px;background:var(--code)}
+  .box.in{border-color:var(--accent)} .box.out{border-color:var(--amber)} .box.env{border-color:var(--blue)}
+  .arrow{text-align:center;color:var(--mut);margin:2px 0}
+  .src{font-family:var(--mono);font-size:12.5px;color:var(--mut);word-break:break-all}
+  a{color:var(--blue);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .foot{margin-top:54px;padding-top:18px;border-top:1px solid var(--line);
+        color:var(--mut);font-size:13px}
+  .verif{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:14px 0}
+  .verif .src{margin:4px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="tag">Resumen verificado · Paper preprint</span>
+  <h1>Continual Harness — Adaptación online para agentes auto-mejorantes
+    <span class="sub">Karten et al., arXiv:2605.09998 (Princeton · ARISE · Google DeepMind, 2026)</span>
+  </h1>
+  <p class="mut">Verificado contra 4 fuentes consistentes · estructurado por Claude · 23 may 2026</p>
+</header>
+
+<div class="tldr">
+  <h3>TL;DR</h3>
+  <p>El paper propone <strong>Continual Harness</strong>: un “refiner” automatizado que <strong>reescribe el andamiaje del agente</strong> (system prompt, sub-agentes, skills, memoria) <strong>durante una misma sesión de juego, sin resetear el entorno</strong>. Es el equivalente a lo que Claude Code hace para agentes de programación, pero para agentes <em>embodied</em> con horizontes largos y observabilidad parcial. Se valida jugando <strong>Pokémon Red y Emerald</strong> con modelos Gemini 3 y open-source Gemma-4, mostrando <strong>Pareto-dominancia</strong> sobre líneas base en Gemini 3 Pro (~40% menos costo para los mismos milestones en Emerald).</p>
+</div>
+
+<h2><span class="n">0</span>Verificación de fuentes</h2>
+<p>Las 4 fuentes que pude leer son <strong>consistentes</strong> en autoría, idea y resultados — no hay contradicciones. La 5ª (dbreunig) venía con URL truncada y no se fetcheó; las primarias cubren el contenido.</p>
+<div class="verif">
+  <div class="src">✅ <a href="https://arxiv.org/html/2605.09998v1">arxiv.org/html/2605.09998v1</a> — paper completo</div>
+  <div class="src">✅ <a href="https://sethkarten.ai/continual-harness/">sethkarten.ai/continual-harness</a> — página del proyecto</div>
+  <div class="src">✅ <a href="https://github.com/sethkarten/continual-harness">github.com/sethkarten/continual-harness</a> — código MIT, reproducible</div>
+  <div class="src">✅ <a href="https://huggingface.co/papers/2605.09998">huggingface.co/papers/2605.09998</a> — abstract HF</div>
+  <div class="src">⚠️ <code>dbreunig.com/2025/06/17/a…</code> — URL truncada, no fetcheado (no crítico)</div>
+</div>
+
+<h2><span class="n">1</span>Qué es Continual Harness</h2>
+<p>Un agente “embodied” (que vive en un entorno con percepción + acción + horizonte largo) no se limita a la inferencia del modelo: también depende de su <em>harness</em> — el envoltorio con prompt, sub-agentes, skills aprendidas y memoria. En <strong>Gemini Plays Pokémon (GPP)</strong>, los autores ya habían demostrado que un humano leyendo trayectorias y reescribiendo manualmente la harness logra hitos no triviales (primer sistema AI en completar <strong>Pokémon Blue, Yellow Legacy en modo difícil y Crystal sin perder batallas</strong>).</p>
+<p>Continual Harness <strong>automatiza ese rol del humano</strong>: un <em>refiner</em> analiza ventanas recientes de trayectoria y aplica edits CRUD (create / read / update / delete) a los cuatro componentes del harness, todo <strong>sin reiniciar el entorno</strong>.</p>
+
+<h2><span class="n">2</span>El problema que ataca</h2>
+<ul>
+  <li><strong>No existe un “Claude Code” para agentes embodied.</strong> Los harnesses agénticos son estándar para codear (Claude Code, OpenHands, OpenClaw); para entornos con observabilidad parcial y horizonte largo, no.</li>
+  <li><strong>El humano-en-el-loop no escala</strong>: refinar a mano una harness leyendo trayectorias es caro y subjetivo.</li>
+  <li><strong>Reset-based prompt optimization se queda corto</strong>: muchos modos de falla solo emergen <em>tarde</em> en un episodio (combates complejos, diálogos), y un optimizador que requiere reset jamás los ve.</li>
+</ul>
+
+<h2><span class="n">3</span>Cómo funciona (arquitectura de dos ciclos)</h2>
+<div class="flow">
+  <div class="layer"><div class="lbl">entorno</div><div class="box env">Pokémon Red / Emerald (emulador, percepción + acciones)</div></div>
+  <div class="arrow">↑ &nbsp;↓ &nbsp; bucle interno (cada paso)</div>
+  <div class="layer"><div class="lbl">agente</div><div class="box in">Modelo + Harness ℋ<sub>t</sub> (system prompt, sub-agents, skills, memory)</div></div>
+  <div class="arrow">cada F pasos &nbsp;↓ &nbsp; bucle externo</div>
+  <div class="layer"><div class="lbl">refiner</div><div class="box out">Analiza ventana τ de la trayectoria · identifica fallos · emite edits CRUD → ℋ<sub>t+1</sub></div></div>
+</div>
+<ul>
+  <li><strong>Inner loop:</strong> el agente actúa en el entorno con la harness actual.</li>
+  <li><strong>Outer loop (cada F pasos):</strong> el refiner lee la ventana reciente, detecta firmas de fallo, y modifica <strong>in place</strong> el system prompt, sub-agentes, skills o memoria — sin reset.</li>
+  <li><strong>Variante con co-learning:</strong> un modelo open-source (Gemma-4) actualiza sus <em>pesos</em> en paralelo a la harness, usando un modelo frontera como “maestro” que reetiqueta acciones (process-reward online).</li>
+</ul>
+
+<h2><span class="n">4</span>Resultados (números reportados)</h2>
+<table>
+  <tr><th>Escenario</th><th>Resultado</th><th>Significado</th></tr>
+  <tr><td>Pokémon Emerald · Gemini 3 Pro</td>
+      <td>Continual Harness: <strong>100% milestones a ~$130</strong> (mediana) vs minimalist baseline 98% a $215</td>
+      <td><strong>~40% menos costo</strong> para más completitud · Pareto-dominancia</td></tr>
+  <tr><td>Pokémon Red · Gemini 3 Pro</td>
+      <td>Reduce costo en pulsaciones significativamente; <strong>recupera la mayoría del gap</strong> al harness experto hand-engineered</td>
+      <td>Cierra distancia con expertos humanos automáticamente</td></tr>
+  <tr><td>Co-learning · Gemma-4 (open-source, hasta 31B)</td>
+      <td>Progreso sostenido en milestones a lo largo de iteraciones, <strong>sin resets</strong></td>
+      <td>Funciona con modelos abiertos, no solo frontera</td></tr>
+  <tr><td>Skill de pathfinding</td>
+      <td>Déficit baja de <strong>~50% a un solo dígito</strong> en las primeras horas de una corrida de 24h</td>
+      <td>El refiner mejora capacidades concretas in-session</td></tr>
+  <tr><td>Antecedente GPP (humano-en-el-loop)</td>
+      <td><strong>1ª IA</strong> en completar Pokémon Blue, Yellow Legacy (hard mode) y Crystal sin perder batallas</td>
+      <td>Establece el “upper bound” humano que CH intenta automatizar</td></tr>
+</table>
+
+<h2><span class="n">5</span>Limitaciones — declaradas por los propios autores</h2>
+<div class="grid cards2">
+  <div class="card"><h4><span class="pill crit">capability floor</span></h4>
+    <p class="mut">En modelos chicos: <strong>Flash-Lite</strong> queda <em>por debajo</em> del baseline minimalista. Gemma-4 hasta 31B no aguanta ser maestro y alumno a la vez.</p></div>
+  <div class="card"><h4><span class="pill warn">varianza</span></h4>
+    <p class="mut">Gemini 3 Pro logra Pareto-dominancia <strong>estricta</strong>, pero en <strong>Flash hay alta varianza</strong> entre corridas.</p></div>
+  <div class="card"><h4><span class="pill warn">co-learning no saturado</span></h4>
+    <p class="mut">El loop conjunto de pesos + harness <strong>no converge</strong> en los presupuestos probados; no se establece punto de saturación.</p></div>
+  <div class="card"><h4><span class="pill warn">gap residual</span></h4>
+    <p class="mut">Lo que falta para igualar al expert harness se concentra en <strong>diálogos densos de gimnasios</strong> y <strong>estrategia de combate multi-turno</strong>.</p></div>
+  <div class="card" style="grid-column:1/-1"><h4><span class="pill info">memoria poco usada</span></h4>
+    <p class="mut">Las entradas de memoria que el refiner crea se <strong>reutilizan poco</strong> en términos absolutos — la mayoría no se vuelve a leer. Margen de mejora claro en el diseño de la memoria.</p></div>
+</div>
+
+<h2><span class="n">6</span>Recursos y reproducibilidad</h2>
+<ul>
+  <li><strong>Código:</strong> <a href="https://github.com/sethkarten/continual-harness">github.com/sethkarten/continual-harness</a> · Licencia <strong>MIT</strong></li>
+  <li><strong>Stack:</strong> Python 3.10–3.11, FastAPI, emuladores <code>mGBA</code> (Emerald) y <code>PyBoy</code> (Red), backends VLM: OpenAI / Gemini / Anthropic / OpenRouter / Vertex.</li>
+  <li><strong>ROMs:</strong> requeridos por el usuario (no incluidos).</li>
+  <li><strong>Reproducibilidad:</strong> checkpoints en <code>.pokeagent_cache/</code>, métricas en <code>cumulative_metrics.json</code>, soporte para <code>--load-state</code> y <code>--bootstrap-from</code> (heredar memoria/skills de corridas previas).</li>
+</ul>
+<blockquote>“Continual Harness is the reference implementation of the paper's H_CH … lets the model evolve its own harness in place during a single continuous episode — no resets between updates.” — README del repo</blockquote>
+
+<h2><span class="n">7</span>Qué tiene de relevante para tu proyecto</h2>
+<p>Mucho, honestamente. La idea encaja con cosas que ya tienes o que ya diseñamos:</p>
+<div class="grid cards2">
+  <div class="card" style="border-color:var(--accent)">
+    <h4>Tu sistema de memoria con retrieval</h4>
+    <p class="mut">El diseño que armamos el 21 may va en la <strong>misma familia</strong> — no enviar todo, retrieve lo relevante, escalar a memoria ampliada, preguntar. Continual Harness añade la pieza de <strong>auto-edición</strong> de la memoria por un refiner que mira trayectorias. Una vez tengas el POC, agregarle un refiner que reescriba <code>memoria.json</code>/skills es un paso natural.</p>
+  </div>
+  <div class="card" style="border-color:var(--blue)">
+    <h4>Tu skill <code>manejo-tv</code> y demás</h4>
+    <p class="mut">Las “skills” del paper son <em>exactamente</em> archivos editables como tus <code>skills/*/SKILL.md</code>. La idea de que un proceso lea trayectorias del agente y <strong>edite las skills sin tu intervención</strong> es directamente trasladable a tu agente local.</p>
+  </div>
+  <div class="card" style="border-color:var(--amber)">
+    <h4>Caveats reales</h4>
+    <p class="mut">El propio paper muestra que <strong>modelos chicos no aguantan</strong> ser refiner. Tu LLM local probablemente no sirva como refiner — toca usar un modelo frontera (API) <strong>solo para el outer loop</strong>, y el local para el inner. Eso encaja con tu memoria <code>feedback_python_vs_node</code> de proceso vs trabajos estables.</p>
+  </div>
+  <div class="card" style="border-color:var(--red)">
+    <h4>No copies a ciegas</h4>
+    <p class="mut">Es un preprint sin peer review aún; los números son medianas de corridas con presupuestos definidos. La idea es sólida, los detalles de implementación los irías validando en tu caso. El código MIT está disponible — vale la pena <em>leerlo</em> antes de re-implementar.</p>
+  </div>
+</div>
+
+<div class="foot">
+  Notas: (1) preprint arXiv — pendiente de revisión por pares. (2) Los números son los reportados por los autores en mayo 2026; no han sido independientemente replicados al momento de este resumen. (3) La fuente <code>dbreunig.com/2025/06/17/a…</code> vino con URL truncada y no se incluyó; los hitos de GPP que pudo cubrir aparecen recogidos por el paper principal.
+</div>
+
+</div>
+</body>
+</html>

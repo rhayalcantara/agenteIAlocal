@@ -1,32 +1,32 @@
 # Noticias Recientes de Diario Libre
 
-![Apresan a hombre acusado de violencia contra joven que denunció amenazas](https://resources.diariolibre.com/images/2026/05/16/hombre-apresado-por-agresion-a-anabel-diaz-en-cotui-1a0e3612-focus-0-0-598-352.jpg)
-[Apresan a hombre acusado de violencia contra joven que denunció amenazas](https://www.diariolibre.com/actualidad/sucesos)
+![Crece la participación femenina en el sector transporte y almacenamiento](https://resources.diariolibre.com/images/2026/05/22/crece-la-participacion-femenina-en-el-sector-transporte-148eabbc-focus-0-0-598-352.jpg)
+[Crece la participación femenina en el sector transporte y almacenamiento](https://www.diariolibre.com/economia/empleo)
 
-![Congreso de EE. UU. revive el #MeToo casi una década después de la campaña que agitó al mundo](https://resources.diariolibre.com/images/2026/05/16/congreso-de-estados-unidos-y-el-movimiento-metoo-b7e6ae3d-focus-0-0-598-352.png)
-[Congreso de EE. UU. revive el #MeToo casi una década después de la campaña que agitó al mundo](https://www.diariolibre.com/usa/actualidad)
+![En busca del sueño coreano](https://resources.diariolibre.com/images/2026/05/22/ilustracion-connectas-09a5de7f-focus-0-0-598-352.jpg)
+[En busca del sueño coreano](https://www.diariolibre.com/actualidad/reportajes)
 
-![Cristiano Ronaldo y Al-Nassr pierden la final de la Liga de Campeones de Asia](https://resources.diariolibre.com/images/2026/05/16/06d6543397c2c7c95874621195f51a25ae40c318-afc80c27-focus-0.3-0.7-598-352.jpg)
-[Cristiano Ronaldo y Al-Nassr pierden la final de la Liga de Campeones de Asia](https://www.diariolibre.com/deportes/futbol)
+!["No normalizar" relaciones entre menores y adultos: el llamado urgente tras la muerte de Abril](https://resources.diariolibre.com/images/2026/05/23/alertan-por-normalizacion-de-relaciones-entre-menores-y-adultos-e5ffd91f-focus-0-0-598-352.jpg)
+["No normalizar" relaciones entre menores y adultos: el llamado urgente tras la muerte de Abril](https://www.diariolibre.com/actualidad/sucesos)
 
-![Hallan muerta a la ballena rescatada tras permanecer varada en la costa alemana dos meses](https://resources.diariolibre.com/images/2026/05/16/timmy-la-ballena-jorobada-rescatada-aparece-muerta-en-anholt-159a711d-focus-0-0-598-352.png)
-[Hallan muerta a la ballena rescatada tras permanecer varada en la costa alemana dos meses](https://www.diariolibre.com/planeta/medioambiente)
+![Casos positivos de leptospirosis superan el doble de los registrados en 2025](https://resources.diariolibre.com/images/2026/05/22/20074-1-da336dbb-focus-0-0-598-352.jpg)
+[Casos positivos de leptospirosis superan el doble de los registrados en 2025](https://www.diariolibre.com/actualidad/salud)
 
-![El portaaviones Gerald R. Ford regresa a EE.UU. tras participar en guerra Irán y Venezuela](https://resources.diariolibre.com/images/2026/05/16/el-portaaviones-gerald-r-ford-y-su-despliegue-militar-11b1d0a6-focus-0-0-598-352.png)
-[El portaaviones Gerald R. Ford regresa a EE.UU. tras participar en guerra Irán y Venezuela](https://www.diariolibre.com/usa/actualidad)
+![Fundación Adulam impulsa el voluntariado juvenil y la transformación social en La Romana](https://resources.diariolibre.com/images/2026/04/02/fundacion-adulam-impulsa-el-voluntariado-juvenil-en-la-romana-f4caec21-focus-0.63-0.39-598-352.jpg)
+[Fundación Adulam impulsa el voluntariado juvenil y la transformación social en La Romana](https://www.diariolibre.com/actualidad/educacion)
 
-![Triplete de Kane y fiesta total en el cierre de temporada del Bayern Múnich](https://resources.diariolibre.com/images/2026/02/28/bundesligakane-brilla-en-el-klassiker-y-acerca-a-bayern-a-35º-titulo-7166f6dc-focus-0.05-0.52-598-352.jpg)
-[Triplete de Kane y fiesta total en el cierre de temporada del Bayern Múnich](https://www.diariolibre.com/deportes/futbol)
+![Los Knicks acarician sus primeras Finales del siglo en la NBA](https://resources.diariolibre.com/images/2026/05/24/nba-los-knicks-acarician-sus-primeras-finales-del-siglo-en-la-nba-5b1e67ce-focus-min0.2-0.15-598-352.png)
+[Los Knicks acarician sus primeras Finales del siglo en la NBA](https://www.diariolibre.com/deportes/baloncesto)
 
-!["La única forma de negociar ahora será con acuerdos firmados", advierten las enfermeras](https://resources.diariolibre.com/images/2026/05/16/enfermeras-exigen-firma-de-acuerdos-para-desistir-del-paro-8b68ab75-focus-0-0-598-352.jpg)
-["La única forma de negociar ahora será con acuerdos firmados", advierten las enfermeras](https://www.diariolibre.com/actualidad/salud)
+![Los candidatos presidenciales colombianos apuran mítines en vísperas del cierre de campaña](https://resources.diariolibre.com/images/2022/02/01/bandera-colombiana-04b60b5e-focus-0-0-598-352.jpg)
+[Los candidatos presidenciales colombianos apuran mítines en vísperas del cierre de campaña](https://www.diariolibre.com/mundo/america-latina)
 
-![Arrestan a extesorero y aliado del presidente Ortega en Nicaragua](https://resources.diariolibre.com/images/2026/05/16/nicaragua-arresto-de-francisco-lopez-por-corrupcion-y-lavado-de-diner-0023b20f-focus-0-0-598-352.png)
-[Arrestan a extesorero y aliado del presidente Ortega en Nicaragua](https://www.diariolibre.com/mundo/america-latina)
+![Diecinueve personas podrían estar atrapadas tras el derrumbe de un edificio en Filipinas](https://resources.diariolibre.com/images/2026/05/24/derrumbe-de-edificio-en-manila-19-trabajadores-atrapados-273a0f87-focus-0-0-598-352.jpg)
+[Diecinueve personas podrían estar atrapadas tras el derrumbe de un edificio en Filipinas](https://www.diariolibre.com/mundo/asia)
 
-![El petromacorisano George Soriano consigue su segundo salvamento en triunfo de San Luis](https://resources.diariolibre.com/images/2026/05/16/george-soriano-consigue-su-segundo-salvamento-con-san-luis-705a6802-focus-0.09-0.24-598-352.jpg)
-[El petromacorisano George Soriano consigue su segundo salvamento en triunfo de San Luis](https://www.diariolibre.com/deportes/beisbol)
+![Isabel Pantoja sobre RD: "El descanso más feliz de mi vida"](https://resources.diariolibre.com/images/2026/05/20/inicia-la-cuenta-regresiva-para-el-concierto-de-isabel-pantoja-aff1a186-focus-min0.05-0.35-598-352.jpg)
+[Isabel Pantoja sobre RD: "El descanso más feliz de mi vida"](https://www.diariolibre.com/revista/musica)
 
-![El delantero colombiano Luis Suárez se corona como el máximo goleador de la liga portuguesa](https://resources.diariolibre.com/images/2026/05/16/luis-suarez-se-corona-como-el-maximo-goleador-de-la-liga-portuguesa-36b76f10-focus-0-0.46-598-352.jpg)
-[El delantero colombiano Luis Suárez se corona como el máximo goleador de la liga portuguesa](https://www.diariolibre.com/deportes/futbol)
+![Hombre secuestrado en Boca Chica fue hallado calcinado dentro de un vehículo en Juan Dolio](https://resources.diariolibre.com/images/2026/01/21/policia-niega-rapto-de-menor-en-la-vega-fue-intento-de-robo-7e373c44-focus-0-0-598-352.jpg)
+[Hombre secuestrado en Boca Chica fue hallado calcinado dentro de un vehículo en Juan Dolio](https://www.diariolibre.com/actualidad/nacional)
 

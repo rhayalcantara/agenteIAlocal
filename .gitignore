@@ -118,3 +118,11 @@ revision_llmcentral/repo/
 *.onnx
 *.gguf
 *.safetensors
+
+# Temporales del agente local (artefactos de prueba que NUNCA van al repo)
+_gmail_*
+_refresh_*
+_curl_*
+_run_*
+_tmp_*
+.monitor_bateria_alertado.flag

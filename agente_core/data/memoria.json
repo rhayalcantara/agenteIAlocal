@@ -1,5 +1,14 @@
 {
   "hechos": [],
-  "resumenes": [],
+  "resumenes": [
+    {
+      "texto": "El asistente confirmó que no hay cambios en el seguimiento de Amazon y generó un reporte de noticias en Markdown. El usuario espera recibirlo por Telegram y verifica que el asistente esté activo.",
+      "fecha": "2026-05-23 19:35"
+    },
+    {
+      "texto": "La conversación explica cómo purgar el aire de las tuberías y cómo resolver un error de token de Google expirado en un script de Python.",
+      "fecha": "2026-05-25 08:48"
+    }
+  ],
   "siguiente_id": 1
 }

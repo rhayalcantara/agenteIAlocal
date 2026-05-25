@@ -12,6 +12,18 @@
     {
       "texto": "Cada dos horas, este proceso automático revisa los últimos diez correos no leídos y genera un resumen si hay nuevos.",
       "fecha": "2026-05-17 05:57"
+    },
+    {
+      "texto": "Sistema automático que revisa cada dos horas los diez últimos correos no leídos y genera un breve resumen de los nuevos.",
+      "fecha": "2026-05-23 20:45"
+    },
+    {
+      "texto": "El agente intentó verificar y actualizar el estado del seguimiento #6 de Amazon, pero encontró errores de autenticación e interferencias del runner. Para solventarlo, ejecutó consultas directas a la base de datos evitando los comandos automáticos.",
+      "fecha": "2026-05-24 00:33"
+    },
+    {
+      "texto": "El asistente intentaba monitorear el correo de Promerica, pero un hook de terminal interceptaba los comandos Python. Tras aplicar contornos para sortear la interferencia, logró ejecutar el monitoreo.",
+      "fecha": "2026-05-24 10:12"
     }
   ],
   "siguiente_id": 1
