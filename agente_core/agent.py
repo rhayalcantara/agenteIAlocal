@@ -1115,7 +1115,11 @@ class Agent:
         elif fn_name == "guardar_memoria":
             result = self.memoria.agregar_hecho(**args)
         elif fn_name == "consultar_memoria":
-            hechos = self.memoria.listar_hechos(**args)
+            # listar_hechos solo acepta `categoria`; ignoramos cualquier kwarg que
+            # el LLM pueda alucinar (visto 'contexto' del 11-may en agenda id 8,
+            # rompió con TypeError y dejó la acción muerta hasta el 25-may).
+            cat = args.get("categoria")
+            hechos = self.memoria.listar_hechos(categoria=cat) if cat else self.memoria.listar_hechos()
             result = json.dumps(hechos, ensure_ascii=False) if hechos else "Sin hechos"
         elif fn_name == "buscar_memoria":
             from memoria_retrieval_tool import ejecutar as _mr_ejecutar

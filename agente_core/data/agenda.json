@@ -9,50 +9,10 @@
       "activa": true,
       "chat_id": 5483766132,
       "creada": "2026-04-24T14:19:28.892812",
-      "ultima_ejecucion": "2026-05-17T10:01:06.357992",
-      "ultimo_resultado": "No hay correos no leídos ni novedades para reportar.",
+      "ultima_ejecucion": "2026-05-24T08:55:40.768155",
+      "ultimo_resultado": "No se pudo acceder a Gmail (token expirado). No hay novedades para reportar.",
       "ultimo_error": null,
       "ejecuciones": [
-        {
-          "timestamp": "2026-05-11T06:58:15.120725",
-          "exito": true,
-          "resumen": "Los 10 correos no leídos son: marketing (Go Rewards, Pala Pizza, TurboScribe, Kiwi.com), recordatorio de Facebook, Reddit, Academía de IA (bienvenida), LinkedIn y EVE Online. Ninguno contiene informac"
-        },
-        {
-          "timestamp": "2026-05-11T08:59:45.860523",
-          "exito": true,
-          "resumen": "**Resumen de correos (11/05/2026 08:58):**\n\n10 correos nuevos — principalmente marketing y notificaciones automáticas.\n\n📌 **Relevantes:**\n- **LinkedIn**: Job alert — Database Administrator en Origami "
-        },
-        {
-          "timestamp": "2026-05-11T11:01:50.744146",
-          "exito": true,
-          "resumen": "Error desconocido"
-        },
-        {
-          "timestamp": "2026-05-11T19:49:12.928988",
-          "exito": true,
-          "resumen": "Error desconocido"
-        },
-        {
-          "timestamp": "2026-05-11T21:54:53.061729",
-          "exito": false,
-          "resumen": "La ejecución superó el límite de 5 minutos."
-        },
-        {
-          "timestamp": "2026-05-12T00:00:54.856409",
-          "exito": false,
-          "resumen": "La ejecución superó el límite de 5 minutos."
-        },
-        {
-          "timestamp": "2026-05-12T05:21:19.683588",
-          "exito": false,
-          "resumen": "La ejecución superó el límite de 5 minutos."
-        },
-        {
-          "timestamp": "2026-05-16T09:37:14.202270",
-          "exito": true,
-          "resumen": "El token de Gmail expiró/revisado — no pude acceder a los correos. Se necesita re-autorizar la cuenta de Gmail.\n\n[SILENCIOSO]"
-        },
         {
           "timestamp": "2026-05-16T11:38:23.200014",
           "exito": true,
@@ -112,6 +72,46 @@
           "timestamp": "2026-05-17T10:01:06.357992",
           "exito": true,
           "resumen": "No hay correos no leídos ni novedades para reportar."
+        },
+        {
+          "timestamp": "2026-05-23T18:29:21.759928",
+          "exito": true,
+          "resumen": "No hay novedades para reportar — el token de Gmail expiró y no pude revisar los correos. Necesita reautenticar las credenciales de Gmail."
+        },
+        {
+          "timestamp": "2026-05-23T20:45:09.391205",
+          "exito": true,
+          "resumen": "No puedo revisar los correos: el token de Gmail expiró y no se pudo refrescar automáticamente. Debes re-autenticar manualmente ejecutando:\n\n```\npython gmail_manager/main.py\n```\n\nEso generará una nueva"
+        },
+        {
+          "timestamp": "2026-05-23T22:46:03.832894",
+          "exito": false,
+          "resumen": "TypeError: Memoria.listar_hechos() got an unexpected keyword argument 'contenido'"
+        },
+        {
+          "timestamp": "2026-05-24T00:47:59.950794",
+          "exito": true,
+          "resumen": "No pude leer los correos — el token de Gmail expiró/revalidación falló. No hay novedades para reportar.\n\n[SILENCIOSO]"
+        },
+        {
+          "timestamp": "2026-05-24T02:50:05.205200",
+          "exito": true,
+          "resumen": "El token de Gmail ha expirado. Necesitas reautenticar las credenciales de Gmail. El cron no puede ejecutarse hasta que se resuelva la autenticación."
+        },
+        {
+          "timestamp": "2026-05-24T04:52:04.531999",
+          "exito": true,
+          "resumen": "El token de Gmail está expirado/revocado, no pude leer los correos.\n\n**Acción requerida:** Necesitas reautentizar las credenciales de Gmail. El token de acceso OAuth2 ya no es válido.\n\n[SILENCIOSO]"
+        },
+        {
+          "timestamp": "2026-05-24T06:53:49.935204",
+          "exito": true,
+          "resumen": "Error desconocido"
+        },
+        {
+          "timestamp": "2026-05-24T08:55:40.768155",
+          "exito": true,
+          "resumen": "No se pudo acceder a Gmail (token expirado). No hay novedades para reportar."
         }
       ],
       "intervalo_minutos": 120,
@@ -128,8 +128,8 @@
       "activa": true,
       "chat_id": 5483766132,
       "creada": "2026-04-24T14:20:42.853457",
-      "ultima_ejecucion": "2026-05-17T08:02:10.609790",
-      "ultimo_resultado": "Ejecutada la skill `buscar-noticias`, generado el reporte con 10 titulares de Diario Libre (incluyendo la detención en Cotuí, la derrota de Ronaldo en la Liga de Campeones de Asia y el arresto en Nicaragua), y enviado el archivo al usuario por Telegram con resumen de los 3 titulares principales.",
+      "ultima_ejecucion": "2026-05-24T08:01:49.283109",
+      "ultimo_resultado": "Resumen matutino enviado con 10 titulares de Diario Libre, incluyendo las 3 noticias más relevantes:\n\n1. **\"No normalizar\" relaciones entre menores y adultos** — Llamado urgente tras la muerte de Abril (Sucesos)\n2. **Casos de leptospirosis superan el doble de 2025** — Alerta de salud pública (Salud)\n3. **Derrumbe en Filipinas** — 19 personas podrían estar atrapadas (Mundo)\n\nEl reporte completo con imágenes y enlaces está disponible en el agente.",
       "ultimo_error": null,
       "ejecuciones": [
         {
@@ -201,6 +201,11 @@
           "timestamp": "2026-05-17T08:02:10.609790",
           "exito": true,
           "resumen": "Ejecutada la skill `buscar-noticias`, generado el reporte con 10 titulares de Diario Libre (incluyendo la detención en Cotuí, la derrota de Ronaldo en la Liga de Campeones de Asia y el arresto en Nica"
+        },
+        {
+          "timestamp": "2026-05-24T08:01:49.283109",
+          "exito": true,
+          "resumen": "Resumen matutino enviado con 10 titulares de Diario Libre, incluyendo las 3 noticias más relevantes:\n\n1. **\"No normalizar\" relaciones entre menores y adultos** — Llamado urgente tras la muerte de Abri"
         }
       ],
       "hora": "08:00",
@@ -435,28 +440,13 @@
       "descripcion": "Verifica el estado de envío cada 6 horas hasta que se entregue.",
       "tipo": "recurrente",
       "prompt": "Verificar estado de seguimiento #6 (Amazon) para ver si hay cambios. Si hay actualización, notificar al usuario.",
-      "activa": true,
+      "activa": false,
       "chat_id": 5483766132,
       "creada": "2026-04-28T08:43:50.229085",
-      "ultima_ejecucion": "2026-05-17T09:45:27.648405",
-      "ultimo_resultado": "El último correo es del 28 de abril — dos días old — con estado \"Enviado\" y no hay correos ni actualizaciones recientes. El estado sigue siendo el mismo: \"En camino - Llega el viernes\".\n\n[SILENCIOSO]",
+      "ultima_ejecucion": "2026-05-25T09:06:21.407984",
+      "ultimo_resultado": "Pedido recibido por Rhay el 25-may-2026. Monitoreo cerrado manualmente.",
       "ultimo_error": null,
       "ejecuciones": [
-        {
-          "timestamp": "2026-05-06T23:28:02.668017",
-          "exito": false,
-          "resumen": "La ejecución superó el límite de 5 minutos."
-        },
-        {
-          "timestamp": "2026-05-07T05:29:29.318565",
-          "exito": true,
-          "resumen": "No hay novedades. El estado del seguimiento #6 sigue siendo \"En camino - Llega el viernes\" sin actualizaciones desde la última revisión. No se detectaron correos nuevos de Amazon con información de tr"
-        },
-        {
-          "timestamp": "2026-05-07T11:31:27.290812",
-          "exito": true,
-          "resumen": "No hay correos nuevos de entrega de Amazon desde el 1 de mayo. El estado del seguimiento #6 permanece sin cambios: \"En camino - Llega el viernes\" desde el 28 de abril. No se detectaron procesos nuevos"
-        },
         {
           "timestamp": "2026-05-07T17:33:35.689914",
           "exito": true,
@@ -541,6 +531,21 @@
           "timestamp": "2026-05-17T09:45:27.648405",
           "exito": true,
           "resumen": "El último correo es del 28 de abril — dos días old — con estado \"Enviado\" y no hay correos ni actualizaciones recientes. El estado sigue siendo el mismo: \"En camino - Llega el viernes\".\n\n[SILENCIOSO]"
+        },
+        {
+          "timestamp": "2026-05-23T18:29:15.923828",
+          "exito": true,
+          "resumen": "Error desconocido"
+        },
+        {
+          "timestamp": "2026-05-24T00:32:47.838566",
+          "exito": true,
+          "resumen": "{\n  \"reply\": \"Tu pedido Amazon #9275461 ya está listo para recoger.\\n\\n**Estado actual:** Entregado en bodega Amazon\\n📍 Ubicación: Amazon Hub, 5020 W 4Th Ave, Oakland, CA 94608\\n\\n**Última actualizaci"
+        },
+        {
+          "timestamp": "2026-05-24T06:34:41.047550",
+          "exito": true,
+          "resumen": "Error desconocido"
         }
       ],
       "intervalo_minutos": 360
@@ -554,35 +559,10 @@
       "activa": true,
       "chat_id": 5483766132,
       "creada": "2026-05-05T01:06:02.201771",
-      "ultima_ejecucion": "2026-05-17T10:02:23.518950",
-      "ultimo_resultado": "No se encontraron correos nuevos de Promerica desde la última verificación. El más reciente data del 4 de mayo de 2026. Estado de la transacción sin cambios.",
-      "ultimo_error": null,
+      "ultima_ejecucion": "2026-05-24T10:06:49.039845",
+      "ultimo_resultado": "El token de Gmail está expirado, no se pudo verificar el correo. El usuario necesita reautenticar Gmail.",
+      "ultimo_error": "La ejecución superó el límite de 5 minutos.",
       "ejecuciones": [
-        {
-          "timestamp": "2026-05-10T12:40:40.902727",
-          "exito": true,
-          "resumen": "Error desconocido"
-        },
-        {
-          "timestamp": "2026-05-10T14:42:13.685999",
-          "exito": true,
-          "resumen": "Error desconocido"
-        },
-        {
-          "timestamp": "2026-05-10T16:43:48.044041",
-          "exito": true,
-          "resumen": "Error desconocido"
-        },
-        {
-          "timestamp": "2026-05-10T18:46:23.804961",
-          "exito": true,
-          "resumen": "No hay correos nuevos de Promerica desde el 4 de mayo (hoy es 10 de mayo). No hay novedades para la transacción.\n\n[SILENCIOSO]"
-        },
-        {
-          "timestamp": "2026-05-10T20:47:23.088636",
-          "exito": true,
-          "resumen": "Error desconocido"
-        },
         {
           "timestamp": "2026-05-10T22:48:12.975588",
           "exito": true,
@@ -657,6 +637,31 @@
           "timestamp": "2026-05-17T10:02:23.518950",
           "exito": true,
           "resumen": "No se encontraron correos nuevos de Promerica desde la última verificación. El más reciente data del 4 de mayo de 2026. Estado de la transacción sin cambios."
+        },
+        {
+          "timestamp": "2026-05-23T18:28:43.318137",
+          "exito": true,
+          "resumen": "No se pudo verificar — el token de Gmail expiró y necesita renovación manual. Sin acceso al correo, no hay novedades para reportar."
+        },
+        {
+          "timestamp": "2026-05-23T20:44:03.952002",
+          "exito": true,
+          "resumen": "Error desconocido"
+        },
+        {
+          "timestamp": "2026-05-23T22:45:11.987679",
+          "exito": true,
+          "resumen": "El token de Gmail ha expirado. No se pudo consultar el correo. Se requiere re-autenticación de Gmail para continuar con el monitoreo.\n\n[SILENCIOSO]"
+        },
+        {
+          "timestamp": "2026-05-24T08:01:35.461959",
+          "exito": true,
+          "resumen": "El token de Gmail está expirado, no se pudo verificar el correo. El usuario necesita reautenticar Gmail."
+        },
+        {
+          "timestamp": "2026-05-24T10:06:49.039845",
+          "exito": false,
+          "resumen": "La ejecución superó el límite de 5 minutos."
         }
       ],
       "intervalo_minutos": 120,
@@ -670,12 +675,12 @@
       "descripcion": null,
       "tipo": "diaria",
       "prompt": "Revisar con María delrag sobre 'sixtante a favor CD Sav allow'. El usuario debe contactar a María para verificar este asunto pendiente.",
-      "activa": true,
+      "activa": false,
       "chat_id": 5483766132,
       "creada": "2026-05-05T13:43:07.309731",
-      "ultima_ejecucion": "2026-05-11T08:01:07.013646",
-      "ultimo_resultado": null,
-      "ultimo_error": "TypeError: Memoria.listar_hechos() got an unexpected keyword argument 'contexto'",
+      "ultima_ejecucion": "2026-05-25T09:13:34.402258",
+      "ultimo_resultado": "Asunto resuelto manualmente por Rhay el 25-may-2026. El prompt original era una transcripcion de voz incorrecta; el tema real ya se gestiono fuera de la agenda.",
+      "ultimo_error": null,
       "ejecuciones": [
         {
           "timestamp": "2026-05-11T08:01:07.013646",
