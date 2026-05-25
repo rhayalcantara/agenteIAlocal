@@ -9,20 +9,10 @@
       "activa": true,
       "chat_id": 5483766132,
       "creada": "2026-04-24T14:19:28.892812",
-      "ultima_ejecucion": "2026-05-25T14:03:45.368342",
-      "ultimo_resultado": "📋 Plan:\n[ ] 1. Listar últimos 10 correos con gmail-reader\n[ ] 2. Leer detalles (remitente, asunto, adjuntos)\n[ ] 3. Detectar posibles seguimientos (pedidos, bancos, reservas)\n[ ] 4. Generar resumen y enviar por Telegram\n[ ] 5. Responder brevemente al usuario\n\nEjecutando [1]...",
+      "ultima_ejecucion": "2026-05-25T19:22:20.655607",
+      "ultimo_resultado": "📧 **Resumen de correos — 25/May 2026 19:20**\n\n🔴 **Novedades relevantes (2):**\n\n1. **Amazon - Pedido confirmado** #112-7707672-1171422\n   - Cargador de laptop 65W para Lenovo — $18.99\n   - Estado: **En reparto** — llegada estimada: 4-5 de junio\n   - ✅ Seguimiento creado (#10) con monitoreo cada 4 horas\n\n2. **Oracle Cloud** — Tu trial gratuito **finalizó hoy**\n   - Acceso limitado a servicios Always Free únicamente\n\n📨 **Resto de correos (8):** Notificaciones de redes sociales y newsletters:\n- Link",
       "ultimo_error": null,
       "ejecuciones": [
-        {
-          "timestamp": "2026-05-16T15:41:46.856044",
-          "exito": true,
-          "resumen": "**📧 Resumen de correos — 16/May/2026**\n\n- **201 correos no leídos** acumulados\n\n**Destacados:**\n1. **Banco Promerica** — Estado de cuenta Tarjeta CREDIPLUS (terminada en 6819) con corte al 15/May/2026"
-        },
-        {
-          "timestamp": "2026-05-16T17:43:43.229331",
-          "exito": true,
-          "resumen": "📋 Plan:\n[ ] 1. Consultar últimos 10 correos no leídos con gmail-reader\n[ ] 2. Analizar remitentes, asuntos, adjuntos y detectar posibles seguimientos/tracking\n[ ] 3. Formatear resumen y enviar por Tel"
-        },
         {
           "timestamp": "2026-05-16T19:46:43.535344",
           "exito": true,
@@ -112,6 +102,16 @@
           "timestamp": "2026-05-25T14:03:45.368342",
           "exito": true,
           "resumen": "📋 Plan:\n[ ] 1. Listar últimos 10 correos con gmail-reader\n[ ] 2. Leer detalles (remitente, asunto, adjuntos)\n[ ] 3. Detectar posibles seguimientos (pedidos, bancos, reservas)\n[ ] 4. Generar resumen y "
+        },
+        {
+          "timestamp": "2026-05-25T17:19:33.622458",
+          "exito": false,
+          "resumen": "La ejecución superó el límite de 5 minutos."
+        },
+        {
+          "timestamp": "2026-05-25T19:22:20.655607",
+          "exito": true,
+          "resumen": "📧 **Resumen de correos — 25/May 2026 19:20**\n\n🔴 **Novedades relevantes (2):**\n\n1. **Amazon - Pedido confirmado** #112-7707672-1171422\n   - Cargador de laptop 65W para Lenovo — $18.99\n   - Estado: **En"
         }
       ],
       "intervalo_minutos": 120,
@@ -559,20 +559,10 @@
       "activa": true,
       "chat_id": 5483766132,
       "creada": "2026-05-05T01:06:02.201771",
-      "ultima_ejecucion": "2026-05-25T14:02:01.837718",
-      "ultimo_resultado": "Sin novedades — el correo más reciente de Promerica es del 21 de mayo (hace 4 días), sin transacciones nuevas. Se deja el estado del seguimiento como está.\n\n[SILENCIOSO]",
+      "ultima_ejecucion": "2026-05-25T19:18:15.938676",
+      "ultimo_resultado": "No hay correos nuevos de Promerica desde el 21 de mayo (4 días atrás). Sin novedades para la transacción monitoreada.",
       "ultimo_error": null,
       "ejecuciones": [
-        {
-          "timestamp": "2026-05-11T10:04:24.395233",
-          "exito": true,
-          "resumen": "Error desconocido"
-        },
-        {
-          "timestamp": "2026-05-11T12:05:28.088825",
-          "exito": true,
-          "resumen": "Los 5 correos más recientes de Promerica tienen entre 7 y 14 días de antigüedad (última actividad: 04-May). No hay transacciones ni novedades nuevas respecto al estado anterior."
-        },
         {
           "timestamp": "2026-05-11T19:49:00.662001",
           "exito": true,
@@ -662,6 +652,16 @@
           "timestamp": "2026-05-25T14:02:01.837718",
           "exito": true,
           "resumen": "Sin novedades — el correo más reciente de Promerica es del 21 de mayo (hace 4 días), sin transacciones nuevas. Se deja el estado del seguimiento como está.\n\n[SILENCIOSO]"
+        },
+        {
+          "timestamp": "2026-05-25T17:17:16.383030",
+          "exito": true,
+          "resumen": "[SILENCIO]No hay correos nuevos de Promerica desde el último monitoreo (21/may). La última transacción registrada es de US$ 20.00 — sin cambios de estado. Todo igual.\n\n[SILENC]\n\n[SILENCIO]"
+        },
+        {
+          "timestamp": "2026-05-25T19:18:15.938676",
+          "exito": true,
+          "resumen": "No hay correos nuevos de Promerica desde el 21 de mayo (4 días atrás). Sin novedades para la transacción monitoreada."
         }
       ],
       "intervalo_minutos": 120,

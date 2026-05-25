@@ -1,30 +1,18 @@
 {
   "acciones_autorizadas": [
-    "ejecutar scripts python del proyecto",
-    "leer archivos del proyecto",    
-    "crear archivos nuevos en el proyecto",
-    "instalar paquetes con pip",
-    "ejecutar comandos bash de lectura (ls, cat, find, grep, ps, tail)",
-    "leer páginas web con scrape_url",
-    "navegar con el browser (browser_navegar)",
-    "tomar screenshots con el browser",
-    "guardar y consultar memoria",
-    "leer y escribir en la wiki",
-    "crear y activar skills",
-    "enviar archivos y fotos por Telegram",
-    "ejecutar scripts de skills existentes",
-    "listar directorios y archivos"
+    "leer correos de Gmail",
+    "buscar en Gmail",
+    "generar resumen de correos",
+    "enviar resumen por Telegram",
+    "ejecutar skill de seguimiento",
+    "leer contenido de correos",
+    "consultar estados de seguimiento"
   ],
   "requieren_confirmacion": [
-    "buscar en internet con DuckDuckGo",
-    "borrar archivos o directorios",
-    "editar archivos existentes del proyecto",
-    "modificar .env",
-    "instalar software del sistema (brew, apt, etc.)",
-    "ejecutar git push o git reset --hard",
-    "eliminar entradas de memoria o wiki",
-    "acceder a APIs externas con credenciales nuevas no mencionadas"
+    "eliminar correos",
+    "enviar correos",
+    "responder correos",
+    "borrar archivos del sistema"
   ],
-  "NUNCA REALIZES":["editar,modificar,eliminar archivo de la carpeta agente_core"]
-
+  "ultima_actualizacion": "2025-04-01"
 }

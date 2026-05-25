@@ -8,6 +8,18 @@
     {
       "texto": "La conversación explica cómo purgar el aire de las tuberías y cómo resolver un error de token de Google expirado en un script de Python.",
       "fecha": "2026-05-25 08:48"
+    },
+    {
+      "texto": "El usuario envía mensajes repetitivos afirmando su gusto por *The Expanse* y las naves espaciales, cada uno con un número de referencia. La asistente solo responde con un breve \"ok\" citando dicho número.",
+      "fecha": "2026-05-25 14:36"
+    },
+    {
+      "texto": "El usuario reitera su entusiasmo por *The Expanse* y sus naves espaciales, mientras el asistente registra cada intervención mediante un identificador numérico.",
+      "fecha": "2026-05-25 14:39"
+    },
+    {
+      "texto": "El usuario expresa su afición por *The Expanse* y sus naves antes de solicitar verificar sus correos. El asistente responde reconociendo el tema y listando los comandos técnicos necesarios.",
+      "fecha": "2026-05-25 17:23"
     }
   ],
   "siguiente_id": 1

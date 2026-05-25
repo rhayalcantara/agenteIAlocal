@@ -130,3 +130,5 @@ anthropic_gateway/data/
 worker_hub/data/
 .env.bak.*
 agente_core/data/agenda.json.bak.*
+telegram_agente.log
+telegram_agente.log.err

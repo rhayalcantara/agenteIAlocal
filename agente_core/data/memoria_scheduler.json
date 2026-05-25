@@ -24,6 +24,14 @@
     {
       "texto": "El asistente intentaba monitorear el correo de Promerica, pero un hook de terminal interceptaba los comandos Python. Tras aplicar contornos para sortear la interferencia, logró ejecutar el monitoreo.",
       "fecha": "2026-05-24 10:12"
+    },
+    {
+      "texto": "El asistente detectó errores en el script de automatización y ahora lee los correos directamente con la API de Gmail.",
+      "fecha": "2026-05-25 17:24"
+    },
+    {
+      "texto": "Revisó automáticamente correos no leídos, detectó un pedido de Amazon y un correo de Oracle, y priorizó registrar el seguimiento del pedido.",
+      "fecha": "2026-05-25 19:22"
     }
   ],
   "siguiente_id": 1
