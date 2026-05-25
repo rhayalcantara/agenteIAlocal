@@ -1,5 +1,29 @@
 # Agenda — Pendientes Agente IA Local
 
+> 🏁 **ESTADO: CERRADA 2026-05-25** — plan completo en ~3 semanas (vs 6 previstas).
+> El backlog vivo está ahora en **[BACKLOG.md](BACKLOG.md)**.
+>
+> **Resumen de cierre:** todo el plan original quedó done o tiene equivalente.
+> Sem 1 (bug agenda + Monitor Hub) ✅ · Sem 2 (Job Manager parte 1) ✅ ·
+> Sem 3 (Job Manager parte 2: DAG + job_client + dashboard + spawn supervisor) ✅ ·
+> Sem 4 (WhatsApp execute_bash + cache JSON) ✅ · Sem 5-6 (Monitor Hub Fases 2-4 +
+> Gateway anthropic-compatible) ✅ excepto Cloudflare Tunnel pendiente.
+>
+> **Pendientes residuales (movidos a BACKLOG.md):**
+> 1. Wiki 4 páginas para skill `buscar-noticias`.
+> 2. Cloudflare Tunnel para exponer el Gateway anthropic-compatible.
+>
+> **Bonus no planificados que SÍ se hicieron:** bridge Claude-local↔Ranger,
+> backup BD Ranger, POC memoria retrieval, voz piper Daniela, panel TV
+> definitivo + cron auto-arranque, monitor batería, transcripción
+> automática de voz Telegram, skill manejo-tv, fix tool_router con
+> acentos, fix Gmail token timeout, fix consultar_memoria, rotación
+> token telegram-ranger, scrub de tokens en repo, todo lo de seguridad.
+>
+> Documento histórico abajo conservado para trazabilidad.
+
+---
+
 **Creada:** 2026-05-08
 **Horario:** 18:15 — 20:00 (después de la caminata de 5pm)
 **Días:** Lunes, Miércoles, Jueves (días remotos)
