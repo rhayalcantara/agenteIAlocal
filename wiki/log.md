@@ -24,3 +24,7 @@ Formato: `## [YYYY-MM-DD HH:MM] tipo | descripción`
 ## [2026-05-25 21:00] write | configuracion/worker-hub — creada (pool LLMs detrás de endpoint OAI único, :8500)
 
 ## [2026-05-25 21:00] update | index — entrada worker-hub en Configuración
+
+## [2026-05-25 22:30] write | configuracion/remoteany-tailnet — creada (escritorio remoto sobre Tailscale, sin relay Oracle, Mac LaunchAgent + Windows on-demand)
+
+## [2026-05-25 22:30] update | index — entrada remoteany-tailnet en Configuración

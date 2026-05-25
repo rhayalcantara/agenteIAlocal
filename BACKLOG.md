@@ -76,3 +76,4 @@
 - ✅ **Resúmenes rodantes Fase 1.5** — `memoria_retrieval` ahora indexa los resúmenes del compactador en tabla `bloques`. Búsqueda unificada msg+bloque con score. Smoke E2E con qwen3.6:27b vía hub (mayo 25)
 - ✅ **Bugs limpiados:** `gmail_manager/auth.py` borrado (imports rotos, nadie lo importaba); acción agenda "Verificar con María" eliminada (mayo 25)
 - ✅ **Comparativa voces piper** — Daniela vs Davefx vs Ald via 3 muestras, Rhay mantuvo Daniela (mayo 25)
+- ✅ **RemoteAny integrado al tailnet bidireccional** — Mac host con LaunchAgent persistente (`com.rhay.remoteany`), Windows host on-demand, sin password ni relay Oracle, validado E2E con mouse+click (mayo 25)

@@ -13,6 +13,7 @@
 - [Agenda de noticias](configuracion/agenda-noticias.md) — acciones diarias 08:00 y 20:00.
 - [Gateway Anthropic-compatible](configuracion/gateway-anthropic.md) — expuesto al tailnet vía Tailscale.
 - [worker_hub](configuracion/worker-hub.md) — pool de LLMs detrás de un endpoint OAI único.
+- [RemoteAny tailnet](configuracion/remoteany-tailnet.md) — escritorio remoto sobre Tailscale, bidireccional (Mac ↔ Windows).
 
 ### Noticias
 - [Diario Libre (fuente)](noticias/diariolibre.md)
