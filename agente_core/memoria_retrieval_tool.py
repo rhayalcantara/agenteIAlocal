@@ -1,19 +1,27 @@
-"""Memoria con recuperación — POC Fase 1.
+"""Memoria con recuperación — POC Fase 1 + Fase 1.5 (bloques).
 
-Persiste cada mensaje user/assistant con embedding (sentence-transformers,
-`intfloat/multilingual-e5-small` por defecto) en `agente_core/data/memoria_retrieval.db`
-y expone la tool agéntica `buscar_memoria(query, k)` para que el LLM
-recupere contexto antiguo cuando el usuario referencia algo de hace tiempo.
+Persiste en `agente_core/data/memoria_retrieval.db`:
+  • messages — un mensaje user/assistant por fila (Fase 1).
+  • bloques  — resúmenes rodantes que produce el compactador del agente,
+               indexados semánticamente (Fase 1.5 añadida 25-may-2026).
+
+Embeddings: sentence-transformers, `intfloat/multilingual-e5-small` por defecto.
+Tool agéntica `buscar_memoria(query, k)` recupera tanto mensajes como bloques
+unificados, ordenados por score, cada uno marcado con campo `tipo`.
 
 Es una CAPA NUEVA AL LADO — no toca `memoria.py` / `memoria.json` /
-`messages.json` ni el compactador. Reversible: basta no cargar la tool.
+`messages.json` ni el código del compactador en sí. El hook que llena `bloques`
+desde el compactador es opcional y daemon-thread (no rompe el turno).
 
 API (vía dispatcher `ejecutar(operacion, **kwargs) -> str`):
     ejecutar("ingestar", rol="user", texto="...", session_id="global")
-    ejecutar("buscar", query="...", k=5, session_id=None, rol=None, dias_max=None)
+    ejecutar("ingestar_bloque", resumen="...", desde_ts="...", hasta_ts="...",
+             n_mensajes=10, session_id="global")
+    ejecutar("buscar", query="...", k=5, tipo="ambos"|"msg"|"bloque",
+             session_id=None, rol=None, dias_max=None)
     ejecutar("estado")
-    ejecutar("limpiar", antes_de_ts=None, session_id=None)
-    ejecutar("reindexar")  # stub Fase 1
+    ejecutar("limpiar", antes_de_ts=None, session_id=None, tipo="ambos"|"msg"|"bloque")
+    ejecutar("reindexar")  # stub
 
 Tolerante a fallo: si `sentence-transformers` no está instalado, retorna
 "⚠️ degradado" en vez de romper el turno del agente.
@@ -58,7 +66,7 @@ def _connect():
 
 
 def _init_db():
-    """Crea tabla e índices si no existen. Idempotente, lazy (no en import)."""
+    """Crea tablas e índices si no existen. Idempotente, lazy (no en import)."""
     global _initialized
     if _initialized:
         return
@@ -79,6 +87,23 @@ def _init_db():
         c.execute("CREATE INDEX IF NOT EXISTS ix_msg_ts      ON messages(ts)")
         c.execute("CREATE INDEX IF NOT EXISTS ix_msg_session ON messages(session_id)")
         c.execute("CREATE INDEX IF NOT EXISTS ix_msg_rol     ON messages(rol)")
+        # Fase 1.5: resúmenes rodantes que produce el compactador del agente.
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS bloques (
+              id          INTEGER PRIMARY KEY AUTOINCREMENT,
+              session_id  TEXT NOT NULL DEFAULT 'global',
+              resumen     TEXT NOT NULL,
+              desde_ts    TEXT,
+              hasta_ts    TEXT,
+              n_mensajes  INTEGER,
+              ts          TEXT NOT NULL,
+              embedding   BLOB NOT NULL,
+              embed_dim   INTEGER NOT NULL,
+              embed_model TEXT NOT NULL
+            )
+        """)
+        c.execute("CREATE INDEX IF NOT EXISTS ix_blq_ts      ON bloques(ts)")
+        c.execute("CREATE INDEX IF NOT EXISTS ix_blq_session ON bloques(session_id)")
     _initialized = True
 
 
@@ -150,61 +175,139 @@ def ingestar(rol: str, texto: str, session_id: str = "global",
     return f"OK id={msg_id}"
 
 
-def buscar(query: str, k: int = 5, session_id: str = None, rol: str = None,
-           dias_max: int = None) -> str:
-    """Top-K mensajes semánticamente similares (cosine numpy in-memory).
-    Retorna JSON: [{id, rol, ts, texto, score}, ...]"""
+def ingestar_bloque(resumen: str, desde_ts: str = None, hasta_ts: str = None,
+                    n_mensajes: int = None, session_id: str = "global") -> str:
+    """Persiste un resumen rodante (output del compactador) con embedding.
+
+    Llamado por el hook del compactador en `agent.py:compactar_historial`.
+    Tolerante a fallo: en daemon thread, no rompe el turno si falla.
+    """
+    if not resumen or not str(resumen).strip():
+        return "OK (resumen vacío, ignorado)"
+    texto_clean = str(resumen)[:MAX_TEXTO]
+    emb = _embed(texto_clean, is_query=False)
+    if emb is None:
+        return "⚠️ degradado: encoder no disponible"
+    blob = emb.tobytes()
+    dim = int(emb.shape[0])
+    _init_db()
+    with _write_lock, _connect() as c:
+        cur = c.execute(
+            """INSERT INTO bloques
+                 (session_id, resumen, desde_ts, hasta_ts, n_mensajes, ts,
+                  embedding, embed_dim, embed_model)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (session_id or "global", texto_clean, desde_ts, hasta_ts,
+             int(n_mensajes) if n_mensajes else None, _now_iso(),
+             blob, dim, EMBED_MODEL),
+        )
+        blq_id = cur.lastrowid
+    return f"OK id={blq_id} bloque ({n_mensajes or '?'} mensajes)"
+
+
+def buscar(query: str, k: int = 5, tipo: str = "ambos", session_id: str = None,
+           rol: str = None, dias_max: int = None) -> str:
+    """Top-K resultados semánticamente similares (cosine numpy in-memory).
+
+    `tipo`: "msg" (solo mensajes), "bloque" (solo resúmenes), "ambos" (default).
+    Cada resultado lleva campo `tipo` para que el LLM lo distinga.
+
+    Retorna JSON: [{id, tipo, rol|n_mensajes, ts, texto, score}, ...]
+    """
     if not query or not str(query).strip():
         return json.dumps([], ensure_ascii=False)
     try:
         k = max(1, min(int(k or 5), 20))
     except (TypeError, ValueError):
         k = 5
+    if tipo not in ("ambos", "msg", "bloque"):
+        tipo = "ambos"
 
     q_emb = _embed(str(query), is_query=True)
     if q_emb is None:
         return json.dumps({"error": "⚠️ degradado: sentence-transformers no instalado"},
                           ensure_ascii=False)
+    q_dim = int(q_emb.shape[0])
 
     _init_db()
-    where, params = [], []
-    if session_id:
-        where.append("session_id = ?"); params.append(session_id)
-    if rol:
-        where.append("rol = ?"); params.append(rol)
+    cutoff = None
     if dias_max:
         cutoff = (datetime.now(timezone.utc)
                   - timedelta(days=int(dias_max))).strftime("%Y-%m-%dT%H:%M:%SZ")
-        where.append("ts >= ?"); params.append(cutoff)
 
-    sql = "SELECT id, session_id, rol, texto, ts, embedding, embed_dim FROM messages"
-    if where:
-        sql += " WHERE " + " AND ".join(where)
-    with _connect() as c:
-        rows = c.execute(sql, params).fetchall()
+    # ── messages ────────────────────────────────────────────────────────
+    msg_rows = []
+    if tipo in ("ambos", "msg"):
+        where, params = [], []
+        if session_id:
+            where.append("session_id = ?"); params.append(session_id)
+        if rol:
+            where.append("rol = ?"); params.append(rol)
+        if cutoff:
+            where.append("ts >= ?"); params.append(cutoff)
+        sql = "SELECT id, session_id, rol, texto, ts, embedding, embed_dim FROM messages"
+        if where:
+            sql += " WHERE " + " AND ".join(where)
+        with _connect() as c:
+            msg_rows = c.execute(sql, params).fetchall()
 
-    if not rows:
+    # ── bloques ─────────────────────────────────────────────────────────
+    blq_rows = []
+    if tipo in ("ambos", "bloque"):
+        where, params = [], []
+        if session_id:
+            where.append("session_id = ?"); params.append(session_id)
+        if cutoff:
+            where.append("ts >= ?"); params.append(cutoff)
+        sql = ("SELECT id, session_id, resumen, n_mensajes, desde_ts, hasta_ts, ts, "
+               "embedding, embed_dim FROM bloques")
+        if where:
+            sql += " WHERE " + " AND ".join(where)
+        with _connect() as c:
+            blq_rows = c.execute(sql, params).fetchall()
+
+    if not msg_rows and not blq_rows:
         return json.dumps([], ensure_ascii=False)
 
-    q_dim = int(q_emb.shape[0])
-    valid_rows = []
-    embeds = []
+    # ── candidatos unificados ──────────────────────────────────────────
+    cands = []  # tuplas (embed, dict_resultado_sin_score)
     descartadas = 0
-    for r in rows:
+    for r in msg_rows:
         if r["embed_dim"] != q_dim:
-            descartadas += 1
-            continue
-        valid_rows.append(r)
-        embeds.append(np.frombuffer(r["embedding"], dtype=np.float32))
+            descartadas += 1; continue
+        cands.append((
+            np.frombuffer(r["embedding"], dtype=np.float32),
+            {
+                "id": int(r["id"]),
+                "tipo": "msg",
+                "rol": r["rol"],
+                "ts": r["ts"],
+                "texto": r["texto"][:600],
+            },
+        ))
+    for r in blq_rows:
+        if r["embed_dim"] != q_dim:
+            descartadas += 1; continue
+        cands.append((
+            np.frombuffer(r["embedding"], dtype=np.float32),
+            {
+                "id": int(r["id"]),
+                "tipo": "bloque",
+                "n_mensajes": r["n_mensajes"],
+                "desde_ts": r["desde_ts"],
+                "hasta_ts": r["hasta_ts"],
+                "ts": r["ts"],
+                "texto": r["resumen"][:600],
+            },
+        ))
     if descartadas:
         logger.warning(f"buscar_memoria: ignoradas {descartadas} filas con dim distinto")
-    if not valid_rows:
+    if not cands:
         return json.dumps([], ensure_ascii=False)
 
-    M = np.vstack(embeds)
+    M = np.vstack([c[0] for c in cands])
     scores = (M @ q_emb).astype(float)
 
-    # top-K eficiente
     if len(scores) <= k:
         idxs = np.argsort(-scores)
     else:
@@ -213,36 +316,43 @@ def buscar(query: str, k: int = 5, session_id: str = None, rol: str = None,
 
     out = []
     for i in idxs[:k]:
-        r = valid_rows[int(i)]
-        out.append({
-            "id": int(r["id"]),
-            "rol": r["rol"],
-            "ts": r["ts"],
-            "texto": r["texto"][:600],  # truncar al LLM para no inflar contexto
-            "score": round(float(scores[int(i)]), 4),
-        })
+        item = dict(cands[int(i)][1])  # copia
+        item["score"] = round(float(scores[int(i)]), 4)
+        out.append(item)
     return json.dumps(out, ensure_ascii=False)
 
 
 def estado() -> str:
-    """Stats: total mensajes, por rol, último ts, modelo, tamaño DB."""
+    """Stats: mensajes + bloques + modelo + tamaño DB."""
     _init_db()
     with _connect() as c:
-        total = c.execute("SELECT COUNT(*) FROM messages").fetchone()[0]
+        msg_total = c.execute("SELECT COUNT(*) FROM messages").fetchone()[0]
         por_rol = dict(c.execute(
             "SELECT rol, COUNT(*) FROM messages GROUP BY rol").fetchall())
-        ultimo = c.execute("SELECT MAX(ts) FROM messages").fetchone()[0]
-        modelos = [r[0] for r in c.execute(
-            "SELECT DISTINCT embed_model FROM messages").fetchall()]
+        msg_ultimo = c.execute("SELECT MAX(ts) FROM messages").fetchone()[0]
+        blq_total = c.execute("SELECT COUNT(*) FROM bloques").fetchone()[0]
+        blq_ultimo = c.execute("SELECT MAX(ts) FROM bloques").fetchone()[0]
+        blq_sum_n = c.execute("SELECT COALESCE(SUM(n_mensajes), 0) FROM bloques").fetchone()[0]
+        modelos = sorted(set(
+            [r[0] for r in c.execute("SELECT DISTINCT embed_model FROM messages").fetchall()] +
+            [r[0] for r in c.execute("SELECT DISTINCT embed_model FROM bloques").fetchall()]
+        ))
     enc = _get_encoder()
     try:
         bytes_db = os.path.getsize(DB_PATH) if os.path.exists(DB_PATH) else 0
     except Exception:
         bytes_db = 0
     return json.dumps({
-        "total": total,
-        "por_rol": por_rol,
-        "ultimo_ts": ultimo,
+        "mensajes": {
+            "total": msg_total,
+            "por_rol": por_rol,
+            "ultimo_ts": msg_ultimo,
+        },
+        "bloques": {
+            "total": blq_total,
+            "ultimo_ts": blq_ultimo,
+            "mensajes_resumidos_acumulados": blq_sum_n,
+        },
         "modelo_actual": EMBED_MODEL,
         "modelos_en_db": modelos,
         "modelo_cargado": enc is not None,
@@ -251,21 +361,26 @@ def estado() -> str:
     }, ensure_ascii=False, indent=2)
 
 
-def limpiar(antes_de_ts: str = None, session_id: str = None) -> str:
-    """Borra mensajes filtrados. Retorna cuántos."""
+def limpiar(antes_de_ts: str = None, session_id: str = None, tipo: str = "ambos") -> str:
+    """Borra mensajes y/o bloques filtrados. `tipo` = "ambos"|"msg"|"bloque".
+    Retorna cuántos por tabla."""
+    if tipo not in ("ambos", "msg", "bloque"):
+        return f"❌ tipo '{tipo}' no válido (use ambos|msg|bloque)"
     _init_db()
     where, params = [], []
     if antes_de_ts:
         where.append("ts < ?"); params.append(antes_de_ts)
     if session_id:
         where.append("session_id = ?"); params.append(session_id)
-    sql = "DELETE FROM messages"
-    if where:
-        sql += " WHERE " + " AND ".join(where)
+    suffix = " WHERE " + " AND ".join(where) if where else ""
+
+    counts = {}
     with _write_lock, _connect() as c:
-        cur = c.execute(sql, params)
-        n = cur.rowcount
-    return f"OK: {n} borrados"
+        if tipo in ("ambos", "msg"):
+            counts["mensajes"] = c.execute("DELETE FROM messages" + suffix, params).rowcount
+        if tipo in ("ambos", "bloque"):
+            counts["bloques"] = c.execute("DELETE FROM bloques" + suffix, params).rowcount
+    return json.dumps({"borrados": counts}, ensure_ascii=False)
 
 
 def reindexar(modelo_nuevo: str = None) -> str:
@@ -278,6 +393,7 @@ def reindexar(modelo_nuevo: str = None) -> str:
 
 _OPERACIONES = {
     "ingestar": ingestar,
+    "ingestar_bloque": ingestar_bloque,
     "buscar": buscar,
     "estado": estado,
     "limpiar": limpiar,

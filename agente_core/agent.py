@@ -275,6 +275,12 @@ class Agent:
                     if out.type == "message":
                         resumen = "\n".join(p.text for p in out.content)
                         self.memoria.agregar_resumen(resumen)
+                        # Fase 1.5: además del JSON viejo, indexar el resumen
+                        # semánticamente para que buscar_memoria lo recupere.
+                        self._ingestar_bloque_retrieval(
+                            resumen=resumen,
+                            n_mensajes=len(antiguos),
+                        )
                         break
             except Exception as e:
                 logger.warning(f"Error generando resumen: {e}")
@@ -1055,6 +1061,29 @@ class Agent:
             ).start()
         except Exception as e:
             logger.warning(f"retrieval ingest fallo (ignorado): {e}")
+
+    def _ingestar_bloque_retrieval(self, resumen: str, n_mensajes: int = None):
+        """Fase 1.5 — indexa el resumen del compactador en la tabla `bloques`.
+
+        Llamado desde `compactar_historial` justo después de
+        `self.memoria.agregar_resumen(...)`. Daemon thread, tolerante a fallo.
+        """
+        if not resumen or not str(resumen).strip():
+            return
+        try:
+            from memoria_retrieval_tool import ejecutar as _mr_ejecutar
+            threading.Thread(
+                target=_mr_ejecutar,
+                args=("ingestar_bloque",),
+                kwargs={
+                    "resumen": str(resumen)[:8000],
+                    "n_mensajes": n_mensajes,
+                    "session_id": str(getattr(self, "_current_chat_id", 0) or "global"),
+                },
+                daemon=True,
+            ).start()
+        except Exception as e:
+            logger.warning(f"retrieval bloque ingest fallo (ignorado): {e}")
 
     # ── Ejecución de una herramienta ─────────────────────────────────────────
 
