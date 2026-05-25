@@ -126,3 +126,7 @@ _curl_*
 _run_*
 _tmp_*
 .monitor_bateria_alertado.flag
+anthropic_gateway/data/
+worker_hub/data/
+.env.bak.*
+agente_core/data/agenda.json.bak.*

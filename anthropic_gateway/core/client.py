@@ -1,8 +1,10 @@
-"""HTTP client al backend OpenAI-compatible (LM Studio gateway).
+"""HTTP client al backend OpenAI-compatible.
 
-Lee config de env:
-  LMSTUDIO_BASE_URL  (default https://rhayalcantara-002-site2.ntempurl.com/v1)
-  LMSTUDIO_API_KEY   (Bearer)
+Lee config de env (en orden de precedencia):
+  ANTHROPIC_GATEWAY_BACKEND_URL  -- preferido cuando el backend es el worker_hub local
+  LMSTUDIO_BASE_URL              -- legacy, fallback
+  ANTHROPIC_GATEWAY_BACKEND_KEY  -- preferido cuando el backend es el hub (suele ser WORKER_HUB_API_KEY)
+  LMSTUDIO_API_KEY               -- legacy, fallback
 """
 from __future__ import annotations
 
@@ -14,8 +16,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BASE_URL = os.getenv("LMSTUDIO_BASE_URL", "https://rhayalcantara-002-site2.ntempurl.com/v1").rstrip("/")
-API_KEY = os.getenv("LMSTUDIO_API_KEY", "")
+BASE_URL = (
+    os.getenv("ANTHROPIC_GATEWAY_BACKEND_URL")
+    or os.getenv("LMSTUDIO_BASE_URL")
+    or "http://127.0.0.1:8500/v1"
+).rstrip("/")
+API_KEY = (
+    os.getenv("ANTHROPIC_GATEWAY_BACKEND_KEY")
+    or os.getenv("LMSTUDIO_API_KEY")
+    or ""
+)
 DEFAULT_TIMEOUT = float(os.getenv("ANTHROPIC_GATEWAY_TIMEOUT", "120"))
 
 

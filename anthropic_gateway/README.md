@@ -82,13 +82,27 @@ Emite eventos Anthropic-style: `message_start`, `content_block_start`, `content_
 - ✅ stop_reason map (stop/length/tool_calls → end_turn/max_tokens/tool_use)
 - ✅ Validación con SDK oficial `anthropic` Python
 
+## Exposición a la red
+
+- ✅ **Tailscale tailnet** — el gateway escucha en `0.0.0.0:8400` y queda accesible desde cualquier nodo del tailnet en `http://100.89.251.75:8400`. Auth obligatoria vía `ANTHROPIC_GATEWAY_API_KEY`. Ver `wiki/configuracion/gateway-anthropic.md`.
+- ❌ **Cloudflare Tunnel — descartado.** Los consumidores actuales viven en el tailnet (PCs de Rhay, Mac de Ranger, móvil). CF Tunnel solo se reabriría si en el futuro un consumidor externo lo necesita.
+- 🔧 **Regla firewall Windows** — pendiente de aplicar con PowerShell elevado (ver wiki).
+
+## Arranque on-demand
+
+```powershell
+.\iniciar_gateway.ps1           # idempotente
+.\iniciar_gateway.ps1 -Status   # estado + health
+.\iniciar_gateway.ps1 -Stop
+.\iniciar_gateway.ps1 -Force    # reinicio
+```
+
 ## Pendiente (fase 2)
 
 - ⚠️ **Tool use translation** — Anthropic `tool_use` / `tool_result` blocks ↔ OpenAI `tool_calls` / `tool` role. Hoy se aplana como markers de texto (lossy).
 - ⚠️ **Vision / image blocks** — Anthropic `image` blocks ↔ OpenAI `image_url`. No implementado.
 - ⚠️ **Streaming tool calls** — chunks de tool_use mid-stream.
-- ⚠️ **Cloudflare Tunnel** para exponer público bajo dominio propio.
-- ⚠️ **NSSM service** para correr como servicio Windows.
+- ⚠️ **Servicio Windows** (NSSM) si se quiere auto-arranque. Hoy on-demand vía `iniciar_gateway.ps1`.
 
 ## Estructura
 

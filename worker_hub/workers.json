@@ -1,0 +1,20 @@
+{
+  "workers": [
+    {
+      "name": "ranger",
+      "base_url": "http://100.91.126.66:1234/v1",
+      "priority": 10,
+      "enabled": true,
+      "api_key_env": null,
+      "notes": "LM Studio en Mac Studio M2 Ultra (tailnet 100.91.126.66). Sin auth."
+    },
+    {
+      "name": "remoto",
+      "base_url": "https://rhayalcantara-002-site2.ntempurl.com/api/v1",
+      "priority": 5,
+      "enabled": true,
+      "api_key_env": "LMSTUDIO_REMOTO_API_KEY",
+      "notes": "Backend OAI publico. Catalogo: nemotron, qwen3.6, gemma-3, qwen2.5, etc. Requiere Bearer LMSTUDIO_REMOTO_API_KEY (renombrada 25-may para no chocar con LMSTUDIO_API_KEY que ahora autentica al hub)."
+    }
+  ]
+}
