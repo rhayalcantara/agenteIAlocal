@@ -560,8 +560,8 @@
       "chat_id": 5483766132,
       "creada": "2026-05-05T01:06:02.201771",
       "ultima_ejecucion": "2026-05-24T10:06:49.039845",
-      "ultimo_resultado": "El token de Gmail está expirado, no se pudo verificar el correo. El usuario necesita reautenticar Gmail.",
-      "ultimo_error": "La ejecución superó el límite de 5 minutos.",
+      "ultimo_resultado": "Pendiente proximo ciclo (Gmail re-autenticado por Rhay el 25-may, recuperacion automatica esperada).",
+      "ultimo_error": null,
       "ejecuciones": [
         {
           "timestamp": "2026-05-10T22:48:12.975588",

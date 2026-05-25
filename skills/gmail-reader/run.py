@@ -25,31 +25,47 @@ SCOPES = [
 
 
 def _get_service():
-    """Obtiene el servicio de Gmail autenticado."""
+    """Obtiene el servicio de Gmail autenticado.
+
+    Sale RÁPIDO (exit 2 = token expirado) si las credenciales están muertas,
+    en vez de dejar que el agente queme 5 min interpretando un traceback.
+    Visto 24-may con Promerica id=7: 'creds.refresh(Request())' lanzó
+    RefreshError sin capturar → traceback feo → timeout del scheduler.
+    """
     try:
         from google.auth.transport.requests import Request
         from google.oauth2.credentials import Credentials
+        from google.auth.exceptions import RefreshError
         from googleapiclient.discovery import build
     except ImportError:
         print("ERROR: Instala google-api-python-client y google-auth-oauthlib")
         sys.exit(1)
 
     if not os.path.exists(TOKEN_FILE):
-        print(f"ERROR: No existe token de autenticación en {TOKEN_FILE}")
-        print("Ejecuta primero: python gmail_manager/main.py")
-        sys.exit(1)
+        print("ERROR: TOKEN_GMAIL_EXPIRADO — no existe token. Ejecuta: python reauth_gmail.py")
+        sys.exit(2)
 
     creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
     if not creds.valid:
         if creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-            with open(TOKEN_FILE, "w") as f:
-                f.write(creds.to_json())
+            try:
+                creds.refresh(Request())
+                with open(TOKEN_FILE, "w") as f:
+                    f.write(creds.to_json())
+            except RefreshError as e:
+                # El refresh token también murió (revocado/expirado en el lado de Google).
+                # Salir YA con mensaje único y corto — sin esto el agente queda 5 min.
+                print(f"ERROR: TOKEN_GMAIL_EXPIRADO — el refresh_token también falló ({e}). "
+                      "Ejecuta: python reauth_gmail.py")
+                sys.exit(2)
+            except Exception as e:
+                print(f"ERROR: TOKEN_GMAIL_EXPIRADO — fallo en refresh ({type(e).__name__}: {e}). "
+                      "Ejecuta: python reauth_gmail.py")
+                sys.exit(2)
         else:
-            print("ERROR: Token expirado. Ejecuta: python gmail_manager/main.py")
-            sys.exit(1)
+            print("ERROR: TOKEN_GMAIL_EXPIRADO — sin refresh_token. Ejecuta: python reauth_gmail.py")
+            sys.exit(2)
 
-    from googleapiclient.discovery import build
     return build("gmail", "v1", credentials=creds)
 
 
