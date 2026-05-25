@@ -24,7 +24,7 @@
 
 | # | Item | Estimación | Notas |
 |---|------|-----------|-------|
-| 6 | **Probar otras voces piper** (es_MX-ald, es_ES-davefx alternancia) | ~15 min | Models descargados, basta cambiar `PIPER_VOICE_MODEL` env. Daniela quedó como default. |
+| ~~6~~ | ~~**Probar otras voces piper**~~ | ✅ DONE 25-may | Comparado Daniela vs Davefx (es_ES) vs Ald (es_MX) via 3 muestras Telegram con misma frase. Rhay confirmó: **mantiene Daniela** (default actual). Cero cambios al código. |
 | 7 | **Panel TV: vista C mix rotativo** (operaciones + agenda + alertas) | ~2h | Diseño ya en `MOCKUP_PANEL_TV.html`. Si Rhay quiere más info en la TV cuando esté siempre encendida. |
 | 8 | **`claude-server` multi-dispositivo** | ~varias sesiones | Memoria `project_claude_server.md` — FastAPI :8200 con inbox+SSE para chatear con Claude desde móvil/PC vía Tailscale. Quedó a medias. |
 | 9 | **Sumar PC con RTX 3060 al `worker_hub` como worker** | ~30 min cuando esté lista | Instalar LM Studio, exponer `0.0.0.0:1234`, agregar Tailscale, sumar entrada en `worker_hub/workers.json` (priority entre 7 y 9: local con GPU > remoto ntempurl, pero <= Ranger M2 Ultra según modelo). Rhay anunciará cuando la PC esté disponible. |
@@ -75,3 +75,4 @@
 - ✅ **worker_hub :8500** — pool de LLMs detrás de endpoint OAI único, routing por modelo + failover, 2 workers iniciales (ranger Mac M2 + remoto ntempurl, total 36 modelos únicos), streaming SSE end-to-end (mayo 25)
 - ✅ **Resúmenes rodantes Fase 1.5** — `memoria_retrieval` ahora indexa los resúmenes del compactador en tabla `bloques`. Búsqueda unificada msg+bloque con score. Smoke E2E con qwen3.6:27b vía hub (mayo 25)
 - ✅ **Bugs limpiados:** `gmail_manager/auth.py` borrado (imports rotos, nadie lo importaba); acción agenda "Verificar con María" eliminada (mayo 25)
+- ✅ **Comparativa voces piper** — Daniela vs Davefx vs Ald via 3 muestras, Rhay mantuvo Daniela (mayo 25)
