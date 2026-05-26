@@ -77,3 +77,4 @@
 - ✅ **Bugs limpiados:** `gmail_manager/auth.py` borrado (imports rotos, nadie lo importaba); acción agenda "Verificar con María" eliminada (mayo 25)
 - ✅ **Comparativa voces piper** — Daniela vs Davefx vs Ald via 3 muestras, Rhay mantuvo Daniela (mayo 25)
 - ✅ **RemoteAny integrado al tailnet bidireccional** — Mac host con LaunchAgent persistente (`com.rhay.remoteany`), Windows host on-demand, sin password ni relay Oracle, validado E2E con mouse+click (mayo 25)
+- ✅ **Auto-arranque supervisor+agente al login Windows** — `iniciar_supervisor.ps1` + atajo en Startup folder (`RangerSupervisor.cmd`). Idempotente. Sobrevive reboot sin admin (mayo 26)
