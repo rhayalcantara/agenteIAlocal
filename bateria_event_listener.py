@@ -10,7 +10,8 @@ Comportamiento:
     flag file de histéresis).
   - pct ≥ UMBRAL_RECUPERADO (20%) Y cargando bien → limpia flag (próxima caída
     vuelve a alertar).
-  - Cambio de BatteryStatus (enchufado ↔ desenchufado) → log (no alerta).
+  - Cambio AC ↔ Discharging → alerta Telegram (debounce 5s para evitar spam
+    si el cable malo fluctúa).
 
 Reusa `monitor_bateria.telegram_send`, `log`, constantes (UMBRAL_*, FLAG_PATH).
 Tolerante a desconexión transitoria de WMI (reintenta con backoff).
@@ -52,11 +53,39 @@ _AC_PLUGGED  = {2, 3, 6, 7, 8, 9, 11}
 
 _running = True
 
+# Debounce para evitar spam de avisos enchufado/desenchufado si el cable
+# fluctúa. Solo notifica si han pasado >FUENTE_DEBOUNCE_SECS desde la última.
+FUENTE_DEBOUNCE_SECS = int(os.getenv("BATERIA_FUENTE_DEBOUNCE_SECS", "5"))
+
 
 def _signal_handler(signum, _frame):
     global _running
     log(f"listener recibido signal {signum} — saliendo limpio")
     _running = False
+
+
+def _es_ac(status: int) -> bool:
+    """True si el estado WMI indica fuente AC (enchufado, sea cargando o no)."""
+    return status in _AC_PLUGGED
+
+
+def _notificar_cambio_fuente(prev_status: int, new_status: int, pct: float) -> None:
+    """Manda Telegram cuando cambia de AC a Discharging o viceversa."""
+    prev_ac = _es_ac(prev_status)
+    new_ac  = _es_ac(new_status)
+    if prev_ac == new_ac:
+        return  # cambio dentro de la misma clase (ej. charging → fully charged)
+    if new_ac:
+        msg = (f"🔌 *Cable enchufado* (batería {pct}%)\n"
+               f"BatteryStatus: {prev_status} → {new_status}")
+    else:
+        msg = (f"🔋 *Cable desenchufado* (batería {pct}%)\n"
+               f"BatteryStatus: {prev_status} → {new_status}\n"
+               f"Ojo si no fue intencional.")
+    if telegram_send(msg):
+        log(f"AVISO fuente enviado: {prev_status}→{new_status}")
+    else:
+        log(f"AVISO fuente fallo Telegram: {prev_status}→{new_status}")
 
 
 def _decidir_alerta(pct: float, status: int) -> tuple[bool, str]:
@@ -132,6 +161,7 @@ def _loop() -> int:
         )
 
         last_status = st0
+        last_fuente_change_ts = 0.0  # epoch del último notificación de fuente
         while _running:
             try:
                 # Timeout corto para chequear _running periódicamente.
@@ -152,6 +182,14 @@ def _loop() -> int:
 
             if status != last_status:
                 log(f"BatteryStatus cambió: {last_status} → {status} (pct={pct}%)")
+                # Solo notificar si el cambio cruza AC↔Discharging y pasó el debounce
+                if _es_ac(last_status) != _es_ac(status):
+                    now = time.time()
+                    if now - last_fuente_change_ts >= FUENTE_DEBOUNCE_SECS:
+                        _notificar_cambio_fuente(last_status, status, pct)
+                        last_fuente_change_ts = now
+                    else:
+                        log(f"  (debounce: cambio dentro de {FUENTE_DEBOUNCE_SECS}s, silenciado)")
                 last_status = status
 
             _procesar_lectura(pct, status)
