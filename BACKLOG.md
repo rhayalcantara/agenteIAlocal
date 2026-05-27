@@ -78,3 +78,4 @@
 - ✅ **Comparativa voces piper** — Daniela vs Davefx vs Ald via 3 muestras, Rhay mantuvo Daniela (mayo 25)
 - ✅ **RemoteAny integrado al tailnet bidireccional** — Mac host con LaunchAgent persistente (`com.rhay.remoteany`), Windows host on-demand, sin password ni relay Oracle, validado E2E con mouse+click (mayo 25)
 - ✅ **Auto-arranque supervisor+agente al login Windows** — `iniciar_supervisor.ps1` + atajo en Startup folder (`RangerSupervisor.cmd`). Idempotente. Sobrevive reboot sin admin (mayo 26)
+- ✅ **Monitor batería event-driven (WMI)** — `bateria_event_listener.py` suscrito a `Win32_Battery`, reacciona a cambios sin loop nuestro. Schtask `RangerMonitorBateria` (cada 5 min) deshabilitado. Auto-arranque al login con `RangerBateriaListener.cmd` (mayo 27)
