@@ -1,32 +1,32 @@
 # Noticias Recientes de Diario Libre
 
-![Crece la participación femenina en el sector transporte y almacenamiento](https://resources.diariolibre.com/images/2026/05/22/crece-la-participacion-femenina-en-el-sector-transporte-148eabbc-focus-0-0-598-352.jpg)
-[Crece la participación femenina en el sector transporte y almacenamiento](https://www.diariolibre.com/economia/empleo)
+![Al menos 16 niñas muertas y 79 heridas al incendiarse un internado en Kenia](https://resources.diariolibre.com/images/dummy_diariolibre.jpg)
+[Al menos 16 niñas muertas y 79 heridas al incendiarse un internado en Kenia](https://www.diariolibre.com/mundo/africa)
 
-![En busca del sueño coreano](https://resources.diariolibre.com/images/2026/05/22/ilustracion-connectas-09a5de7f-focus-0-0-598-352.jpg)
-[En busca del sueño coreano](https://www.diariolibre.com/actualidad/reportajes)
+![Juan Soto cruza el ecuador hacia los 500 jonrones como un Fórmula Uno](https://resources.diariolibre.com/images/2026/05/21/soto-la-saco-dos-veces-pero-los-mets-volvieron-a-caer-en-washington-d4079be0-focus-0.4-0.56-598-352.jpg)
+[Juan Soto cruza el ecuador hacia los 500 jonrones como un Fórmula Uno](https://www.diariolibre.com/deportes/beisbol)
 
-!["No normalizar" relaciones entre menores y adultos: el llamado urgente tras la muerte de Abril](https://resources.diariolibre.com/images/2026/05/23/alertan-por-normalizacion-de-relaciones-entre-menores-y-adultos-e5ffd91f-focus-0-0-598-352.jpg)
-["No normalizar" relaciones entre menores y adultos: el llamado urgente tras la muerte de Abril](https://www.diariolibre.com/actualidad/sucesos)
+![Indagan hogar del Conani donde murió una menor de 14 años](https://resources.diariolibre.com/images/2026/05/28/imagen-shutterstock2193737127-a94c6ee7-focus-0-0-896-504-410b7eae-focus-0-0-598-352.jpg)
+[Indagan hogar del Conani donde murió una menor de 14 años](https://www.diariolibre.com/actualidad/nacional)
 
-![Casos positivos de leptospirosis superan el doble de los registrados en 2025](https://resources.diariolibre.com/images/2026/05/22/20074-1-da336dbb-focus-0-0-598-352.jpg)
-[Casos positivos de leptospirosis superan el doble de los registrados en 2025](https://www.diariolibre.com/actualidad/salud)
+![Tasa de impuesto sobre la renta a las empresas: RD y países nórdicos](https://resources.diariolibre.com/images/2026/05/27/shutterstock2610206725jpg-f6dd03f6-focus-0-0-598-352.jpg)
+[Tasa de impuesto sobre la renta a las empresas: RD y países nórdicos](https://www.diariolibre.com/economia/finanzas)
 
-![Fundación Adulam impulsa el voluntariado juvenil y la transformación social en La Romana](https://resources.diariolibre.com/images/2026/04/02/fundacion-adulam-impulsa-el-voluntariado-juvenil-en-la-romana-f4caec21-focus-0.63-0.39-598-352.jpg)
-[Fundación Adulam impulsa el voluntariado juvenil y la transformación social en La Romana](https://www.diariolibre.com/actualidad/educacion)
+![Banco Central proyecta que el turismo apunta a generar más de US$12,500 millones en 2026](https://resources.diariolibre.com/images/2026/05/04/el-947--de-turistas-califica-a-rd-como-un-destino-asequible-dd2e37c2-focus-0-0-598-352.jpg)
+[Banco Central proyecta que el turismo apunta a generar más de US$12,500 millones en 2026](https://www.diariolibre.com/economia/turismo)
 
-![Los Knicks acarician sus primeras Finales del siglo en la NBA](https://resources.diariolibre.com/images/2026/05/24/nba-los-knicks-acarician-sus-primeras-finales-del-siglo-en-la-nba-5b1e67ce-focus-min0.2-0.15-598-352.png)
-[Los Knicks acarician sus primeras Finales del siglo en la NBA](https://www.diariolibre.com/deportes/baloncesto)
+![Las herramientas lideraron el aumento en costos de construcción de viviendas en abril de 2026](https://resources.diariolibre.com/images/2026/01/26/la-construccion-de-una-vivienda-aumenta-372--en-2025-71f52d1a-focus-0-0-598-352.jpg)
+[Las herramientas lideraron el aumento en costos de construcción de viviendas en abril de 2026](https://www.diariolibre.com/economia/vivienda)
 
-![Los candidatos presidenciales colombianos apuran mítines en vísperas del cierre de campaña](https://resources.diariolibre.com/images/2022/02/01/bandera-colombiana-04b60b5e-focus-0-0-598-352.jpg)
-[Los candidatos presidenciales colombianos apuran mítines en vísperas del cierre de campaña](https://www.diariolibre.com/mundo/america-latina)
+![Persiste la incertidumbre fiscal, y podría continuar aumentando](https://resources.diariolibre.com/images/2026/05/27/shutterstock2631278657jpg-1125df3c-focus-0-0-598-352.jpg)
+[Persiste la incertidumbre fiscal, y podría continuar aumentando](https://www.diariolibre.com/economia/finanzas)
 
-![Diecinueve personas podrían estar atrapadas tras el derrumbe de un edificio en Filipinas](https://resources.diariolibre.com/images/2026/05/24/derrumbe-de-edificio-en-manila-19-trabajadores-atrapados-273a0f87-focus-0-0-598-352.jpg)
-[Diecinueve personas podrían estar atrapadas tras el derrumbe de un edificio en Filipinas](https://www.diariolibre.com/mundo/asia)
+![¿Cuáles son los productos más importados por República Dominicana?](https://resources.diariolibre.com/images/2026/05/27/shutterstock2593042675jpg-5aedede7-focus-0-0-598-352.jpg)
+[¿Cuáles son los productos más importados por República Dominicana?](https://www.diariolibre.com/economia/finanzas)
 
-![Isabel Pantoja sobre RD: "El descanso más feliz de mi vida"](https://resources.diariolibre.com/images/2026/05/20/inicia-la-cuenta-regresiva-para-el-concierto-de-isabel-pantoja-aff1a186-focus-min0.05-0.35-598-352.jpg)
-[Isabel Pantoja sobre RD: "El descanso más feliz de mi vida"](https://www.diariolibre.com/revista/musica)
+![Empresarios llaman a construir consensos para salir de la trampa del bajo crecimiento económico](https://resources.diariolibre.com/images/2026/05/27/conep-llama-a-construir-consesos-para-vencer-el-bajo-crecimiento-a0408fe1-focus-min0.07-0.36-598-352.jpg)
+[Empresarios llaman a construir consensos para salir de la trampa del bajo crecimiento económico](https://www.diariolibre.com/economia/negocios)
 
-![Hombre secuestrado en Boca Chica fue hallado calcinado dentro de un vehículo en Juan Dolio](https://resources.diariolibre.com/images/2026/01/21/policia-niega-rapto-de-menor-en-la-vega-fue-intento-de-robo-7e373c44-focus-0-0-598-352.jpg)
-[Hombre secuestrado en Boca Chica fue hallado calcinado dentro de un vehículo en Juan Dolio](https://www.diariolibre.com/actualidad/nacional)
+![Buscarán hoy devolver a prisión a Donni Santana](https://resources.diariolibre.com/images/2026/05/28/imagen-donni-santana-archivo-e0d3e1cf-focus-0.46-0.41-598-352.jpg)
+[Buscarán hoy devolver a prisión a Donni Santana](https://www.diariolibre.com/actualidad/justicia)
 

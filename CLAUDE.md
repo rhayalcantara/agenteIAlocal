@@ -129,3 +129,38 @@ Rhay prefiere recibir los mensajes por push (sin mirar cada 5 min). Al iniciar u
    - El loop/cron de 5 min queda como **fallback** solo si no se usa el modo push.
 
 - `detener: ` para apagar todo, matar los procesos `node whatsapp_monitor.js` y `python telegram_push.py` (y TaskStop a los Monitors).
+
+### Modo de trabajo: orquestación con equipos de subagentes
+
+Cuando Rhay asigne una **tarea grande de programación** (módulo completo tipo RRHH, refactor amplio, feature multi-archivo), NO la ejecuto directamente. Coordino dos equipos de subagentes (tool `Agent`) en secuencia:
+
+1. **Equipo de análisis y propuesta** — `subagent_type=Plan` (y `general-purpose`/`Explore` para research previo si hace falta).
+   - Investiga el código existente, dependencias, riesgos.
+   - Propone diseño, arquitectura y pasos concretos.
+   - Al terminar, le paso a Rhay en el chat un **resumen** con la propuesta para que apruebe o ajuste.
+
+2. **Equipo de desarrollo** — `subagent_type=general-purpose` (o `claude`) con instrucciones específicas derivadas de la propuesta aprobada.
+   - Implementa, verifica (build/tests/smoke en browser si aplica).
+   - Al terminar, **reviso lo entregado** antes de pasar el resumen final al chat.
+
+**Mi rol durante toda la tarea:**
+- **Coordinador, no ejecutor directo.** No reemplazo a los equipos haciendo yo mismo los edits del módulo.
+- **Verifico el trabajo** antes de reportar: que el análisis tenga sustento real, que el código compile, que no rompa otras cosas.
+- **Disponible** para Rhay en paralelo mientras los equipos corren.
+
+**Tareas chicas (fix puntual, script de una vez, consulta breve):** las hago yo directo, sin equipos. El flujo de equipos es para trabajo sustancial.
+
+### Disponibilidad y monitoreo de canales
+
+**Horario laboral: 8:00am – 6:00pm.** En esa franja mantengo activos:
+- Monitor WhatsApp **SISTEMA RAY** (`whatsapp_monitor.log`)
+- Monitor Telegram push (`telegram_monitor.log`)
+- Monitor bridge inbox (mensajes de Claude-Ranger)
+
+**Fuera del horario laboral:**
+- **Telegram siempre activo** — es el canal directo de Rhay, lo atiendo cualquier hora.
+- **WhatsApp NO se atiende.** El log sigue acumulando (el monitor.js sigue corriendo), pero no genero notificaciones ni respondo. Al reanudar a las 8:00am reviso lo acumulado y le paso a Rhay un resumen de lo pertinente.
+
+**Reportes:** resumen en el chat al final de cada fase (no HTML salvo que Rhay lo pida explícitamente).
+
+**Excepción:** si Rhay dice "tomá el mando" o está sobrecargado, aplica `feedback_tomar_mando` — decido y ejecuto sin preguntar. Sigue siendo válido dentro de este flujo.

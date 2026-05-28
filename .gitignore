@@ -132,3 +132,6 @@ worker_hub/data/
 agente_core/data/agenda.json.bak.*
 telegram_agente.log
 telegram_agente.log.err
+whatsapp_monitor.log.err
+whatsapp_monitor.log.out
+.env.local_mysql

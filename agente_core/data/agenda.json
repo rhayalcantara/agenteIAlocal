@@ -9,109 +9,109 @@
       "activa": true,
       "chat_id": 5483766132,
       "creada": "2026-04-24T14:19:28.892812",
-      "ultima_ejecucion": "2026-05-25T19:22:20.655607",
-      "ultimo_resultado": "📧 **Resumen de correos — 25/May 2026 19:20**\n\n🔴 **Novedades relevantes (2):**\n\n1. **Amazon - Pedido confirmado** #112-7707672-1171422\n   - Cargador de laptop 65W para Lenovo — $18.99\n   - Estado: **En reparto** — llegada estimada: 4-5 de junio\n   - ✅ Seguimiento creado (#10) con monitoreo cada 4 horas\n\n2. **Oracle Cloud** — Tu trial gratuito **finalizó hoy**\n   - Acceso limitado a servicios Always Free únicamente\n\n📨 **Resto de correos (8):** Notificaciones de redes sociales y newsletters:\n- Link",
+      "ultima_ejecucion": "2026-05-28T09:04:38.783181",
+      "ultimo_resultado": "[19:02] Revisé los últimos correos: 3 correos — ninguno relevante. Todos son marketing/promocionales (ProUsuario, TransUnionDR, La Vanguardia). Sin novedades.\n\n[SILENCIOSO]",
       "ultimo_error": null,
       "ejecuciones": [
         {
-          "timestamp": "2026-05-16T19:46:43.535344",
+          "timestamp": "2026-05-26T18:23:00.406763",
           "exito": true,
-          "resumen": "📬 **Resumen de correos (16 May 2026)**\n\n**10 correos nuevos:**\n\n| # | De | Asunto | Adjunto |\n|---|-----|--------|---------|\n| 1 | Banco Promerica | Estado de cuenta Tarjeta CREDIPLUS **6819** (corte "
+          "resumen": "### Resumen de correo — 26 May 2026 18:21\n\n**10 correos nuevos** sin leer. Nada urgente, pero hay novedades:\n\n| Prioridad | Remitente | Asunto |\n|-----------|-----------|--------|\n| 🔴 Alta | Google Cl"
         },
         {
-          "timestamp": "2026-05-16T21:48:07.120316",
+          "timestamp": "2026-05-26T20:26:54.242143",
           "exito": true,
-          "resumen": "Se completó la ejecución: leí 10 correos no leídos, identifiqué 4 relevantes (estado de cuenta Promerica, 2 facturas de Claro, notificación Stripe) y el resumen se envió por Telegram. No se detectó ni"
+          "resumen": "📬 Resumen de correos — 26 May 2026 (últimos 10)\n\n**🔔 Novedades relevantes:**\n\n1. ⚠️ **Google Cloud** — Cambio obligatorio de certificados TLS antes del 15 Jun 2026. Acción requerida solo si usas trust"
         },
         {
-          "timestamp": "2026-05-16T23:50:22.031734",
+          "timestamp": "2026-05-26T22:30:02.559098",
           "exito": true,
-          "resumen": "Resumen de últimos 10 correos no leídos:\n\n• **201 correos sin leer** en total.\n• **Principales remitentes:** Reddit (2x, digest), BM Cargo (2x, promo), LinkedIn, Banco Promerica, Facturas Claro, Faceb"
+          "resumen": "(sin respuesta del agente)"
         },
         {
-          "timestamp": "2026-05-17T01:52:26.679792",
-          "exito": true,
-          "resumen": "Error desconocido"
-        },
-        {
-          "timestamp": "2026-05-17T03:55:07.681548",
-          "exito": true,
-          "resumen": "Aquí tienes el resumen:\n\n📩 **10 correos recibidos**\n\n**Financieros:**\n- **Banco Promerica** — Estado de cuenta tarjeta CREDIPLUS (6819), corte 5/15/2026\n- **Facturas Claro** — Mayo/2026: factura y com"
-        },
-        {
-          "timestamp": "2026-05-17T05:57:27.713388",
+          "timestamp": "2026-05-27T00:32:14.022186",
           "exito": true,
           "resumen": "Error desconocido"
         },
         {
-          "timestamp": "2026-05-17T07:59:43.277550",
-          "exito": true,
-          "resumen": "📬 **Resumen de correos (17 May 2026, 07:57)**\n\n10 correos no leídos. **3 relevantes:**\n\n1️⃣ **Banco Promerica** — Estado de cuenta Tarjeta CREDIPLUS (terminada en 6819), corte 15/may [PDF adjunto]\n\n2️"
-        },
-        {
-          "timestamp": "2026-05-17T10:01:06.357992",
-          "exito": true,
-          "resumen": "No hay correos no leídos ni novedades para reportar."
-        },
-        {
-          "timestamp": "2026-05-23T18:29:21.759928",
-          "exito": true,
-          "resumen": "No hay novedades para reportar — el token de Gmail expiró y no pude revisar los correos. Necesita reautenticar las credenciales de Gmail."
-        },
-        {
-          "timestamp": "2026-05-23T20:45:09.391205",
-          "exito": true,
-          "resumen": "No puedo revisar los correos: el token de Gmail expiró y no se pudo refrescar automáticamente. Debes re-autenticar manualmente ejecutando:\n\n```\npython gmail_manager/main.py\n```\n\nEso generará una nueva"
-        },
-        {
-          "timestamp": "2026-05-23T22:46:03.832894",
-          "exito": false,
-          "resumen": "TypeError: Memoria.listar_hechos() got an unexpected keyword argument 'contenido'"
-        },
-        {
-          "timestamp": "2026-05-24T00:47:59.950794",
-          "exito": true,
-          "resumen": "No pude leer los correos — el token de Gmail expiró/revalidación falló. No hay novedades para reportar.\n\n[SILENCIOSO]"
-        },
-        {
-          "timestamp": "2026-05-24T02:50:05.205200",
-          "exito": true,
-          "resumen": "El token de Gmail ha expirado. Necesitas reautenticar las credenciales de Gmail. El cron no puede ejecutarse hasta que se resuelva la autenticación."
-        },
-        {
-          "timestamp": "2026-05-24T04:52:04.531999",
-          "exito": true,
-          "resumen": "El token de Gmail está expirado/revocado, no pude leer los correos.\n\n**Acción requerida:** Necesitas reautentizar las credenciales de Gmail. El token de acceso OAuth2 ya no es válido.\n\n[SILENCIOSO]"
-        },
-        {
-          "timestamp": "2026-05-24T06:53:49.935204",
+          "timestamp": "2026-05-27T02:33:35.946952",
           "exito": true,
           "resumen": "Error desconocido"
         },
         {
-          "timestamp": "2026-05-24T08:55:40.768155",
+          "timestamp": "2026-05-27T04:35:34.745563",
           "exito": true,
-          "resumen": "No se pudo acceder a Gmail (token expirado). No hay novedades para reportar."
+          "resumen": "Error desconocido"
         },
         {
-          "timestamp": "2026-05-25T12:01:19.713431",
+          "timestamp": "2026-05-27T06:37:45.777164",
           "exito": true,
-          "resumen": "No hay correos nuevos desde la última revisión. Los 10 mensajes mostrados son los mismos del turno anterior.\n\n[SILENCIOSO]"
+          "resumen": "No hay correos con números de tracking, envíos o transacciones de seguimiento. Los correos son principalmente notificaciones de LinkedIn, newsletters y promociones. Voy a enviar un resumen.\n\n[SILENCIO"
         },
         {
-          "timestamp": "2026-05-25T14:03:45.368342",
-          "exito": true,
-          "resumen": "📋 Plan:\n[ ] 1. Listar últimos 10 correos con gmail-reader\n[ ] 2. Leer detalles (remitente, asunto, adjuntos)\n[ ] 3. Detectar posibles seguimientos (pedidos, bancos, reservas)\n[ ] 4. Generar resumen y "
-        },
-        {
-          "timestamp": "2026-05-25T17:19:33.622458",
+          "timestamp": "2026-05-27T08:43:29.370019",
           "exito": false,
           "resumen": "La ejecución superó el límite de 5 minutos."
         },
         {
-          "timestamp": "2026-05-25T19:22:20.655607",
+          "timestamp": "2026-05-27T10:44:43.643046",
           "exito": true,
-          "resumen": "📧 **Resumen de correos — 25/May 2026 19:20**\n\n🔴 **Novedades relevantes (2):**\n\n1. **Amazon - Pedido confirmado** #112-7707672-1171422\n   - Cargador de laptop 65W para Lenovo — $18.99\n   - Estado: **En"
+          "resumen": "Error desconocido"
+        },
+        {
+          "timestamp": "2026-05-27T12:47:02.786811",
+          "exito": true,
+          "resumen": "Error desconocido"
+        },
+        {
+          "timestamp": "2026-05-27T14:48:44.784738",
+          "exito": true,
+          "resumen": "No hay novedades relevantes en los últimos 10 correos: la mayoría son promociones (Spotify, Banco Caribe, Sophos), sugerencias de redes sociales, recuerdos de Facebook y un recordatorio de seguridad d"
+        },
+        {
+          "timestamp": "2026-05-27T16:50:09.613285",
+          "exito": true,
+          "resumen": "Los últimos correos son mayoritariamente spam/publicidad (BM Cargo, curso de IA). No hay información relevante para notificar."
+        },
+        {
+          "timestamp": "2026-05-27T18:52:23.602152",
+          "exito": true,
+          "resumen": "No hay novedades en los últimos 10 correos — son publicidad de Promerica y un resumen de LinkedIn. Sin envíos, transacciones ni información relevante."
+        },
+        {
+          "timestamp": "2026-05-27T20:54:36.866525",
+          "exito": true,
+          "resumen": "Error desconocido"
+        },
+        {
+          "timestamp": "2026-05-27T22:55:39.054191",
+          "exito": true,
+          "resumen": "Error desconocido"
+        },
+        {
+          "timestamp": "2026-05-28T00:57:30.711921",
+          "exito": true,
+          "resumen": "[201 correos sin leer]. Últimos: Shopwise, LinkedIn (3), Nicepage promo, Banco Promerica promo, NVIDIA CUDA 13.3 release, Jon Hernandez IA/Vibe Coding, Sophos. Mayoría spam/promocional. NVIDIA CUDA y "
+        },
+        {
+          "timestamp": "2026-05-28T02:59:48.818233",
+          "exito": true,
+          "resumen": "Corrijo el comando — el script usa `leer` no `unread`."
+        },
+        {
+          "timestamp": "2026-05-28T05:01:16.684019",
+          "exito": true,
+          "resumen": "Error desconocido"
+        },
+        {
+          "timestamp": "2026-05-28T07:02:53.299005",
+          "exito": true,
+          "resumen": "Error desconocido"
+        },
+        {
+          "timestamp": "2026-05-28T09:04:38.783181",
+          "exito": true,
+          "resumen": "[19:02] Revisé los últimos correos: 3 correos — ninguno relevante. Todos son marketing/promocionales (ProUsuario, TransUnionDR, La Vanguardia). Sin novedades.\n\n[SILENCIOSO]"
         }
       ],
       "intervalo_minutos": 120,
@@ -128,8 +128,8 @@
       "activa": true,
       "chat_id": 5483766132,
       "creada": "2026-04-24T14:20:42.853457",
-      "ultima_ejecucion": "2026-05-24T08:01:49.283109",
-      "ultimo_resultado": "Resumen matutino enviado con 10 titulares de Diario Libre, incluyendo las 3 noticias más relevantes:\n\n1. **\"No normalizar\" relaciones entre menores y adultos** — Llamado urgente tras la muerte de Abril (Sucesos)\n2. **Casos de leptospirosis superan el doble de 2025** — Alerta de salud pública (Salud)\n3. **Derrumbe en Filipinas** — 19 personas podrían estar atrapadas (Mundo)\n\nEl reporte completo con imágenes y enlaces está disponible en el agente.",
+      "ultima_ejecucion": "2026-05-28T08:01:50.143477",
+      "ultimo_resultado": "Se ejecutó la skill `buscar-noticias` que generó un reporte con 10 titulares de Diario Libre. Se envió el archivo por Telegram como resumen matutino. No se detectaron correos ni referencias de seguimiento durante esta ejecución.",
       "ultimo_error": null,
       "ejecuciones": [
         {
@@ -206,6 +206,16 @@
           "timestamp": "2026-05-24T08:01:49.283109",
           "exito": true,
           "resumen": "Resumen matutino enviado con 10 titulares de Diario Libre, incluyendo las 3 noticias más relevantes:\n\n1. **\"No normalizar\" relaciones entre menores y adultos** — Llamado urgente tras la muerte de Abri"
+        },
+        {
+          "timestamp": "2026-05-27T08:02:04.003088",
+          "exito": true,
+          "resumen": "Las imágenes no se puedieron descargar a tiempo. Envío el resumen por texto:\n\n📰 **Resumen matutino — Diario Libre | 27 mayo 2026**\n\n🔥 **3 titulares principales:**\n\n**1. Enhanced Games vs COI: El milló"
+        },
+        {
+          "timestamp": "2026-05-28T08:01:50.143477",
+          "exito": true,
+          "resumen": "Se ejecutó la skill `buscar-noticias` que generó un reporte con 10 titulares de Diario Libre. Se envió el archivo por Telegram como resumen matutino. No se detectaron correos ni referencias de seguimi"
         }
       ],
       "hora": "08:00",
@@ -220,15 +230,10 @@
       "activa": true,
       "chat_id": 5483766132,
       "creada": "2026-04-24T14:20:48.548117",
-      "ultima_ejecucion": "2026-05-16T20:02:01.192126",
-      "ultimo_resultado": "📰 **Resumen de Noticias — 16 may 2026**\n\n---\n\n**1 🔥 El portaaviones Gerald R. Ford regresa a EE.UU. tras participar en conflicto Irán-Venezuela**\nLa nave de guerra regresa tras su despliegue en medio de la escalada militar entre Irán, Venezuela y EE.UU.\n🔗 https://www.diariolibre.com/usa/actualidad\n![Imagen](https://resources.diariolibre.com/images/2026/05/16/el-portaaviones-gerald-r-ford-y-su-despliegue-militar-11b1d0a6-focus-0-0-598-352.png)\n\n---\n\n**2 🚨 Arrestan a extesorero y aliado del presid",
+      "ultima_ejecucion": "2026-05-27T20:01:54.667155",
+      "ultimo_resultado": "Se generó el reporte de 10 titulares de Diario Libre y se envió por Telegram con las 5 noticias más relevantes destacadas en el caption. No se detectaron números de seguimiento o procesos rastreables en las noticias.",
       "ultimo_error": null,
       "ejecuciones": [
-        {
-          "timestamp": "2026-04-24T20:00:49.098030",
-          "exito": true,
-          "resumen": "El procedimiento para escribir el archivo de markdown falló al guardarlo en el sistema, por lo que no se pudo generar el resumen completo para enviar por Telegram. Sin embargo, aquí tienes el contenid"
-        },
         {
           "timestamp": "2026-04-25T20:01:15.180578",
           "exito": true,
@@ -313,6 +318,21 @@
           "timestamp": "2026-05-16T20:02:01.192126",
           "exito": true,
           "resumen": "📰 **Resumen de Noticias — 16 may 2026**\n\n---\n\n**1 🔥 El portaaviones Gerald R. Ford regresa a EE.UU. tras participar en conflicto Irán-Venezuela**\nLa nave de guerra regresa tras su despliegue en medio "
+        },
+        {
+          "timestamp": "2026-05-25T20:02:16.900549",
+          "exito": true,
+          "resumen": "El reporte ya está generado. Aquí tienes el resumen con las **3 noticias más relevantes**:\n\n---\n\n## 📰 Noticias Recientes — Diario Libre\n\n### 1. Madre e hijo dominicanos mueren en incendio de apartamen"
+        },
+        {
+          "timestamp": "2026-05-26T20:03:59.235574",
+          "exito": true,
+          "resumen": "Resumen: Generé el reporte de noticias de Diario Libre con los 10 titulares más recientes del 26 de mayo. Envié el archivo por Telegram con las descripciones completas y enlaces. No se detectaron segu"
+        },
+        {
+          "timestamp": "2026-05-27T20:01:54.667155",
+          "exito": true,
+          "resumen": "Se generó el reporte de 10 titulares de Diario Libre y se envió por Telegram con las 5 noticias más relevantes destacadas en el caption. No se detectaron números de seguimiento o procesos rastreables "
         }
       ],
       "hora": "20:00",
@@ -559,95 +579,10 @@
       "activa": true,
       "chat_id": 5483766132,
       "creada": "2026-05-05T01:06:02.201771",
-      "ultima_ejecucion": "2026-05-25T19:18:15.938676",
-      "ultimo_resultado": "No hay correos nuevos de Promerica desde el 21 de mayo (4 días atrás). Sin novedades para la transacción monitoreada.",
+      "ultima_ejecucion": "2026-05-28T08:02:37.267342",
+      "ultimo_resultado": "No se encontraron nuevos correos de Promerica desde la última revisión. Los últimos correos son de transacciones existentes (más reciente: 21 may, consumo de US$ 20.00). Estado del seguimiento #9 sin cambios.",
       "ultimo_error": null,
       "ejecuciones": [
-        {
-          "timestamp": "2026-05-11T19:49:00.662001",
-          "exito": true,
-          "resumen": "No hay nuevas transacciones en los últimos correos de Promerica. El correo más reciente corresponde al 4 de mayo (US$ 100.00), sin movimientos recientes. Estado sin cambios."
-        },
-        {
-          "timestamp": "2026-05-11T21:54:53.115952",
-          "exito": false,
-          "resumen": "La ejecución superó el límite de 5 minutos."
-        },
-        {
-          "timestamp": "2026-05-16T09:37:23.484858",
-          "exito": true,
-          "resumen": "El token de Gmail expiró — necesito re-autenticar. El sistema de Gmail requiere revalidar las credenciales OAuth2. [SILENCIOSO]"
-        },
-        {
-          "timestamp": "2026-05-16T11:38:55.858127",
-          "exito": true,
-          "resumen": "Error desconocido"
-        },
-        {
-          "timestamp": "2026-05-16T13:39:44.053086",
-          "exito": false,
-          "resumen": "APIConnectionError: Connection error."
-        },
-        {
-          "timestamp": "2026-05-16T15:41:11.673144",
-          "exito": true,
-          "resumen": "Error desconocido"
-        },
-        {
-          "timestamp": "2026-05-16T17:42:32.429033",
-          "exito": true,
-          "resumen": "No hay correos nuevos de Promerica desde el 4 de mayo — todo igual."
-        },
-        {
-          "timestamp": "2026-05-16T19:43:50.163811",
-          "exito": true,
-          "resumen": "Se revisaron los últimos 5 correos de Promerica. El más reciente es del 4 de mayo (US$ 100.00) — ninguna novedad ni cambio de estado desde el último monitoreo. Estado se mantiene sin cambios."
-        },
-        {
-          "timestamp": "2026-05-16T21:45:15.327143",
-          "exito": true,
-          "resumen": "[SILENCIO]"
-        },
-        {
-          "timestamp": "2026-05-17T08:01:22.020051",
-          "exito": true,
-          "resumen": "Error desconocido"
-        },
-        {
-          "timestamp": "2026-05-17T10:02:23.518950",
-          "exito": true,
-          "resumen": "No se encontraron correos nuevos de Promerica desde la última verificación. El más reciente data del 4 de mayo de 2026. Estado de la transacción sin cambios."
-        },
-        {
-          "timestamp": "2026-05-23T18:28:43.318137",
-          "exito": true,
-          "resumen": "No se pudo verificar — el token de Gmail expiró y necesita renovación manual. Sin acceso al correo, no hay novedades para reportar."
-        },
-        {
-          "timestamp": "2026-05-23T20:44:03.952002",
-          "exito": true,
-          "resumen": "Error desconocido"
-        },
-        {
-          "timestamp": "2026-05-23T22:45:11.987679",
-          "exito": true,
-          "resumen": "El token de Gmail ha expirado. No se pudo consultar el correo. Se requiere re-autenticación de Gmail para continuar con el monitoreo.\n\n[SILENCIOSO]"
-        },
-        {
-          "timestamp": "2026-05-24T08:01:35.461959",
-          "exito": true,
-          "resumen": "El token de Gmail está expirado, no se pudo verificar el correo. El usuario necesita reautenticar Gmail."
-        },
-        {
-          "timestamp": "2026-05-24T10:06:49.039845",
-          "exito": false,
-          "resumen": "La ejecución superó el límite de 5 minutos."
-        },
-        {
-          "timestamp": "2026-05-25T12:00:36.344312",
-          "exito": true,
-          "resumen": "El correo de Promerica aparece sin novedades: no se recibieron correos nuevos del remitente `servicio@promerica.com.do`.\n\nEl estado de la transacción se mantiene sin cambios.\n\n[SILENCIOSO]"
-        },
         {
           "timestamp": "2026-05-25T14:02:01.837718",
           "exito": true,
@@ -662,6 +597,91 @@
           "timestamp": "2026-05-25T19:18:15.938676",
           "exito": true,
           "resumen": "No hay correos nuevos de Promerica desde el 21 de mayo (4 días atrás). Sin novedades para la transacción monitoreada."
+        },
+        {
+          "timestamp": "2026-05-25T21:19:26.607282",
+          "exito": true,
+          "resumen": "Error desconocido"
+        },
+        {
+          "timestamp": "2026-05-26T10:10:57.037920",
+          "exito": true,
+          "resumen": "[SILENCIO]"
+        },
+        {
+          "timestamp": "2026-05-26T12:12:11.485336",
+          "exito": true,
+          "resumen": "Error desconocido"
+        },
+        {
+          "timestamp": "2026-05-26T14:13:03.753904",
+          "exito": true,
+          "resumen": "(sin respuesta del agente)"
+        },
+        {
+          "timestamp": "2026-05-26T16:14:13.020265",
+          "exito": true,
+          "resumen": "No hay nuevos correos de Promerica desde el 21 de mayo. La transacción sigue en el mismo estado.\n\n[SILENCIOSO]"
+        },
+        {
+          "timestamp": "2026-05-26T18:15:08.759168",
+          "exito": true,
+          "resumen": "Error desconocido"
+        },
+        {
+          "timestamp": "2026-05-26T20:16:00.538226",
+          "exito": true,
+          "resumen": "[SILENCIO]\n\nNo se encontraron correos nuevos de Promerica desde la última verificación. El correo más reciente es del 21 de mayo (hace 5 días). La transacción sigue sin nuevos cambios.\n\n[SILENCIOSO]"
+        },
+        {
+          "timestamp": "2026-05-26T22:16:57.582976",
+          "exito": true,
+          "resumen": "No hay novedades en los correos de Promerica. El último aviso es del 21 de mayo (US$ 20.00), sin cambios respecto al estado anterior de la transacción #9.\n\n[SILENCIO]"
+        },
+        {
+          "timestamp": "2026-05-27T08:01:07.074969",
+          "exito": true,
+          "resumen": "[SILENCIO]"
+        },
+        {
+          "timestamp": "2026-05-27T10:02:10.887042",
+          "exito": true,
+          "resumen": "No se encontró ningún correo nuevo de Promerica desde el último monitoreo. Los últimos son del 21 de mayo (US$ 20.00) y 4 de mayo (US$ 100.00). El estado del seguimiento se mantiene igual."
+        },
+        {
+          "timestamp": "2026-05-27T12:03:21.629507",
+          "exito": true,
+          "resumen": "Error desconocido"
+        },
+        {
+          "timestamp": "2026-05-27T14:04:34.811678",
+          "exito": true,
+          "resumen": "No se encontraron correos nuevos de Promerica — los más recientes son del 21 de mayo (~6 días atrás). Estado del seguimiento sin cambios."
+        },
+        {
+          "timestamp": "2026-05-27T16:05:52.492199",
+          "exito": true,
+          "resumen": "[CORREO] Los últimos correos de Promerica más recientes sin novedades respecto al monitoreo:\n\n- **21 May 2026** — Transacción de US$ 20.00 (tarjeta 5690)\n- **04 May 2026** — Transacción de US$ 100.00\n"
+        },
+        {
+          "timestamp": "2026-05-27T18:07:40.987277",
+          "exito": true,
+          "resumen": "Error desconocido"
+        },
+        {
+          "timestamp": "2026-05-27T20:08:44.158220",
+          "exito": true,
+          "resumen": "Los correos mas recientes de Promerica son del 21 de mayo (hace 6 dias) — transacciones previas, sin novedades sobre la transaccion en monitoreo. Estado sin cambios."
+        },
+        {
+          "timestamp": "2026-05-27T22:10:07.445534",
+          "exito": true,
+          "resumen": "No hay novedades — el último correo de Promerica es del 4 de mayo. Estado sin cambios."
+        },
+        {
+          "timestamp": "2026-05-28T08:02:37.267342",
+          "exito": true,
+          "resumen": "No se encontraron nuevos correos de Promerica desde la última revisión. Los últimos correos son de transacciones existentes (más reciente: 21 may, consumo de US$ 20.00). Estado del seguimiento #9 sin "
         }
       ],
       "intervalo_minutos": 120,

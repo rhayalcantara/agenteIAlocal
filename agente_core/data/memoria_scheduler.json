@@ -2,14 +2,6 @@
   "hechos": [],
   "resumenes": [
     {
-      "texto": "El asistente ajusta el directorio de trabajo y reactiva la habilidad de seguimiento para verificar correctamente el estado del envío de Amazon.",
-      "fecha": "2026-05-16 21:42"
-    },
-    {
-      "texto": "El sistema revisa automáticamente cada dos horas los últimos 10 correos no leídos y genera un resumen si aparecen nuevos.",
-      "fecha": "2026-05-17 03:55"
-    },
-    {
       "texto": "Cada dos horas, este proceso automático revisa los últimos diez correos no leídos y genera un resumen si hay nuevos.",
       "fecha": "2026-05-17 05:57"
     },
@@ -32,6 +24,22 @@
     {
       "texto": "Revisó automáticamente correos no leídos, detectó un pedido de Amazon y un correo de Oracle, y priorizó registrar el seguimiento del pedido.",
       "fecha": "2026-05-25 19:22"
+    },
+    {
+      "texto": "El sistema automatiza la búsqueda de titulares y el envío de un resumen de noticias vespertino.",
+      "fecha": "2026-05-25 20:02"
+    },
+    {
+      "texto": "Cada dos horas, el sistema revisa automáticamente los últimos diez correos no leídos y genera un resumen al detectar nuevos mensajes.",
+      "fecha": "2026-05-26 22:30"
+    },
+    {
+      "texto": "El comando automático de resumir correos tardó demasiado, por lo que el asistente revisará el código del skill para corregir el paso de argumentos.",
+      "fecha": "2026-05-27 08:45"
+    },
+    {
+      "texto": "El asistente intentó monitorear el correo de confirmación de la transacción #9 de Promerica, pero encontró errores de sintaxis en Windows. Ahora repetirá la búsqueda con otro método para garantizar el resultado.",
+      "fecha": "2026-05-28 08:02"
     }
   ],
   "siguiente_id": 1
